@@ -1,17 +1,21 @@
 # Vibrant Visuals check pack
 
-A yes/no answer, not a look.
+This pack answers one question in one go: **why is nothing happening?**
 
-The lighting values in `lighting/global.json` are read by Bedrock's deferred
-renderer and by nothing else. So:
+It changes two independent things:
 
-| What you see | What it means |
-|---|---|
-| The world turns **bright magenta** | Deferred rendering is running **and** this pack reached it. Any pack of this kind will work — the main pack just needs tuning. |
-| The world looks **completely normal** | One of those two is false. Either Vibrant Visuals is off (or unsupported on this device), or the pack is not actually active on the world. Until that is fixed, no pack of this kind can change anything. |
+1. **Lighting** (`lighting/global.json`) — read by the deferred renderer and by
+   nothing else. Ambient is pushed far past any sane value and tinted magenta.
+2. **Block textures** (`textures/blocks/*.png`) — plain texture replacement,
+   which works on any renderer. Dirt, stone, cobblestone, sand, gravel, oak
+   planks, oak log and grass become lime green with a black X.
 
-Ambient is pushed far past any sane value so the answer cannot be mistaken for a
-subtle tweak, and the sun is dropped to near nothing so the magenta is not
-washed out by daylight.
+Look at any dirt or stone near you, in daylight:
+
+| What you see | What it means | What to do |
+|---|---|---|
+| Everything bathed in **magenta light** (and the blocks are lime X) | Deferred rendering is running **and** the pack reached it | Nothing is broken — the main pack just needs its numbers tuning |
+| Blocks are **lime green with a black X**, but the light is normal | The pack **is** active, but Vibrant Visuals is **off or unsupported** | Turn on Settings → Video → Vibrant Visuals. If the toggle is missing or greyed out, the device or version does not support it, and no pack of this kind can do anything |
+| **Nothing changed at all** | The pack is **not active on this world** | Re-import it and activate it in the world's Settings → Resource Packs, then rejoin the world |
 
 Remove the pack once you have your answer.
