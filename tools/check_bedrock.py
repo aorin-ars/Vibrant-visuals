@@ -30,6 +30,13 @@ SETTINGS_FILES = {
     "water/water.json": ("minecraft:water_settings", "minecraft:default_water"),
 }
 
+# These two carry no description block, so they are checked on their own.
+EXTRA_FILES = ["shadows/global.json", "pbr/global.json"]
+
+# The only value confirmed in a working pack. An unknown one risks the whole
+# file being dropped, which would take the shadow settings with it.
+SHADOW_STYLES = {"soft_shadows"}
+
 # Maps keyed by time-of-day. Every key must parse as a float in [0,1].
 KEYFRAME_PATHS = [
     ("lighting/global.json", ["minecraft:lighting_settings", "directional_lights", "orbital", "sun", "illuminance"], "number"),
@@ -96,6 +103,19 @@ ALLOWED = {
                 "temperature": {"enabled": None, "temperature": None, "type": None},
             },
             "tone_mapping": {"operator": None},
+        },
+        "format_version": None,
+    },
+    "shadows/global.json": {
+        "minecraft:shadow_settings": {"shadow_style": None, "texel_size": None},
+        "format_version": None,
+    },
+    "pbr/global.json": {
+        "minecraft:pbr_fallback_settings": {
+            "blocks": {"global_metalness_emissive_roughness_subsurface": None},
+            "actors": {"global_metalness_emissive_roughness_subsurface": None},
+            "items": {"global_metalness_emissive_roughness_subsurface": None},
+            "particles": {"global_metalness_emissive_roughness_subsurface": None},
         },
         "format_version": None,
     },
@@ -172,6 +192,15 @@ def check_manifest(problems: list[str]) -> None:
     if not any(m.get("type") == "resources" for m in modules):
         problems.append("manifest has no module of type 'resources'")
 
+    # Without this the game treats the pack as an ordinary resource pack:
+    # textures still apply, and every deferred-rendering file is ignored.
+    # That failure is silent, which makes it the worst one to get wrong.
+    capabilities = manifest.get("capabilities", [])
+    deferred = [f for f in list(SETTINGS_FILES) + EXTRA_FILES if (PACK / f).is_file()]
+    if deferred and "pbr" not in capabilities:
+        problems.append('manifest has no "capabilities": ["pbr"], so the '
+                        f'{len(deferred)} deferred rendering file(s) will be ignored')
+
     # Translated name/description only resolve if the .lang files carry the keys.
     for field in ("name", "description"):
         key = header.get(field)
@@ -246,6 +275,31 @@ def check_keyframes(problems: list[str]) -> None:
             problems.append(f"{where}: needs at least two keyframes, has {len(table)}")
 
 
+def check_shadow_and_pbr(problems: list[str]) -> None:
+    path = PACK / "shadows/global.json"
+    if path.is_file():
+        settings = dig(json.loads(path.read_text()), ["minecraft:shadow_settings"]) or {}
+
+        style = settings.get("shadow_style")
+        if style not in SHADOW_STYLES:
+            problems.append(f"shadows: shadow_style {style!r} is not a confirmed "
+                            f"value ({', '.join(sorted(SHADOW_STYLES))})")
+
+        texels = settings.get("texel_size")
+        if not isinstance(texels, int) or texels <= 0 or texels & (texels - 1):
+            problems.append(f"shadows: texel_size must be a power of two, got {texels!r}")
+
+    path = PACK / "pbr/global.json"
+    if path.is_file():
+        fallback = dig(json.loads(path.read_text()), ["minecraft:pbr_fallback_settings"]) or {}
+        for category, values in fallback.items():
+            mers = (values or {}).get("global_metalness_emissive_roughness_subsurface")
+            if not (isinstance(mers, list) and len(mers) in (3, 4)
+                    and all(isinstance(c, int) and 0 <= c <= 255 for c in mers)):
+                problems.append(f"pbr {category}: expected 3 or 4 integers in 0..255, "
+                                f"got {mers!r}")
+
+
 def check_misc(problems: list[str]) -> None:
     lighting_path = PACK / "lighting/global.json"
     if lighting_path.is_file():
@@ -280,6 +334,7 @@ def main() -> int:
         if path.is_file():
             check_unknown_keys(json.loads(path.read_text()), spec, name, problems)
     check_keyframes(problems)
+    check_shadow_and_pbr(problems)
     check_misc(problems)
 
     if problems:
@@ -288,7 +343,7 @@ def main() -> int:
         return 1
 
     files = sorted(p.relative_to(PACK) for p in PACK.rglob("*") if p.is_file())
-    overrides = sum(1 for n in SETTINGS_FILES if (PACK / n).is_file())
+    overrides = sum(1 for n in list(SETTINGS_FILES) + EXTRA_FILES if (PACK / n).is_file())
     print(f"{PACK}: OK - {len(files)} files, {overrides} settings file(s) "
           f"overridden, all keys known to the engine")
     return 0

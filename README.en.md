@@ -29,25 +29,35 @@ Shader-mod looks for Minecraft, for **both editions**.
 
 To install by hand, unzip it into `com.mojang/resource_packs/`.
 
-## Entity shadows (important)
+## Entity shadows
 
-**On Bedrock, shape-accurate entity shadows are a feature of Vibrant Visuals
-itself.** Switching it on in Video Settings is what makes a train, a boat or a
-mob cast a shadow shaped like its model. A resource pack cannot create them.
+**Entities casting shadows shaped like their models is a feature of Vibrant
+Visuals itself** — switching it on in Video Settings is what produces them.
 
-What a resource pack *can* change (verified against Mojang's own vanilla pack):
+Their quality, though, *is* configurable from a resource pack
+(`shadows/global.json`):
+
+| Key | This pack | Meaning |
+|---|---|---|
+| `shadow_style` | `soft_shadows` | Softens the shadow edge |
+| `texel_size` | 2048 | Shadow map resolution — higher resolves window frames, handrails, bogies |
+
+Drop `texel_size` to 1024 if it costs too much performance.
+
+What a resource pack can and cannot change:
 
 | Can change | Cannot change |
 |---|---|
-| Sun and moon illuminance and colour | Shadow resolution or distance |
-| Ambient and sky light intensity | Shadow softness or bias |
-| Atmospheric scattering — sky colour, haze, sun glare | Which entities cast shadows |
-| Colour grading — contrast, saturation, temperature | The shader code itself |
+| Shadow softness and shadow map resolution | Which entities cast shadows |
+| Sun and moon illuminance and colour | Shadow bias (the striping trade-off) |
+| Ambient and sky light intensity | The shader code itself |
+| Atmospheric scattering — sky colour, haze, sun glare | |
+| Colour grading — contrast, saturation, temperature | |
 | Water — waves, caustics, turbidity | |
-| Block PBR — metalness, roughness, emission | |
+| PBR defaults for blocks and entities | |
 
-**So the way to make shadows read strongly is to raise the sun and lower the
-ambient fill.** That is exactly what this pack does.
+**The other way to make shadows read is to raise the sun and lower the ambient
+fill**, which is what the values below do.
 
 | Setting | Vanilla | This pack | Why |
 |---|---|---|---|
@@ -55,9 +65,21 @@ ambient fill.** That is exactly what this pack does.
 | Ambient | 0.02 / white | 0.014 / `#BFD4FF` | Shadows fill with sky blue instead of crushing to black |
 | Sky intensity | 1.0 | 1.30 | Same; more blue bounce inside shadows |
 | Rayleigh strength | 10 | 14 | Deeper blue at the zenith |
-| Sun Mie strength (day) | 0.0 | 0.22 | Glow around the sun during the day, not just at sunset |
+| Sun Mie strength (day) | 0.0 | 0.22 | Glow around the sun during the day |
 | Contrast / saturation | 1.15 / 1.05 | 1.22 / 1.14 | Photographic punch |
 | Water waves | off | on | A surface that moves |
+| Entity roughness | 255 | 205 | A little sheen on bodywork and creatures |
+
+## The manifest's `capabilities`
+
+```json
+"capabilities": ["pbr"]
+```
+
+**Without this line every deferred rendering file — `lighting`, `atmospherics`
+and the rest — is silently ignored.** Texture replacement still works, so the
+pack looks installed and does nothing, which is the most confusing way for it to
+break. `tools/check_bedrock.py` catches it.
 
 ## Making an add-on's vehicles look metallic
 
@@ -84,9 +106,9 @@ texture gives it lacquered paintwork. For `textures/entity/my_train.png`, add
 | B | Roughness | Polished bodywork 40–70, matte 180+ |
 | A | Subsurface | 0 normally |
 
-> This is the form Mojang's vanilla pack actually ships. A constant-value form
-> also exists, but there was no example of it in the official sample, so only
-> the verified form is documented here.
+> A constant-value form also exists — the same `[metalness, emission, roughness,
+> subsurface]` array `pbr/global.json` uses — and needs no image at all. It is
+> used by shipping Vibrant Visuals packs.
 
 ## Tuning
 
@@ -100,6 +122,8 @@ Edit the JSON in `bedrock/` directly — they are only numbers.
 | Bluer sky | `atmospherics/atmospherics.json` → `rayleigh_strength` |
 | Calmer colour | `color_grading/color_grading.json` → `saturation` / `contrast` |
 | Still water | `water/water.json` → `waves.enabled: false` |
+| Sharper shadows | `shadows/global.json` → raise `texel_size` (costs performance) |
+| Glossier entities | `pbr/global.json` → lower the third value under `actors` |
 
 Then check it:
 
