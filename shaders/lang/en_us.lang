@@ -1,0 +1,221 @@
+## Vibrant Visuals - English
+
+screen.SHADOWS=Shadows
+screen.ENTITIES=Entities & Vehicles
+screen.LIGHTING=Lighting
+screen.ATMOSPHERE=Sky & Atmosphere
+screen.WATER=Water & Reflections
+screen.WAVING=Waving
+screen.POST=Image & Colour
+
+profile.POTATO=Potato
+profile.LOW=Low
+profile.MEDIUM=Medium
+profile.HIGH=High
+profile.ULTRA=Ultra
+
+## ---------------------------------------------------------------- shadows
+
+option.shadowMapResolution=Shadow Resolution
+option.shadowMapResolution.comment=Size of the shadow map. Higher values resolve finer detail - window frames, handrails, bogies - at a real cost in performance and memory.
+
+option.shadowDistance=Shadow Distance
+option.shadowDistance.comment=How far from the camera shadows are drawn, in blocks. Long objects such as trains need a larger value than the terrain alone would.
+suffix.shadowDistance=m
+
+option.SHADOW_FILTER=Shadow Filter
+option.SHADOW_FILTER.comment=How the shadow edge is softened.
+value.SHADOW_FILTER.0=Hard
+value.SHADOW_FILTER.1=Soft (PCF)
+value.SHADOW_FILTER.2=Contact hardening
+value.SHADOW_FILTER.3=Contact hardening (high)
+
+option.SHADOW_SOFTNESS=Shadow Softness
+option.SHADOW_SOFTNESS.comment=Width of the penumbra. The shadow stays sharp where an object touches the ground and spreads with distance, so this mostly affects overhangs and roofs.
+
+option.SHADOW_DISTORTION=Shadow Distortion
+option.SHADOW_DISTORTION.comment=Concentrates shadow map resolution near the camera. Higher values sharpen nearby shadows and coarsen distant ones. Lower it when you want an even quality across a long scene such as a station platform.
+
+option.SHADOW_BIAS_SCALE=Shadow Bias
+option.SHADOW_BIAS_SCALE.comment=Global offset applied before the shadow lookup. Raise it if surfaces show striping, lower it if shadows detach from what casts them.
+
+option.SHADOW_BRIGHTNESS=Shadow Brightness
+option.SHADOW_BRIGHTNESS.comment=Light level inside a shadow, on top of what the sky already contributes.
+
+option.COLORED_SHADOWS=Coloured Shadows
+option.COLORED_SHADOWS.comment=Light that passes through stained glass, ice or a tinted window keeps that colour instead of being blocked outright.
+
+## --------------------------------------------------------------- entities
+
+option.ENTITY_SHADOW_BIAS=Entity Shadow Bias
+option.ENTITY_SHADOW_BIAS.comment=Extra shadow offset applied to entities only. Entity models are thin and often self-intersecting, which produces striping at a bias terrain is perfectly happy with. Raise this if a mob or vehicle shows dark bands across it.
+
+option.entityShadowDistanceMul=Entity Shadow Range
+option.entityShadowDistanceMul.comment=Multiplies the shadow distance for entities. Entities are culled by the distance of their origin, so a long entity - a train car, a ship - can lose its shadow while most of it is still in range. Raise this if shadows pop off long vehicles. Iris only.
+
+option.HIDE_VANILLA_ENTITY_SHADOW=Hide Blob Shadow
+option.HIDE_VANILLA_ENTITY_SHADOW.comment=Removes the flat oval the game paints under every entity. The shadow map already draws the entity's real silhouette; leaving both on puts a dark ellipse under an otherwise correct shadow.
+
+option.ENTITY_SPECULAR=Entity Glossiness
+option.ENTITY_SPECULAR.comment=How reflective entities are when the resource pack supplies no specular map.
+
+option.VEHICLE_SPECULAR=Vehicle Glossiness
+option.VEHICLE_SPECULAR.comment=Same, for entities listed as vehicles in entity.properties. Higher values read as lacquered paintwork.
+
+## --------------------------------------------------------------- lighting
+
+option.SUN_ILLUMINANCE=Sunlight
+option.SUN_ILLUMINANCE.comment=Strength of direct light from the sun and moon.
+
+option.SKY_ILLUMINANCE=Skylight
+option.SKY_ILLUMINANCE.comment=Strength of ambient light gathered from the sky dome.
+
+option.BLOCKLIGHT_INTENSITY=Block Light
+option.BLOCKLIGHT_INTENSITY.comment=Strength of torches, lanterns and other light sources.
+
+option.BLOCKLIGHT_TEMPERATURE=Block Light Colour
+option.BLOCKLIGHT_TEMPERATURE.comment=Colour temperature of block light. Low values are candle warm, high values are daylight white.
+suffix.BLOCKLIGHT_TEMPERATURE=K
+
+option.MINIMUM_LIGHT=Minimum Light
+option.MINIMUM_LIGHT.comment=Floor on how dark an unlit surface can get.
+
+option.ambientOcclusionLevel=Vanilla Ambient Occlusion
+option.ambientOcclusionLevel.comment=How much of Minecraft's own baked corner shading is kept.
+
+option.SPECULAR_HIGHLIGHT=Specular Highlights
+option.SPECULAR_HIGHLIGHT.comment=Sun and sky reflections on surfaces. This is what puts the moving sheen along a vehicle's flank.
+
+option.SUBSURFACE_SCATTERING=Subsurface Scattering
+option.SUBSURFACE_SCATTERING.comment=Light passing through thin surfaces such as leaves and grass.
+
+option.HANDHELD_LIGHT=Handheld Light
+option.HANDHELD_LIGHT.comment=A carried torch or lantern lights the world around you.
+
+option.SSAO=Ambient Occlusion
+option.SSAO.comment=Darkens creases and contact points that the shadow map is too coarse to catch.
+
+option.SSAO_SAMPLES=AO Samples
+option.SSAO_SAMPLES.comment=Sample count for ambient occlusion.
+
+option.SSAO_RADIUS=AO Radius
+option.SSAO_RADIUS.comment=How far ambient occlusion reaches, in blocks.
+
+option.SSAO_STRENGTH=AO Strength
+option.SSAO_STRENGTH.comment=How dark ambient occlusion is allowed to get.
+
+## ------------------------------------------------------------- atmosphere
+
+option.sunPathRotation=Sun Path Angle
+option.sunPathRotation.comment=Tilts the path the sun travels. Anything other than zero means the sun stops passing exactly overhead, which gives longer, more interesting shadows all day.
+suffix.sunPathRotation=°
+
+option.SKY_SATURATION=Sky Saturation
+option.SKY_SATURATION.comment=Colour intensity of the sky.
+
+option.FOG_DENSITY=Fog Density
+option.FOG_DENSITY.comment=Thickness of the distance haze. Distant geometry fades towards the colour of the sky in that exact direction.
+
+option.FOG_ALTITUDE_FALLOFF=Fog Height Falloff
+option.FOG_ALTITUDE_FALLOFF.comment=How quickly fog thins out with altitude. Higher values keep haze in the valleys and clear the peaks.
+
+option.VOLUMETRIC_LIGHT=Light Shafts
+option.VOLUMETRIC_LIGHT.comment=Sunbeams through the air, sampled from the same shadow map as the surfaces - so they line up with what actually casts them.
+
+option.VOLUMETRIC_STEPS=Light Shaft Quality
+option.VOLUMETRIC_STEPS.comment=Ray marching steps. More steps means smoother shafts.
+
+option.VOLUMETRIC_STRENGTH=Light Shaft Strength
+option.VOLUMETRIC_STRENGTH.comment=Brightness of the light shafts.
+
+option.CLOUD_BRIGHTNESS=Cloud Brightness
+option.CLOUD_BRIGHTNESS.comment=Brightness of Minecraft's clouds.
+
+## ------------------------------------------------------------------ water
+
+option.WATER_WAVES=Water Waves
+option.WATER_WAVES.comment=Animated surface displacement on water, matched in the shadow pass.
+
+option.WATER_WAVE_HEIGHT=Wave Height
+option.WATER_WAVE_HEIGHT.comment=Size of the water waves.
+
+option.WATER_REFLECTIONS=Water Reflections
+option.WATER_REFLECTIONS.comment=Reflections on the water surface.
+
+option.REFRACTION=Refraction
+option.REFRACTION.comment=Bends what is seen through water and glass.
+
+option.WATER_ABSORPTION=Water Absorption
+option.WATER_ABSORPTION.comment=How quickly water swallows light. Higher values make deep water darker and greener.
+
+option.WATER_ALPHA=Water Tint
+option.WATER_ALPHA.comment=How strongly the biome's water colour tints what is seen through the surface.
+
+option.SSR=Screen Space Reflections
+option.SSR.comment=Reflects the scene on the screen, falling back to the sky for anything off-camera.
+
+option.SSR_STEPS=Reflection Quality
+option.SSR_STEPS.comment=Ray marching steps for screen space reflections.
+
+option.SSR_REFINE=Reflection Refinement
+option.SSR_REFINE.comment=Binary search steps used to land the reflection on the surface rather than past it.
+
+## ----------------------------------------------------------------- waving
+
+option.WAVING_PLANTS=Waving Plants
+option.WAVING_PLANTS.comment=Grass, flowers and crops bend in the wind.
+
+option.WAVING_LEAVES=Waving Leaves
+option.WAVING_LEAVES.comment=Leaf blocks sway in the wind.
+
+option.WAVING_STRENGTH=Wind Strength
+option.WAVING_STRENGTH.comment=How far foliage is displaced.
+
+## ------------------------------------------------------------------- post
+
+option.TONEMAP=Tone Curve
+option.TONEMAP.comment=How high dynamic range light is fitted onto the display.
+value.TONEMAP.0=Reinhard
+value.TONEMAP.1=ACES
+value.TONEMAP.2=Filmic
+value.TONEMAP.3=AgX
+
+option.AUTO_EXPOSURE=Auto Exposure
+option.AUTO_EXPOSURE.comment=Adapts brightness to the scene, the way an eye does on stepping out of a tunnel.
+
+option.EXPOSURE_SPEED=Adaptation Speed
+option.EXPOSURE_SPEED.comment=How quickly auto exposure reacts.
+
+option.MANUAL_EXPOSURE=Exposure
+option.MANUAL_EXPOSURE.comment=Overall brightness multiplier, applied on top of auto exposure.
+
+option.WHITE_BALANCE=White Balance
+option.WHITE_BALANCE.comment=Colour temperature the image is neutralised to. Below 6500 K cools the picture, above warms it.
+suffix.WHITE_BALANCE=K
+
+option.VIBRANCE=Vibrance
+option.VIBRANCE.comment=Lifts muted colours while leaving already saturated ones alone.
+
+option.SATURATION=Saturation
+option.SATURATION.comment=Overall colour intensity.
+
+option.CONTRAST=Contrast
+option.CONTRAST.comment=Separation between the darks and the brights.
+
+option.VIGNETTE_STRENGTH=Vignette
+option.VIGNETTE_STRENGTH.comment=Darkening towards the corners of the frame.
+
+option.BLOOM=Bloom
+option.BLOOM.comment=Glare around bright areas.
+
+option.BLOOM_STRENGTH=Bloom Strength
+option.BLOOM_STRENGTH.comment=How much glare is mixed back into the image.
+
+option.TAA=Temporal Anti-Aliasing
+option.TAA.comment=Smooths edges and resolves the sampling noise in soft shadows and ambient occlusion by accumulating across frames. Turning it off makes that noise visible as a fixed dither pattern.
+
+option.TAA_SHARPEN=TAA Sharpening
+option.TAA_SHARPEN.comment=Compensates for the softening that temporal accumulation introduces.
+
+option.SHARPEN=Sharpening
+option.SHARPEN.comment=Extra edge definition applied to the final image.

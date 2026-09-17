@@ -1,0 +1,6 @@
+*.glsl  text eol=lf linguist-language=GLSL
+*.vsh   text eol=lf linguist-language=GLSL
+*.fsh   text eol=lf linguist-language=GLSL
+*.gsh   text eol=lf linguist-language=GLSL
+*.properties text eol=lf
+*.lang  text eol=lf
