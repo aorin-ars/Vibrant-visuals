@@ -171,7 +171,7 @@ def find_glslang(explicit: str | None) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--glslang")
-    parser.add_argument("--shaders", default="shaders")
+    parser.add_argument("--shaders", default="java/shaders")
     parser.add_argument("--variant", action="append")
     args = parser.parse_args()
 

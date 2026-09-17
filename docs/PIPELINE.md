@@ -1,4 +1,7 @@
-# Pipeline
+# Pipeline (Java Edition)
+
+> This describes the **Java Edition** shader pack in `java/`. The Bedrock pack
+> has no pipeline of its own: it supplies settings to the engine's renderer.
 
 What runs, in what order, and why each buffer holds what it does.
 

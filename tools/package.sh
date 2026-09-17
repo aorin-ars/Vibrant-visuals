@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
-# Build a .zip that can be dropped straight into .minecraft/shaderpacks.
+# Build both distributable packs.
+#
+#   build/VibrantVisuals-<ver>.mcpack        Bedrock  -> open it, or drop in
+#                                            com.mojang/resource_packs/
+#   build/VibrantVisuals-Java-<ver>.zip      Java     -> .minecraft/shaderpacks/
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-name="VibrantVisuals"
 version="$(git describe --tags --always --dirty 2>/dev/null || echo dev)"
-out="build/${name}-${version}.zip"
-
 mkdir -p build
-rm -f "$out"
 
-# Only shaders/ belongs in the pack; the repository's own tooling does not.
-zip -r -q "$out" shaders LICENSE README.md
+# Bedrock: manifest.json has to sit at the archive root, so zip from inside.
+bedrock="build/VibrantVisuals-${version}.mcpack"
+rm -f "$bedrock"
+(cd bedrock && zip -r -q "../$bedrock" . -x '.*')
+echo "$bedrock"
 
-echo "$out"
+# Java: shaders/ has to sit at the archive root.
+java="build/VibrantVisuals-Java-${version}.zip"
+rm -f "$java"
+(cd java && zip -r -q "../$java" shaders)
+zip -q -j "$java" LICENSE
+echo "$java"

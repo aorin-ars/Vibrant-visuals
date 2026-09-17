@@ -1,4 +1,9 @@
-# Entity shadows
+# Entity shadows (Java Edition)
+
+> This document is about the **Java Edition** pack in `java/`, where the shadow
+> mapping is written in the pack itself. On **Bedrock**, shape-accurate entity
+> shadows come from the engine's own Vibrant Visuals renderer and a resource
+> pack cannot change them — see [the README](../README.md) instead.
 
 How Vibrant Visuals gets an entity to cast a shadow shaped like its model, and
 which knob to reach for when it misbehaves.

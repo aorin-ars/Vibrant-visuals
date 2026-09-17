@@ -1,0 +1,23 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "pack.name",
+    "description": "pack.description",
+    "uuid": "0e682665-2038-4c85-9402-d8e77c5c7e65",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 21, 80]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "description": "pack.description",
+      "uuid": "eac9213d-21ec-48bf-bafb-e30430db73e4",
+      "version": [1, 0, 0]
+    }
+  ],
+  "metadata": {
+    "authors": ["aorin-ars"],
+    "license": "MIT",
+    "url": "https://github.com/aorin-ars/Vibrant-visuals"
+  }
+}

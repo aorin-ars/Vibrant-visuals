@@ -13,7 +13,7 @@ import re
 import sys
 from pathlib import Path
 
-SHADERS = Path("shaders")
+SHADERS = Path("java/shaders")
 
 DEFINE_RE = re.compile(r'^\s*#define\s+([A-Za-z_]\w*)\b(.*)$')
 CONST_RE = re.compile(r'^\s*const\s+\w+\s+([A-Za-z_]\w*)\s*=\s*[^;]+;\s*(//\s*\[.*\])?')

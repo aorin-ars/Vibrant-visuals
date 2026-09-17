@@ -2,153 +2,143 @@
 
 [日本語](README.md) | **English**
 
-A deferred shader pack for Minecraft Java Edition, built around one idea:
-**entities should cast shadows shaped like their models**, not the flat oval
-the game paints underneath them.
+Shader-mod looks for Minecraft, for **both editions**.
 
-Entities with custom models — the rolling stock of a train mod, a ship, an
-aircraft — go through the same shadow pass as terrain, so the silhouette of a
-car body, the gap between bogies and the light coming through its windows all
-land on the ground as they should.
+| | Contents | Goes to |
+|---|---|---|
+| [`bedrock/`](bedrock/) | Resource pack for Vibrant Visuals (deferred rendering) | open the `.mcpack` |
+| [`java/`](java/) | Shader pack for Iris / OptiFine | `.minecraft/shaderpacks/` |
+
+> **The two editions use completely different formats.** A Java shader pack
+> dropped into Bedrock does not even appear in the list, and vice versa.
 
 ---
+
+# Bedrock Edition
 
 ## Requirements
 
-| | |
-|---|---|
-| Loader | **Iris 1.6+** (recommended) or **OptiFine H9+** |
-| Minecraft | 1.16.5 – 1.21.x |
-| GPU | OpenGL 3.3 or newer |
-
-Iris is recommended because it supports `entityShadowDistanceMul` (see below).
-The pack runs on OptiFine; that one setting is simply ignored there.
+- Minecraft Bedrock **1.21.80 or newer**
+- **Vibrant Visuals switched on** in Video Settings
 
 ## Installing
 
-1. Take a release zip, or build one with `tools/package.sh`
-2. Drop it in `.minecraft/shaderpacks/`
-3. In game: **Options → Video Settings → Shaders**, pick `VibrantVisuals`
+1. Open `VibrantVisuals-*.mcpack` — it imports itself
+2. **Settings → Video → Vibrant Visuals**: on
+3. In the world's **Settings → Resource Packs**, activate the pack
 
-The repository itself is a valid shader pack, so placing this folder in
-`shaderpacks/` works too.
+To install by hand, unzip it into `com.mojang/resource_packs/`.
 
----
+## Entity shadows (important)
 
-## Entity shadows
+**On Bedrock, shape-accurate entity shadows are a feature of Vibrant Visuals
+itself.** Switching it on in Video Settings is what makes a train, a boat or a
+mob cast a shadow shaped like its model. A resource pack cannot create them.
 
-### What changes
+What a resource pack *can* change (verified against Mojang's own vanilla pack):
 
-Vanilla Minecraft draws a **flat oval texture** under each entity. Every model
-gets the same ellipse, so a twenty-block train car drops the same shadow as a
-chicken.
+| Can change | Cannot change |
+|---|---|
+| Sun and moon illuminance and colour | Shadow resolution or distance |
+| Ambient and sky light intensity | Shadow softness or bias |
+| Atmospheric scattering — sky colour, haze, sun glare | Which entities cast shadows |
+| Colour grading — contrast, saturation, temperature | The shader code itself |
+| Water — waves, caustics, turbidity | |
+| Block PBR — metalness, roughness, emission | |
 
-This pack instead:
+**So the way to make shadows read strongly is to raise the sun and lower the
+ambient fill.** That is exactly what this pack does.
 
-- **Renders entities into the shadow map.** Terrain, block entities and
-  entities share one pass, so the shadow always follows the model's real
-  outline — including self-shadowing, such as a roof shading the flank below it.
-- **Discards the vanilla blob**, which would otherwise sit as a dark ellipse
-  underneath an otherwise correct shadow. Toggle: `Hide Blob Shadow`.
-- **Keeps the colour of light that passed through something translucent.**
-  Stained glass and tinted windows tint the floor rather than blocking it.
-- **Hardens at contact and softens with distance.** The shadow stays crisp
-  where a bogie meets the rail and spreads under a roof overhang.
+| Setting | Vanilla | This pack | Why |
+|---|---|---|---|
+| Sun illuminance at noon | 100 | 132 | Widens the gap between lit and shadowed |
+| Ambient | 0.02 / white | 0.014 / `#BFD4FF` | Shadows fill with sky blue instead of crushing to black |
+| Sky intensity | 1.0 | 1.30 | Same; more blue bounce inside shadows |
+| Rayleigh strength | 10 | 14 | Deeper blue at the zenith |
+| Sun Mie strength (day) | 0.0 | 0.22 | Glow around the sun during the day, not just at sunset |
+| Contrast / saturation | 1.15 / 1.05 | 1.22 / 1.14 | Photographic punch |
+| Water waves | off | on | A surface that moves |
 
-### Registering a vehicle mod
+## Making an add-on's vehicles look metallic
 
-Open `shaders/entity.properties` and append the mod's entity ids:
+Vibrant Visuals supports PBR. Adding a **texture set** beside an add-on's
+texture gives it lacquered paintwork. For `textures/entity/my_train.png`, add
+`my_train.texture_set.json` next to it:
 
-```properties
-# Rail vehicles
-entity.4011 = minecraft:minecart minecraft:chest_minecart \
-              <modid>:<entity_name> <modid>:<entity_name2>
-
-# Road and water
-entity.4010 = minecraft:boat minecraft:chest_boat \
-              <modid>:<entity_name>
+```json
+{
+  "format_version": "1.21.30",
+  "minecraft:texture_set": {
+    "color": "my_train",
+    "metalness_emissive_roughness_subsurface": "my_train_mers"
+  }
+}
 ```
 
-Registered entities are shaded as **vehicles**: lacquered paintwork driven by
-the `Vehicle glossiness` slider, and a shadow bias tuned for a large rigid body.
+`my_train_mers.png` matches the colour texture's size, one channel each:
 
-> **Shadows work without this.** Registration only changes how the surface is
-> shaded. Listing an id that does not exist is harmless — the loader logs it.
-
-### Troubleshooting
-
-| Symptom | Fix |
-|---|---|
-| Dark banding across a model | Raise `Entity Shadow Bias` |
-| Shadow floats away from its caster | Lower `Entity Shadow Bias` / `Shadow Bias` |
-| Shadow vanishes at a distance | Raise `Entity Shadow Range` (Iris only), then `Shadow Distance` |
-| Rear of a long consist has no shadow | Same; set `Shadow Distance` beyond the full length |
-| Shadows look blocky | Raise `Shadow Resolution`, or lower `Shadow Distortion` to even out near and far quality |
-| A dark ellipse remains underfoot | Check `Hide Blob Shadow` is on |
-| No shadows at all | Check shaders are enabled and `Shadow Distance` is not 0 |
-
-The mechanics are written up in [docs/ENTITY_SHADOWS.md](docs/ENTITY_SHADOWS.md).
-
----
-
-## Settings for station and depot scenes
-
-Long consists under a platform canopy respond well to:
-
-| Setting | Suggested | Why |
+| Channel | Meaning | For a rail car |
 |---|---|---|
-| Shadow Distance | 192–256 m | Has to cover the whole consist |
-| Entity Shadow Range | 2.0–3.0 | Stops long vehicles being culled by origin distance |
-| Shadow Distortion | 0.40–0.55 | Evens out quality from the near end to the far end |
-| Shadow Resolution | 2048–4096 | Resolves window frames, handrails, pantographs |
-| Vehicle Glossiness | 0.70–0.85 | Reads as painted bodywork |
-| Sun Path Angle | -30 to -20° | Keeps the light raking across the flanks all day |
+| R | Metalness | Painted 0, bare stainless 255 |
+| G | Emission | Destination boards and headlights 200–255, else 0 |
+| B | Roughness | Polished bodywork 40–70, matte 180+ |
+| A | Subsurface | 0 normally |
 
-The `High` profile is close to this; start there and adjust.
+> This is the form Mojang's vanilla pack actually ships. A constant-value form
+> also exists, but there was no example of it in the official sample, so only
+> the verified form is documented here.
+
+## Tuning
+
+Edit the JSON in `bedrock/` directly — they are only numbers.
+
+| Goal | File and key |
+|---|---|
+| Deeper shadows | `lighting/global.json` → lower `ambient.illuminance` |
+| Bluer shadows | same file → push `ambient.color` bluer |
+| Stronger sun | same file → raise `sun.illuminance` |
+| Bluer sky | `atmospherics/atmospherics.json` → `rayleigh_strength` |
+| Calmer colour | `color_grading/color_grading.json` → `saturation` / `contrast` |
+| Still water | `water/water.json` → `waves.enabled: false` |
+
+Then check it:
+
+```bash
+python3 tools/check_bedrock.py
+```
+
+Minecraft silently ignores a mistyped key rather than reporting it, so run this
+before installing.
 
 ---
 
-## Options
+# Java Edition
 
-Everything is adjustable from the in-game shader options screen, in English or
-Japanese.
+A deferred shader pack for Iris / OptiFine, built around **entities casting
+shadows shaped like their models** — there the shadow mapping is written in the
+pack rather than supplied by the engine.
 
-| Screen | Contents |
-|---|---|
-| Shadows | Resolution, distance, filter, softness, distortion, bias, coloured shadows |
-| Entities & Vehicles | Entity-only bias, shadow range, blob shadow, glossiness |
-| Lighting | Sun, sky, block light and its colour temperature, specular, AO |
-| Sky & Atmosphere | Sun path, sky saturation, fog, light shafts, clouds |
-| Water & Reflections | Waves, reflections, refraction, absorption, SSR |
-| Waving | Plants, leaves, wind strength |
-| Image & Colour | Tone curve, auto exposure, white balance, saturation, bloom, TAA, sharpening |
+- Requires **Iris 1.6+** (recommended) or **OptiFine H9+**, Minecraft 1.16.5 – 1.21.x
+- Install: drop `VibrantVisuals-Java-*.zip` in `.minecraft/shaderpacks/`
+- Details: [docs/ENTITY_SHADOWS.md](docs/ENTITY_SHADOWS.md), [docs/PIPELINE.md](docs/PIPELINE.md)
 
-Profiles: `Potato`, `Low`, `Medium`, `High`, `Ultra`.
+Options are available in English and Japanese. Profiles: `Potato` through
+`Ultra`. For long consists, start at `High`, then raise `Shadow Distance` and
+`Entity Shadow Range`.
 
 ---
 
 ## Development
 
-The shaders can be checked without launching Minecraft.
-
 ```bash
-# Compile all 52 stages under 4 macro variants with glslang.
-# Includes are resolved the way the loaders do, and reported error lines are
-# mapped back to the file they actually came from.
-python3 tools/validate_shaders.py
-
-# Cross-check the options across GLSL, shaders.properties and each .lang file
-python3 tools/check_options.py
-
-# Build a distributable zip
-tools/package.sh
+python3 tools/check_bedrock.py        # Bedrock pack, including key-name typos
+python3 tools/validate_shaders.py     # Java GLSL, 52 stages x 4 macro variants
+python3 tools/check_options.py        # Java options consistency
+tools/package.sh                      # Build both distributables
 ```
 
-Pass `--glslang <path>` if `glslangValidator` is not on `PATH`; prebuilt
-binaries are on the
-[glslang releases page](https://github.com/KhronosGroup/glslang/releases).
-
-The render pipeline is described in [docs/PIPELINE.md](docs/PIPELINE.md).
+Pass `--glslang <path>` if `glslangValidator` is not on `PATH`
+([prebuilt binaries](https://github.com/KhronosGroup/glslang/releases)).
 
 ## License
 
