@@ -116,10 +116,23 @@ vec3 shadowTap(vec2 uv, float depth) {
 #endif
 }
 
-/* Average depth of the casters above this point, in depth-buffer units. */
+/*
+    Average depth of the casters above this point, in depth-buffer units.
+
+    The centre is always tested.  The Vogel disk's innermost sample sits a
+    quarter of the search radius out, so a thin occluder directly overhead - a
+    handrail, a rail head, a catenary wire - could otherwise be missed entirely
+    and the caller would conclude the point was unshadowed.
+*/
 float findBlockerDepth(vec3 clipPos, float searchRadius, float rotation, float depth) {
     float sum = 0.0;
     float hits = 0.0;
+
+    float centre = texture(shadowtex1, distortShadowClip(clipPos).xy * 0.5 + 0.5).r;
+    if (centre < depth) {
+        sum += centre;
+        hits += 1.0;
+    }
 
     for (int i = 0; i < SHADOW_BLOCKER_SAMPLES; i++) {
         vec2 offset = vogelDisk(i, SHADOW_BLOCKER_SAMPLES, rotation) * searchRadius;

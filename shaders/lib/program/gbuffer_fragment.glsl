@@ -65,8 +65,13 @@ void main() {
         g-buffer - lit, fogged and reflected like everything else - and the
         temporal filter turns the dither back into a soft edge.
     */
-    float threshold = bayer16(gl_FragCoord.xy) * 0.92 + 0.04;
-    if (color.a < threshold) discard;
+    float threshold = bayer16(gl_FragCoord.xy);
+#ifdef TAA
+    /* Advance the pattern each frame; a static one would survive temporal
+       accumulation as a visible grid instead of resolving to a soft edge. */
+    threshold = fract(threshold + float(frameCounter % 16) * 0.0625);
+#endif
+    if (color.a < threshold * 0.92 + 0.04) discard;
     color.a = 1.0;
 #else
     if (color.a < GB_ALPHA_CUTOFF) discard;

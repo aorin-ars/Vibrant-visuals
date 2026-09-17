@@ -70,7 +70,7 @@ def collect_properties_options() -> tuple[set[str], set[str], dict[str, set[str]
 
         if key == "screen" or key.startswith("screen."):
             screens |= {t for t in rhs.split()
-                        if not t.startswith("[") and t != "<empty>"}
+                        if not t.startswith("[") and not t.startswith("<")}
         elif key == "sliders":
             sliders |= set(rhs.split())
         elif key.startswith("profile."):
@@ -94,12 +94,31 @@ def collect_lang(path: Path) -> tuple[set[str], set[tuple[str, str]]]:
     return labels, values
 
 
+def check_properties_files() -> list[str]:
+    """Both loaders read these with java.util.Properties semantics."""
+    problems = []
+    for path in sorted(SHADERS.glob("*.properties")):
+        joined = re.sub(r"\\\s*\n\s*", " ", path.read_text())
+        keys: list[str] = []
+        for line in joined.splitlines():
+            line = line.strip()
+            if not line or line[0] in "#!":
+                continue
+            if "=" not in line:
+                problems.append(f"{path.name}: line without '=': {line[:60]}")
+                continue
+            keys.append(line.split("=", 1)[0].strip())
+        for key in sorted({k for k in keys if keys.count(k) > 1}):
+            problems.append(f"{path.name}: duplicate key {key}")
+    return problems
+
+
 def main() -> int:
     glsl_values, glsl_toggles = collect_glsl_options()
     defined = set(glsl_values) | glsl_toggles | BUILTIN_OPTIONS
     screens, sliders, profiles = collect_properties_options()
 
-    problems: list[str] = []
+    problems: list[str] = check_properties_files()
 
     for name in sorted(screens - defined):
         problems.append(f"on a screen but never defined in GLSL: {name}")

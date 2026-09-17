@@ -37,10 +37,6 @@ float linearizeDepth(float depth) {
     return (near * far) / (depth * (near - far) + far);
 }
 
-float delinearizeDepth(float linear) {
-    return (far - (near * far) / linear) / (far - near);
-}
-
 /* ------------------------------------------------------------ temporal jitter */
 
 /* Halton(2,3), recentred on the pixel. */
@@ -77,7 +73,11 @@ vec4 jitterClipPos(vec4 clipPos) {
 vec3 reprojectScreenPos(vec3 screenPos) {
     vec3 viewPos  = screenToView(screenPos);
     vec3 scenePos = viewToScenePoint(viewPos);
-    vec3 previous = scenePos + (cameraPosition - previousCameraPosition);
+
+    /* Sky sits at infinity: it follows the camera's rotation but not its
+       translation, so applying the movement here would smear it while flying. */
+    vec3 movement = screenPos.z < 1.0 ? cameraPosition - previousCameraPosition : vec3(0.0);
+    vec3 previous = scenePos + movement;
 
     vec4 prevView = gbufferPreviousModelView * vec4(previous, 1.0);
     vec4 prevClip = gbufferPreviousProjection * prevView;

@@ -29,8 +29,13 @@ vec3 blackbody(float kelvin) {
         c.g = 288.1221695283 * pow(t - 60.0, -0.0755148492);
         c.b = 255.0;
     }
-    c = saturate(c / 255.0);
-    return srgbToLinear(c) / max(luminance(srgbToLinear(c)), 1e-3);
+    vec3 linear = srgbToLinear(saturate(c / 255.0));
+    linear /= max(luminance(linear), 1e-3);
+
+    /* Pulled slightly towards white: block light in a real room has bounced off
+       something before it arrives, and bouncing desaturates. Luminance is
+       unchanged, because both ends of the mix are normalised to 1. */
+    return mix(vec3(1.0), linear, 0.80);
 }
 
 float blockLightFalloff(float lm) {
@@ -87,7 +92,20 @@ ShadingResult shadeSurface(
 
     vec3 shadow = vec3(1.0);
 #ifdef USE_SHADOW_SAMPLERS
-    shadow = sampleShadow(scenePos, geoNormal, geoNdotL,
+    vec3 biasNormal = geoNormal;
+    float biasNdotL = geoNdotL;
+
+    /*
+        Backlit foliage.  Biasing from the shaded side would put the sample
+        behind the leaf and report it as occluded, so the light that should be
+        glowing through it never arrives.  Bias from the lit side instead.
+    */
+    if (m.sss > 0.01 && biasNdotL < 0.0) {
+        biasNormal = -geoNormal;
+        biasNdotL = -biasNdotL;
+    }
+
+    shadow = sampleShadow(scenePos, biasNormal, biasNdotL,
                           shadowBiasForMaterial(m.id), pixel);
 #else
     shadow = vec3(step(0.0, geoNdotL));
@@ -146,11 +164,18 @@ ShadingResult shadeSurface(
     vec3 directSpec = specularGGX(normal, viewDir, lightDir, m.roughness, f0);
     color += directSpec * directE * shadow;
 
-    /* Sky reflection through the split-sum approximation - cheap, and enough
-       to put moving highlights along a train's flank as it rolls past. */
+    /*
+        Sky reflection through the split-sum approximation - cheap, and enough
+        to put moving highlights along a train's flank as it rolls past.
+
+        The translucent programs trace their own reflections and define
+        LIGHTING_NO_AMBIENT_SPECULAR, so the two never stack on one surface.
+    */
+    #ifndef LIGHTING_NO_AMBIENT_SPECULAR
     vec3 reflDir = reflect(-viewDir, normal);
     vec3 skyReflection = skyRadiance(reflDir) * skyLm * ambientOcclusion;
     color += skyReflection * envBRDFApprox(f0, m.roughness, NdotV);
+    #endif
 #endif
 
     color += m.albedo * m.emission * 4.0;

@@ -139,19 +139,4 @@ vec3 skyAverage() {
           + skyRadiance(normalize(vec3( 0.0, 0.12, -1.0)))) / 6.0;
 }
 
-/* Sun and moon discs, drawn into the sky programs only. */
-vec3 celestialDiscs(vec3 dir) {
-    vec3 result = vec3(0.0);
-
-    float sunCos = dot(dir, sunDirection());
-    float sunDisc = smoothstep(0.99965, 0.99987, sunCos);
-    result += sunDisc * sunIrradiance() * 30.0;
-
-    float moonCos = dot(dir, moonDirection());
-    float moonDisc = smoothstep(0.9990, 0.9996, moonCos);
-    result += moonDisc * vec3(0.55, 0.60, 0.72) * (1.0 - dayFactor()) * 1.5;
-
-    return result * (1.0 - rainStrength * 0.9);
-}
-
 #endif

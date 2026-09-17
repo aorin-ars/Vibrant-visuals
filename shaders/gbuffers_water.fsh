@@ -12,6 +12,9 @@
 #define USE_AUX_SAMPLERS
 #define USE_SHADOW_SAMPLERS
 
+/* Reflections are traced below; skip the analytic one in shadeSurface. */
+#define LIGHTING_NO_AMBIENT_SPECULAR
+
 #include "/lib/common.glsl"
 #include "/lib/uniforms.glsl"
 #include "/lib/space.glsl"
@@ -133,12 +136,11 @@ void main() {
 
     vec3 viewDir = normalize(-vScenePos);
     float NdotV = saturate(dot(normal, viewDir));
-    vec3 f0 = vec3(materialF0(material));
+    vec3 f0 = materialF0(material);
     float fresnel = saturate(fresnelSchlick(NdotV, f0).r);
 
     vec3 reflectDir = reflect(-viewDir, normal);
     vec3 reflection = skyRadiance(reflectDir) * mix(0.05, 1.0, lmcoord.y);
-    reflection += celestialDiscs(reflectDir) * 0.35;
 
 #if defined(WATER_REFLECTIONS) && defined(SSR)
     if (reflectDir.y > -0.05) {
@@ -159,7 +161,13 @@ void main() {
     if (isWater) fresnel *= 0.25;
 #endif
 
-    vec3 result = mix(behind, reflection, fresnel) + surface * (1.0 - fresnel);
+    /*
+        `surface` is the direct specular lobe, which already carries its own
+        Fresnel term from the BRDF - on near-mirror water it is the sun's
+        reflection, so attenuating it by Fresnel a second time would dim the
+        glint exactly where it should be brightest.
+    */
+    vec3 result = mix(behind, reflection, fresnel) + surface;
 
     /* --------------------------------------------------------------- fog */
 

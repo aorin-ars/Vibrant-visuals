@@ -33,20 +33,8 @@ vec3 linearToSrgb(vec3 c) {
     return max(1.055 * pow(max(c, vec3(0.0)), vec3(0.4166666667)) - 0.055, vec3(0.0));
 }
 
-float remap(float x, float lo, float hi) {
-    return saturate((x - lo) / max(hi - lo, 1e-6));
-}
-
-/* Smooth, always-positive falloff used all over the atmosphere code. */
-float expFalloff(float x, float k) { return exp2(-x * k * 1.442695); }
-
 vec3 projectOrtho(mat4 m, vec3 v) {
     return vec3(m[0][0], m[1][1], m[2][2]) * v + m[3].xyz;
-}
-
-vec3 projectPerspective(mat4 m, vec3 v) {
-    vec4 p = m * vec4(v, 1.0);
-    return p.xyz / p.w;
 }
 
 /* Octahedral normal encoding: 3 floats of direction into 2 stable channels. */

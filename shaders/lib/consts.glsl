@@ -43,7 +43,6 @@ const float wetnessHalflife = 200.0;
 const float drynessHalflife = 50.0;
 const float eyeBrightnessHalflife = 4.0;
 const float centerDepthHalflife = 2.0;
-const int   noiseTextureResolution = 256;
 
 /* ------------------------------------------------------------ gbuffer layout */
 

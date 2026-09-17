@@ -105,7 +105,6 @@ uniform sampler2D colortex7;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 uniform sampler2D depthtex2;
-uniform sampler2D noisetex;
 #else
 #ifdef USE_AUX_SAMPLERS
 uniform sampler2D colortex4;
@@ -114,7 +113,6 @@ uniform sampler2D colortex6;
 uniform sampler2D colortex7;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
-uniform sampler2D noisetex;
 #endif
 #endif
 
