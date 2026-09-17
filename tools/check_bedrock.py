@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Validate the Bedrock resource pack.
+"""Validate a Bedrock resource pack.
+
+    tools/check_bedrock.py [pack-directory]     (default: bedrock)
+
 
 Bedrock fails quietly: a keyframe key that is not a parseable number, a colour
 channel above 255 or a mistyped settings identifier does not produce an error,
@@ -17,7 +20,7 @@ import sys
 import uuid
 from pathlib import Path
 
-PACK = Path("bedrock")
+PACK = Path(sys.argv[1] if len(sys.argv) > 1 else "bedrock")
 
 # file -> (expected top-level settings key, expected identifier)
 SETTINGS_FILES = {
@@ -180,12 +183,13 @@ def check_manifest(problems: list[str]) -> None:
 
 
 def check_settings(problems: list[str]) -> None:
-    for name, (settings_key, identifier) in SETTINGS_FILES.items():
-        path = PACK / name
-        if not path.is_file():
-            problems.append(f"{name} is missing")
-            continue
-        data = json.loads(path.read_text())
+    present = [n for n in SETTINGS_FILES if (PACK / n).is_file()]
+    if not present:
+        problems.append("the pack overrides no settings file, so it changes nothing")
+
+    for name in present:
+        settings_key, identifier = SETTINGS_FILES[name]
+        data = json.loads((PACK / name).read_text())
 
         if "format_version" not in data:
             problems.append(f"{name}: no format_version")
@@ -202,6 +206,8 @@ def check_settings(problems: list[str]) -> None:
 
 def check_keyframes(problems: list[str]) -> None:
     for name, path, kind in KEYFRAME_PATHS:
+        if not (PACK / name).is_file():
+            continue
         data = json.loads((PACK / name).read_text())
         table = dig(data, path)
         where = f"{name}:{'.'.join(path[1:])}"
@@ -241,10 +247,12 @@ def check_keyframes(problems: list[str]) -> None:
 
 
 def check_misc(problems: list[str]) -> None:
-    lighting = json.loads((PACK / "lighting/global.json").read_text())
-    ambient = dig(lighting, ["minecraft:lighting_settings", "ambient", "color"])
-    if not (isinstance(ambient, str) and HEX_COLOR.match(ambient)):
-        problems.append(f"lighting ambient.color must be #RRGGBB, got {ambient!r}")
+    lighting_path = PACK / "lighting/global.json"
+    if lighting_path.is_file():
+        lighting = json.loads(lighting_path.read_text())
+        ambient = dig(lighting, ["minecraft:lighting_settings", "ambient", "color"])
+        if not (isinstance(ambient, str) and HEX_COLOR.match(ambient)):
+            problems.append(f"lighting ambient.color must be #RRGGBB, got {ambient!r}")
 
     icon = PACK / "pack_icon.png"
     if not icon.is_file():
@@ -280,9 +288,9 @@ def main() -> int:
         return 1
 
     files = sorted(p.relative_to(PACK) for p in PACK.rglob("*") if p.is_file())
-    print(f"bedrock pack OK: {len(files)} files, "
-          f"{len(SETTINGS_FILES)} settings files, "
-          f"{len(KEYFRAME_PATHS)} keyframe tables, all keys known to the engine")
+    overrides = sum(1 for n in SETTINGS_FILES if (PACK / n).is_file())
+    print(f"{PACK}: OK - {len(files)} files, {overrides} settings file(s) "
+          f"overridden, all keys known to the engine")
     return 0
 
 
