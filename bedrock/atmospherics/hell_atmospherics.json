@@ -1,0 +1,38 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:atmosphere_settings": {
+    "description": {
+      "identifier": "minecraft:hell_atmospherics"
+    },
+    "horizon_blend_stops": {
+      "min": 0.0,
+      "start": 0.8,
+      "mie_start": 0.5,
+      "max": 1.0
+    },
+    "rayleigh_strength": {
+      "0.000000": 0.15,
+      "1.000000": 0.15
+    },
+    "sun_mie_strength": {
+      "0.000000": 0.0,
+      "1.000000": 0.0
+    },
+    "moon_mie_strength": {
+      "0.000000": 0.0,
+      "1.000000": 0.0
+    },
+    "sun_glare_shape": {
+      "0.000000": 0.0,
+      "1.000000": 0.0
+    },
+    "sky_zenith_color": {
+      "0.000000": [74, 18, 10],
+      "1.000000": [74, 18, 10]
+    },
+    "sky_horizon_color": {
+      "0.000000": [74, 18, 10],
+      "1.000000": [74, 18, 10]
+    }
+  }
+}

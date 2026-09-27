@@ -6,7 +6,7 @@ Shader-mod looks for Minecraft, for **both editions**.
 
 | | Contents | Goes to |
 |---|---|---|
-| [`bedrock/`](bedrock/) | Resource pack for Vibrant Visuals (deferred rendering) | open the `.mcpack` |
+| [`bedrock/`](bedrock/) | **Vibrant Unbound** — a Complementary Unbound style resource pack for Vibrant Visuals | open the `.mcpack` |
 | [`java/`](java/) | Shader pack for Iris / OptiFine | `.minecraft/shaderpacks/` |
 
 > **The two editions use completely different formats.** A Java shader pack
@@ -14,61 +14,88 @@ Shader-mod looks for Minecraft, for **both editions**.
 
 ---
 
-# Bedrock Edition
+# Bedrock Edition: Vibrant Unbound
+
+Recreates the look of the Java shader **Complementary Shaders (Unbound style)**
+with Bedrock's Vibrant Visuals renderer.
 
 ## Requirements
 
-- Minecraft Bedrock **1.21.80 or newer**
+- Minecraft Bedrock **1.26.0 or newer**
 - **Vibrant Visuals switched on** in Video Settings
 
 ## Installing
 
-1. Open `VibrantVisuals-*.mcpack` — it imports itself
+1. Open `VibrantUnbound-*.mcpack` — it imports itself
 2. **Settings → Video → Vibrant Visuals**: on
 3. In the world's **Settings → Resource Packs**, activate the pack
 
-To install by hand, unzip it into `com.mojang/resource_packs/`.
+**Optional add-on**: activate `VibrantUnbound-Relief-*.mcpack` alongside it to
+give stone, wood, ores and other opaque blocks surface relief (the equivalent of
+Complementary's generated normals). It is built from the vanilla textures, so
+it is not in the repository ([how to build it](#development)). **Personal use
+only** — do not redistribute it.
+
+To install by hand, unzip into `com.mojang/resource_packs/`.
+
+## What changes
+
+| | Vanilla Vibrant Visuals | Vibrant Unbound |
+|---|---|---|
+| Sunlight | Whitish, fades early in the afternoon | Warm white, 130 at noon (vanilla 100), strong golden light all afternoon |
+| Sunset / sunrise | Muted | Orange to red at the horizon, rose to violet above; pink and gold at dawn |
+| Sky | Dull blue-grey | Deep blue zenith, pale hazy horizon, a glow around the sun at all hours |
+| Shadows | Grey | Filled with sky blue; moonlit blue at night (moon 0.7, vanilla 0.4) |
+| Haze and light shafts | Uniform fog in some biomes | **Valley haze** in every biome — thickest at y64, thinning with height — with shafts toward the sun |
+| Rain | — | Haze thickens |
+| Water | No waves | Waves, stronger caustics, nearly clear, tinted by the biome's water colour (green swamps, turquoise warm oceans) |
+| Underwater | — | Clear blue-green, ~30 blocks visibility |
+| Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
+| Sun and moon | Squares | **Round sun** with a soft corona, **round moon** with craters and all 8 phases |
+| Grading | Contrast 1.15 / saturation 1.05 | 1.20 / 1.16; shadows lean slightly cool, highlights slightly warm |
+
+### Why every biome is covered
+
+Since 1.21.90 most vanilla biomes — jungle, desert, taiga, mesa, the Nether,
+the End and more — carry **their own lighting, atmosphere and colour grading**,
+and those take precedence over `lighting/global.json` and the other global
+files. A pack that only overrides the globals changes plains and forest and
+nothing else.
+
+This pack overrides **every identifier the vanilla biomes use** (15 lighting,
+17 atmosphere, 14 colour grading, 1 water) under the same name, so the look is
+the same wherever you are, with small deliberate differences on top — a warmer
+desert, a whiter snowfield.
+
+## What a resource pack cannot do
+
+Vibrant Visuals' shaders belong to the engine; a resource pack only supplies
+numbers and textures. These Complementary features cannot be reproduced:
+
+- Grass and leaves waving in the wind
+- Volumetric cumulus clouds, auroras, nebulae
+- Rain puddles and wet-surface reflections
+- Depth of field, motion blur, lens flare
+
+Fog density cannot follow the time of day either (fog settings do not support
+keyframes).
 
 ## Entity shadows
 
 **Entities casting shadows shaped like their models is a feature of Vibrant
 Visuals itself** — switching it on in Video Settings is what produces them.
+Their resolution comes from the shadow quality video setting; a resource pack
+cannot change it.
 
-Their quality, though, *is* configurable from a resource pack
-(`shadows/global.json`):
+A pack only chooses the shadow **style** (`shadows/global.json`):
 
 | Key | This pack | Meaning |
 |---|---|---|
-| `shadow_style` | `soft_shadows` | Softens the shadow edge |
-| `texel_size` | 2048 | Shadow map resolution — higher resolves window frames, handrails, bogies |
+| `shadow_style` | `soft_shadows` | Soft-edged shadows. `blocky_shadows` gives pixel-art stepped shadows |
+| `texel_size` | 16 | With `blocky_shadows`, the grid shadows snap to. Unused by `soft_shadows` |
 
-Drop `texel_size` to 1024 if it costs too much performance.
-
-What a resource pack can and cannot change:
-
-| Can change | Cannot change |
-|---|---|
-| Shadow softness and shadow map resolution | Which entities cast shadows |
-| Sun and moon illuminance and colour | Shadow bias (the striping trade-off) |
-| Ambient and sky light intensity | The shader code itself |
-| Atmospheric scattering — sky colour, haze, sun glare | |
-| Colour grading — contrast, saturation, temperature | |
-| Water — waves, caustics, turbidity | |
-| PBR defaults for blocks and entities | |
-
-**The other way to make shadows read is to raise the sun and lower the ambient
-fill**, which is what the values below do.
-
-| Setting | Vanilla | This pack | Why |
-|---|---|---|---|
-| Sun illuminance at noon | 100 | 132 | Widens the gap between lit and shadowed |
-| Ambient | 0.02 / white | 0.014 / `#BFD4FF` | Shadows fill with sky blue instead of crushing to black |
-| Sky intensity | 1.0 | 1.30 | Same; more blue bounce inside shadows |
-| Rayleigh strength | 10 | 14 | Deeper blue at the zenith |
-| Sun Mie strength (day) | 0.0 | 0.22 | Glow around the sun during the day |
-| Contrast / saturation | 1.15 / 1.05 | 1.22 / 1.14 | Photographic punch |
-| Water waves | off | on | A surface that moves |
-| Entity roughness | 255 | 205 | A little sheen on bodywork and creatures |
+> Earlier versions of this README called `texel_size` the shadow map
+> resolution. That was wrong: it does not make shadows any finer.
 
 ## The manifest's `capabilities`
 
@@ -76,15 +103,18 @@ fill**, which is what the values below do.
 "capabilities": ["pbr"]
 ```
 
-**Without this line every deferred rendering file — `lighting`, `atmospherics`
+**Without this line every Vibrant Visuals file — `lighting`, `atmospherics`
 and the rest — is silently ignored.** Texture replacement still works, so the
 pack looks installed and does nothing, which is the most confusing way for it to
 break. `tools/check_bedrock.py` catches it.
 
 ## Making an add-on's vehicles look metallic
 
-Vibrant Visuals supports PBR. Adding a **texture set** beside an add-on's
-texture gives it lacquered paintwork. For `textures/entity/my_train.png`, add
+Vibrant Visuals supports PBR. The quickest lever is the pack-wide default for
+entities (`actors` in `pbr/global.json`, `[metalness, emission, roughness,
+subsurface]`; lower roughness is glossier — this pack uses 215, vanilla 255).
+
+For a specific texture, `textures/entity/my_train.png`, add
 `my_train.texture_set.json` next to it:
 
 ```json
@@ -106,33 +136,37 @@ texture gives it lacquered paintwork. For `textures/entity/my_train.png`, add
 | B | Roughness | Polished bodywork 40–70, matte 180+ |
 | A | Subsurface | 0 normally |
 
-> A constant-value form also exists — the same `[metalness, emission, roughness,
-> subsurface]` array `pbr/global.json` uses — and needs no image at all. It is
-> used by shipping Vibrant Visuals packs.
+A texture set is ignored unless every image it names sits **in the same pack,
+in the same folder** — it cannot borrow an image from another pack.
 
 ## Tuning
 
-Edit the JSON in `bedrock/` directly — they are only numbers.
+The settings files are generated by `tools/generate_bedrock.py`; the numbers
+sit near the top of that script. Change them there and regenerate (editing the
+JSON directly works too, but regenerating overwrites it).
 
-| Goal | File and key |
+| Goal | In `tools/generate_bedrock.py` |
 |---|---|
-| Deeper shadows | `lighting/global.json` → lower `ambient.illuminance` |
-| Bluer shadows | same file → push `ambient.color` bluer |
-| Stronger sun | same file → raise `sun.illuminance` |
-| Bluer sky | `atmospherics/atmospherics.json` → `rayleigh_strength` |
-| Calmer colour | `color_grading/color_grading.json` → `saturation` / `contrast` |
-| Still water | `water/water.json` → `waves.enabled: false` |
-| Sharper shadows | `shadows/global.json` → raise `texel_size` (costs performance) |
-| Glossier entities | `pbr/global.json` → lower the third value under `actors` |
-
-Then check it:
+| Stronger / weaker sun | `SUN_ILLUMINANCE` |
+| Sunset colours | `SUN_COLOR` (the light) and `golden` / `sunset` etc. in `sky_tables` (the sky) |
+| Bluer sky | `DAY_ZENITH` and `RAYLEIGH` |
+| Darker / lighter shadows | `AMBIENT_ILLUMINANCE` |
+| Brighter nights | `MOON_ILLUMINANCE` |
+| Less / more haze | first number of each `HAZE` entry (density) |
+| Stronger light shafts | third number of each `HAZE` entry (forward scattering; closer to 1 concentrates it toward the sun) |
+| Calmer colour | `saturation` / `contrast` in `BASE_GRADE` |
+| Still water | `waves.enabled` in `WATER` → `False` |
+| More biome colour in water | `biome_water_color_contribution` in `WATER` (0–1) |
+| Block light colours | `LIGHT_COLORS` |
+| Tilt of the sun's path | `ORBITAL_OFFSET` (degrees) |
 
 ```bash
-python3 tools/check_bedrock.py
+python3 tools/generate_bedrock.py --vanilla <bedrock-samples>/resource_pack
+python3 tools/check_bedrock.py --vanilla <bedrock-samples>/resource_pack
 ```
 
-Minecraft silently ignores a mistyped key rather than reporting it, so run this
-before installing.
+Minecraft silently ignores a mistyped key or an out-of-range value rather than
+reporting it, so run the check before installing.
 
 ---
 
@@ -154,11 +188,22 @@ Options are available in English and Japanese. Profiles: `Potato` through
 
 ## Development
 
+The Bedrock tools need Mojang's vanilla resource pack (`resource_pack` in
+[Mojang/bedrock-samples](https://github.com/Mojang/bedrock-samples)) and
+Python with Pillow and numpy.
+
 ```bash
-python3 tools/check_bedrock.py        # Bedrock pack, including key-name typos
+git clone --depth 1 https://github.com/Mojang/bedrock-samples
+pip install pillow numpy
+V=bedrock-samples/resource_pack
+
+python3 tools/generate_bedrock.py --vanilla $V   # settings files (bedrock/ and diagnostic/)
+python3 tools/draw_sky.py                        # round sun and moon
+python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
+tools/package.sh --vanilla $V                    # distributables, including the relief add-on
+
 python3 tools/validate_shaders.py     # Java GLSL, 52 stages x 4 macro variants
 python3 tools/check_options.py        # Java options consistency
-tools/package.sh                      # Build both distributables
 ```
 
 Pass `--glslang <path>` if `glslangValidator` is not on `PATH`
@@ -166,4 +211,6 @@ Pass `--glslang <path>` if `glslangValidator` is not on `PATH`
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). The relief add-on (output of
+`tools/build_pbr.py`) contains Mojang's textures, is not covered by this
+license, and is for personal use only.

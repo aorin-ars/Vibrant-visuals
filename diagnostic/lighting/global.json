@@ -1,12 +1,9 @@
 {
   "format_version": "1.21.80",
-
-
   "minecraft:lighting_settings": {
     "description": {
       "identifier": "minecraft:default_lighting"
     },
-
     "directional_lights": {
       "orbital": {
         "sun": {
@@ -40,18 +37,15 @@
         "color": [255, 255, 255]
       }
     },
-
     "emissive": {
       "desaturation": 0.0
     },
-
     "ambient": {
       "color": "#FF00FF",
       "illuminance": 2.0
     },
-
     "sky": {
-      "intensity": 0.05
+      "intensity": 0.1
     }
   }
 }

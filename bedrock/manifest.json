@@ -4,15 +4,15 @@
     "name": "pack.name",
     "description": "pack.description",
     "uuid": "0e682665-2038-4c85-9402-d8e77c5c7e65",
-    "version": [2, 0, 0],
-    "min_engine_version": [1, 21, 0]
+    "version": [3, 0, 0],
+    "min_engine_version": [1, 26, 0]
   },
   "modules": [
     {
       "type": "resources",
       "description": "pack.description",
       "uuid": "eac9213d-21ec-48bf-bafb-e30430db73e4",
-      "version": [2, 0, 0]
+      "version": [3, 0, 0]
     }
   ],
   "capabilities": ["pbr"],

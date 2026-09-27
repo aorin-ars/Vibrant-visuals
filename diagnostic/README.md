@@ -4,8 +4,13 @@ This pack answers one question in one go: **why is nothing happening?**
 
 It changes two independent things:
 
-1. **Lighting** (`lighting/global.json`) — read by the deferred renderer and by
+1. **Lighting** (`lighting/*.json`) — read by the deferred renderer and by
    nothing else. Ambient is pushed far past any sane value and tinted magenta.
+   Every lighting identifier the vanilla biomes use is overridden, not just
+   the global one: since 1.21.90 most biomes (jungle, desert, taiga, mesa,
+   the Nether, the End, ...) have their own lighting that wins over
+   `lighting/global.json`, so a global-only test reads "off" in those biomes
+   even when the renderer is running.
 2. **Block textures** (`textures/blocks/*.png`) — plain texture replacement,
    which works on any renderer. Dirt, stone, cobblestone, sand, gravel, oak
    planks, oak log and grass become lime green with a black X.

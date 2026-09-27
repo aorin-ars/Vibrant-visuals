@@ -7,7 +7,7 @@ Minecraft の見た目を、影mod のような画に寄せるパックです。
 
 | | 中身 | 導入先 |
 |---|---|---|
-| [`bedrock/`](bedrock/) | Vibrant Visuals（遅延レンダリング）用リソースパック | `.mcpack` を開く |
+| [`bedrock/`](bedrock/) | **Vibrant Unbound** — Complementary Unbound 風の Vibrant Visuals 用リソースパック | `.mcpack` を開く |
 | [`java/`](java/) | Iris / OptiFine 用シェーダーパック | `.minecraft/shaderpacks/` |
 
 > **統合版と Java版でパックの形式はまったく別物です。** Java版のシェーダーパックを
@@ -15,59 +15,82 @@ Minecraft の見た目を、影mod のような画に寄せるパックです。
 
 ---
 
-# 統合版（Bedrock）
+# 統合版（Bedrock）: Vibrant Unbound
+
+Java版の影mod **Complementary Shaders（Unbound スタイル）** の画作りを、統合版の
+Vibrant Visuals で再現するリソースパックです。
 
 ## 必要なもの
 
-- Minecraft 統合版 **1.21.80 以降**
+- Minecraft 統合版 **1.26.0 以降**
 - ビデオ設定で **Vibrant Visuals が有効**になっていること
 
 ## 導入
 
-1. `VibrantVisuals-*.mcpack` をタップ／ダブルクリックして開く（自動でインポートされます）
+1. `VibrantUnbound-*.mcpack` をタップ／ダブルクリックして開く（自動でインポートされます）
 2. **設定 → ビデオ → Vibrant Visuals** を **オン**にする
 3. ワールドの **設定 → リソースパック** でこのパックを有効にする
 
+**追加パック（任意）**: `VibrantUnbound-Relief-*.mcpack` を一緒に有効にすると、
+石・木材・鉱石などのブロックに凹凸が付きます（Complementary の「Generated Normals」相当）。
+バニラのテクスチャから作るため、リポジトリには入っていません（[作り方](#開発)）。
+**個人利用のみ**で、再配布はしないでください。
+
 手動で入れる場合は、zip を展開して `com.mojang/resource_packs/` に置いてください。
+
+## 何が変わるか
+
+| | バニラの Vibrant Visuals | Vibrant Unbound |
+|---|---|---|
+| 日差し | 白っぽく、夕方は早めに暗くなる | 暖かい白。正午は 130（バニラ 100）、午後いっぱい強い金色の光が残る |
+| 夕焼け・朝焼け | 控えめ | 地平線は橙から赤、上空はバラ色から紫へ。朝はピンクと金色 |
+| 空 | くすんだ青灰色 | 天頂は深い青、地平線は淡い水色の霞。昼も太陽のまわりが光る |
+| 影 | 灰色 | 空の青で満たされた影。夜は月明かりで青く見える（月 0.7、バニラ 0.4） |
+| 霞と光芒 | 一部のバイオームだけ一様な霧 | すべてのバイオームに**谷に溜まる霞**（y64 で最も濃く、上空ほど薄い）。太陽の方向に光芒が出る |
+| 雨 | — | 雨の日は霞が濃くなる |
+| 水 | 波なし | 波あり、コースティクス強め、ほぼ透明。バイオームの水の色が混ざる（沼は緑、暖かい海はターコイズ） |
+| 水中 | — | 青緑に澄んだ水中、見通し約 30 ブロック |
+| ブロックの光 | 一律の色 | **色付き**: 松明・炎は橙、魂の炎は水色、レッドストーンは赤、紫水晶・エンダー系は紫、シーランタンは水色がかった白 など 106 種 |
+| 太陽・月 | 四角 | **丸い太陽**（やわらかい光冠付き）と**丸い月**（クレーター付き、8 つの満ち欠け） |
+| 色調 | コントラスト 1.15 / 彩度 1.05 | 1.20 / 1.16。暗部はわずかに青く、明部はわずかに暖かく |
+
+### すべてのバイオームに効かせている理由
+
+統合版 1.21.90 以降、ジャングル・砂漠・タイガ・メサ・ネザー・エンドなど多くのバイオームは
+**バイオーム専用の照明・大気・色調設定**を持っていて、それが `lighting/global.json` などの
+全体設定より優先されます。全体設定だけを書き換えるパックは、平原や森でしか効きません。
+
+このパックは、バニラのバイオームが参照している識別子（照明 15・大気 17・色調 14・水 1）を
+**すべて同じ名前で上書き**しています。どのバイオームにいても同じ画作りになり、その上で
+砂漠は少し暖かく、雪原は少し白く、といった差を付けています。
+
+## Complementary との違い（リソースパックではできないこと）
+
+Vibrant Visuals の見た目はエンジンのシェーダーが決めていて、リソースパックが変えられるのは
+**数値の設定とテクスチャだけ**です。Complementary の次の機能は再現できません。
+
+- 草や葉が風で揺れる
+- 立体的な雲（Unbound の積雲）・オーロラ・星雲
+- 雨の水たまり・濡れた地面の反射
+- 被写界深度・モーションブラー・レンズフレア
+
+時間帯で霞の濃さを変えることもできません（霧の設定はキーフレームに対応していないため）。
 
 ## エンティティの影について
 
 **エンティティが自分の形の影を落とすこと自体は、Vibrant Visuals 本体の機能です。**
 ビデオ設定でオンにすれば、列車も船も Mob も形どおりの影を落とします。
+影の細かさはビデオ設定の影の品質で決まり、リソースパックからは変えられません。
 
-その上で、**影の品質はリソースパックから設定できます**（`shadows/global.json`）。
+リソースパックから変えられるのは影の**スタイル**だけです（`shadows/global.json`）。
 
 | 項目 | このパック | 意味 |
 |---|---|---|
-| `shadow_style` | `soft_shadows` | 影の輪郭を柔らかくする |
-| `texel_size` | 2048 | シャドウマップの解像度。上げるほど細部（窓枠・手すり・台車）が影に出ます |
+| `shadow_style` | `soft_shadows` | 輪郭の柔らかい影。`blocky_shadows` にするとドット絵風の角ばった影になる |
+| `texel_size` | 16 | `blocky_shadows` のとき、影をどの細かさのマス目にそろえるか。`soft_shadows` では使われない |
 
-`texel_size` が効きすぎて重い場合は 1024 に下げてください。
-
-リソースパックで変えられる範囲は次のとおりです。
-
-| 変えられる | 変えられない |
-|---|---|
-| 影の柔らかさ・シャドウマップ解像度 | どのエンティティが影を落とすか |
-| 太陽・月の明るさと色 | 影のバイアス（縞模様の調整） |
-| 環境光と空の光の強さ | シェーダーコードそのもの |
-| 大気の散乱（空の色、霞、太陽のグレア） | |
-| 色調（コントラスト・彩度・色温度） | |
-| 水（波・コースティクス・濁り） | |
-| PBR（金属感・粗さ・発光）のブロック／エンティティ既定値 | |
-
-**影を「濃く・はっきり」見せるもう一つの方法は、太陽を強くして環境光を下げることです。**
-
-| 項目 | バニラ | このパック | 狙い |
-|---|---|---|---|
-| 太陽の照度（正午） | 100 | 132 | 直射光を強め、影との差を広げる |
-| 環境光 | 0.02 / 白 | 0.014 / 青白 (`#BFD4FF`) | 影を「黒く潰す」のではなく「空の青で満たす」 |
-| 空の強さ | 1.0 | 1.30 | 同上。影の中に青が回り込む |
-| Rayleigh 散乱 | 10 | 14 | 天頂の青を深く |
-| 太陽の Mie 散乱（昼） | 0.0 | 0.22 | 昼間も太陽まわりが光る |
-| コントラスト / 彩度 | 1.15 / 1.05 | 1.22 / 1.14 | 写真的な締まり |
-| 水の波 | 無効 | 有効 | 水面が動く |
-| エンティティの粗さ | 255 | 205 | 車体や生き物に少し艶を出す |
+> 以前のこのパックでは `texel_size` を「シャドウマップの解像度」と説明していましたが、
+> 誤りでした。影の細かさを上げる効果はありません。
 
 ## manifest の `capabilities`
 
@@ -86,7 +109,7 @@ Vibrant Visuals は PBR（金属感・粗さ・発光）に対応しています
 
 一番手軽なのは、パック全体のエンティティ既定値を変えることです
 （`pbr/global.json` の `actors`）。数値は `[金属度, 発光, 粗さ, 表面下散乱]` で、
-粗さを下げるほど艶が出ます。
+粗さを下げるほど艶が出ます（このパックは 215、バニラは 255）。
 
 個別に作り込むなら、アドオンの `textures/entity/` にあるテクスチャ `my_train.png`
 に対して、同じ場所に `my_train.texture_set.json` を置きます。
@@ -110,33 +133,37 @@ Vibrant Visuals は PBR（金属感・粗さ・発光）に対応しています
 | B | 粗さ | 磨かれた車体 40〜70、艶消し 180〜 |
 | A | 表面下散乱 | 通常 0 |
 
-> 画像を用意せず数値だけで指定する書き方もあります（`pbr/global.json` と同じ
-> `[金属度, 発光, 粗さ, 表面下散乱]` の配列）。こちらは実在の Vibrant Visuals
-> パックで使われているのを確認しています。
+テクスチャセットが参照する画像は、**テクスチャセットと同じパックの同じフォルダ**に
+無いと無視されます（別のパックにある画像は使えません）。
 
-## 効き目が弱い／強すぎるとき
+## 調整したいとき
 
-`bedrock/` の JSON を直接編集してください。数字を書き換えるだけです。
+設定ファイルは `tools/generate_bedrock.py` から生成しています。数値はこのスクリプトの
+先頭近くにまとまっているので、そこを変えて再生成するのが確実です
+（JSON を直接編集しても動きますが、再生成すると上書きされます）。
 
-| やりたいこと | 触る場所 |
+| やりたいこと | `tools/generate_bedrock.py` の場所 |
 |---|---|
-| 影をもっと濃く | `lighting/global.json` の `ambient.illuminance` を下げる |
-| 影の青みを強く | 同 `ambient.color` をより青く |
-| 日差しをもっと強く | 同 `sun.illuminance` の各値を上げる |
-| 空をもっと青く | `atmospherics/atmospherics.json` の `rayleigh_strength` |
-| 色を落ち着かせる | `color_grading/color_grading.json` の `saturation` / `contrast` |
-| 水の波を止める | `water/water.json` の `waves.enabled` を `false` |
-| 影をシャープに | `shadows/global.json` の `texel_size` を上げる（重くなります） |
-| エンティティの艶を強く | `pbr/global.json` の `actors` の3番目（粗さ）を下げる |
-
-編集後は検証できます。
+| 日差しを強く／弱く | `SUN_ILLUMINANCE` |
+| 夕焼けの色 | `SUN_COLOR`（光の色）と `sky_tables` の `golden` / `sunset` など（空の色） |
+| 空をもっと青く | `DAY_ZENITH`（天頂の色）と `RAYLEIGH` |
+| 影を暗く／明るく | `AMBIENT_ILLUMINANCE` |
+| 夜を明るく | `MOON_ILLUMINANCE` |
+| 霞を薄く／濃く | `HAZE` の `clear` などの最初の数値（濃さ） |
+| 光芒を強く | `HAZE` の3番目の数値（前方散乱。1 に近いほど太陽方向に集中） |
+| 色を落ち着かせる | `BASE_GRADE` の `saturation` / `contrast` |
+| 水の波を止める | `WATER` の `waves.enabled` を `False` |
+| 水の色をバイオームに寄せる | `WATER` の `biome_water_color_contribution`（0〜1） |
+| ブロックの光の色 | `LIGHT_COLORS` |
+| 太陽の軌道の傾き | `ORBITAL_OFFSET`（度） |
 
 ```bash
-python3 tools/check_bedrock.py
+python3 tools/generate_bedrock.py --vanilla <bedrock-samples>/resource_pack
+python3 tools/check_bedrock.py --vanilla <bedrock-samples>/resource_pack
 ```
 
-キー名を打ち間違えても Minecraft は何も言わずに無視するので、このチェックを通して
-から入れてください。
+キー名を打ち間違えたり範囲外の値を入れたりしても Minecraft は何も言わずに無視するので、
+このチェックを通してから入れてください。
 
 ---
 
@@ -158,11 +185,22 @@ Iris / OptiFine 用の遅延レンダリングシェーダーパックです。*
 
 ## 開発
 
+統合版の生成・検証には Mojang のバニラリソースパック
+（[Mojang/bedrock-samples](https://github.com/Mojang/bedrock-samples) の `resource_pack`）と、
+Python の Pillow / numpy が要ります。
+
 ```bash
-python3 tools/check_bedrock.py        # 統合版パックの検証（キー名のタイポも検出）
+git clone --depth 1 https://github.com/Mojang/bedrock-samples
+pip install pillow numpy
+V=bedrock-samples/resource_pack
+
+python3 tools/generate_bedrock.py --vanilla $V   # 設定ファイルを生成（bedrock/ と diagnostic/）
+python3 tools/draw_sky.py                        # 丸い太陽と月を描く
+python3 tools/check_bedrock.py --vanilla $V      # 統合版パックの検証（キー名・値の範囲・全バイオーム網羅）
+tools/package.sh --vanilla $V                    # 配布ファイルを生成（凹凸追加パックを含む）
+
 python3 tools/validate_shaders.py     # Java版 GLSL を全52ステージ×4構成でコンパイル
 python3 tools/check_options.py        # Java版の設定項目の整合性
-tools/package.sh                      # 両方の配布ファイルを生成
 ```
 
 `glslangValidator` が PATH に無い場合は `--glslang <path>` を渡してください
@@ -171,3 +209,5 @@ tools/package.sh                      # 両方の配布ファイルを生成
 ## ライセンス
 
 MIT License — [LICENSE](LICENSE) を参照してください。
+凹凸追加パック（`tools/build_pbr.py` の出力）は Mojang のテクスチャを含むため、
+このライセンスの対象外で、個人利用に限ります。

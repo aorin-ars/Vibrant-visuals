@@ -1,0 +1,429 @@
+{
+  "format_version": "1.21.120",
+  "minecraft:local_light_settings": {
+    "minecraft:amethyst_cluster": {
+      "light_color": "#C98BFF",
+      "light_type": "static_light"
+    },
+    "minecraft:beacon": {
+      "light_color": "#C8F8FF",
+      "light_type": "static_light"
+    },
+    "minecraft:black_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:black_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:blue_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:blue_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:brewing_stand": {
+      "light_color": "#FFD27A",
+      "light_type": "static_light"
+    },
+    "minecraft:brown_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:brown_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:calibrated_sculk_sensor": {
+      "light_color": "#38D9D0",
+      "light_type": "static_light"
+    },
+    "minecraft:campfire": {
+      "light_color": "#FF9040",
+      "light_type": "static_light"
+    },
+    "minecraft:candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:cave_vines_body_with_berries": {
+      "light_color": "#FFB45A",
+      "light_type": "static_light"
+    },
+    "minecraft:cave_vines_head_with_berries": {
+      "light_color": "#FFB45A",
+      "light_type": "static_light"
+    },
+    "minecraft:colored_torch_blue": {
+      "light_color": "#5C7CFF",
+      "light_type": "static_light"
+    },
+    "minecraft:colored_torch_green": {
+      "light_color": "#5CFF5C",
+      "light_type": "static_light"
+    },
+    "minecraft:colored_torch_purple": {
+      "light_color": "#C05CFF",
+      "light_type": "static_light"
+    },
+    "minecraft:colored_torch_red": {
+      "light_color": "#FF4040",
+      "light_type": "static_light"
+    },
+    "minecraft:conduit": {
+      "light_color": "#9EEBFF",
+      "light_type": "static_light"
+    },
+    "minecraft:copper_bulb": {
+      "light_color": "#FFB070",
+      "light_type": "static_light"
+    },
+    "minecraft:copper_lantern": {
+      "light_color": "#B8EF8D",
+      "light_type": "point_light"
+    },
+    "minecraft:copper_torch": {
+      "light_color": "#B8EF8D",
+      "light_type": "point_light"
+    },
+    "minecraft:creaking_heart": {
+      "light_color": "#FF9A3C",
+      "light_type": "static_light"
+    },
+    "minecraft:crying_obsidian": {
+      "light_color": "#A55CFF",
+      "light_type": "static_light"
+    },
+    "minecraft:cyan_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:cyan_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:dragon_egg": {
+      "light_color": "#C77CFF",
+      "light_type": "static_light"
+    },
+    "minecraft:enchanting_table": {
+      "light_color": "#B28CFF",
+      "light_type": "static_light"
+    },
+    "minecraft:end_portal": {
+      "light_color": "#A55CFF",
+      "light_type": "static_light"
+    },
+    "minecraft:end_rod": {
+      "light_color": "#F4E6FF",
+      "light_type": "point_light"
+    },
+    "minecraft:ender_chest": {
+      "light_color": "#9A7CFF",
+      "light_type": "static_light"
+    },
+    "minecraft:exposed_copper_bulb": {
+      "light_color": "#FFB070",
+      "light_type": "static_light"
+    },
+    "minecraft:exposed_copper_lantern": {
+      "light_color": "#B8EF8D",
+      "light_type": "point_light"
+    },
+    "minecraft:fire": {
+      "light_color": "#FF9040",
+      "light_type": "static_light"
+    },
+    "minecraft:firefly_bush": {
+      "light_color": "#D8FF7A",
+      "light_type": "static_light"
+    },
+    "minecraft:flowing_lava": {
+      "light_color": "#FF6A1F",
+      "light_type": "static_light"
+    },
+    "minecraft:glow_lichen": {
+      "light_color": "#9FE8C6",
+      "light_type": "static_light"
+    },
+    "minecraft:glowstone": {
+      "light_color": "#FFC878",
+      "light_type": "static_light"
+    },
+    "minecraft:gray_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:gray_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:green_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:green_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:lantern": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:large_amethyst_bud": {
+      "light_color": "#C98BFF",
+      "light_type": "static_light"
+    },
+    "minecraft:lava": {
+      "light_color": "#FF6A1F",
+      "light_type": "static_light"
+    },
+    "minecraft:light_blue_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:light_blue_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:light_gray_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:light_gray_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:lime_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:lime_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:lit_blast_furnace": {
+      "light_color": "#FF9040",
+      "light_type": "static_light"
+    },
+    "minecraft:lit_deepslate_redstone_ore": {
+      "light_color": "#FF3A2E",
+      "light_type": "static_light"
+    },
+    "minecraft:lit_furnace": {
+      "light_color": "#FF9040",
+      "light_type": "static_light"
+    },
+    "minecraft:lit_pumpkin": {
+      "light_color": "#FFAA55",
+      "light_type": "static_light"
+    },
+    "minecraft:lit_redstone_lamp": {
+      "light_color": "#FFB46E",
+      "light_type": "static_light"
+    },
+    "minecraft:lit_redstone_ore": {
+      "light_color": "#FF3A2E",
+      "light_type": "static_light"
+    },
+    "minecraft:lit_smoker": {
+      "light_color": "#FF9040",
+      "light_type": "static_light"
+    },
+    "minecraft:magenta_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:magenta_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:magma": {
+      "light_color": "#FF5A1A",
+      "light_type": "static_light"
+    },
+    "minecraft:medium_amethyst_bud": {
+      "light_color": "#C98BFF",
+      "light_type": "static_light"
+    },
+    "minecraft:ochre_froglight": {
+      "light_color": "#FFD27A",
+      "light_type": "static_light"
+    },
+    "minecraft:orange_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:orange_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:oxidized_copper_bulb": {
+      "light_color": "#FFB070",
+      "light_type": "static_light"
+    },
+    "minecraft:oxidized_copper_lantern": {
+      "light_color": "#B8EF8D",
+      "light_type": "point_light"
+    },
+    "minecraft:pearlescent_froglight": {
+      "light_color": "#F7B8FF",
+      "light_type": "static_light"
+    },
+    "minecraft:pink_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:pink_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:portal": {
+      "light_color": "#A55CFF",
+      "light_type": "static_light"
+    },
+    "minecraft:purple_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:purple_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:red_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:red_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:redstone_torch": {
+      "light_color": "#FF3A2E",
+      "light_type": "point_light"
+    },
+    "minecraft:respawn_anchor": {
+      "light_color": "#B066FF",
+      "light_type": "static_light"
+    },
+    "minecraft:sculk_catalyst": {
+      "light_color": "#38D9D0",
+      "light_type": "static_light"
+    },
+    "minecraft:sculk_sensor": {
+      "light_color": "#38D9D0",
+      "light_type": "static_light"
+    },
+    "minecraft:sea_lantern": {
+      "light_color": "#B8F0FF",
+      "light_type": "static_light"
+    },
+    "minecraft:sea_pickle": {
+      "light_color": "#C6FF9E",
+      "light_type": "point_light"
+    },
+    "minecraft:shroomlight": {
+      "light_color": "#FF9B55",
+      "light_type": "static_light"
+    },
+    "minecraft:small_amethyst_bud": {
+      "light_color": "#C98BFF",
+      "light_type": "static_light"
+    },
+    "minecraft:soul_campfire": {
+      "light_color": "#3FE0FF",
+      "light_type": "static_light"
+    },
+    "minecraft:soul_fire": {
+      "light_color": "#3FE0FF",
+      "light_type": "static_light"
+    },
+    "minecraft:soul_lantern": {
+      "light_color": "#3FE0FF",
+      "light_type": "point_light"
+    },
+    "minecraft:soul_torch": {
+      "light_color": "#3FE0FF",
+      "light_type": "point_light"
+    },
+    "minecraft:torch": {
+      "light_color": "#FFB266",
+      "light_type": "point_light"
+    },
+    "minecraft:trial_spawner": {
+      "light_color": "#FFB45A",
+      "light_type": "static_light"
+    },
+    "minecraft:vault": {
+      "light_color": "#FFB45A",
+      "light_type": "static_light"
+    },
+    "minecraft:verdant_froglight": {
+      "light_color": "#B8F29A",
+      "light_type": "static_light"
+    },
+    "minecraft:waxed_copper_bulb": {
+      "light_color": "#FFB070",
+      "light_type": "static_light"
+    },
+    "minecraft:waxed_copper_lantern": {
+      "light_color": "#B8EF8D",
+      "light_type": "point_light"
+    },
+    "minecraft:waxed_exposed_copper_bulb": {
+      "light_color": "#FFB070",
+      "light_type": "static_light"
+    },
+    "minecraft:waxed_exposed_copper_lantern": {
+      "light_color": "#B8EF8D",
+      "light_type": "point_light"
+    },
+    "minecraft:waxed_oxidized_copper_bulb": {
+      "light_color": "#FFB070",
+      "light_type": "static_light"
+    },
+    "minecraft:waxed_oxidized_copper_lantern": {
+      "light_color": "#B8EF8D",
+      "light_type": "point_light"
+    },
+    "minecraft:waxed_weathered_copper_bulb": {
+      "light_color": "#FFB070",
+      "light_type": "static_light"
+    },
+    "minecraft:waxed_weathered_copper_lantern": {
+      "light_color": "#B8EF8D",
+      "light_type": "point_light"
+    },
+    "minecraft:weathered_copper_bulb": {
+      "light_color": "#FFB070",
+      "light_type": "static_light"
+    },
+    "minecraft:weathered_copper_lantern": {
+      "light_color": "#B8EF8D",
+      "light_type": "point_light"
+    },
+    "minecraft:white_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:white_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:yellow_candle": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    },
+    "minecraft:yellow_candle_cake": {
+      "light_color": "#FFA24D",
+      "light_type": "point_light"
+    }
+  }
+}
