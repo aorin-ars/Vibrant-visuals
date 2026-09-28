@@ -50,7 +50,9 @@ CUBEMAP_FORMAT = "1.21.130"
 
 # Mojang: orbital offset and tone mapping operator cannot be blended between
 # biomes, so every file in the pack has to agree on them.
-ORBITAL_OFFSET = 20.0
+# 12 degrees: the noon sun stands high (78 degrees up) so shadows are short,
+# but not straight overhead, where blocks would hide their own shadows.
+ORBITAL_OFFSET = 12.0
 TONE_MAP = "generic"
 
 # Time of day: 0.0 noon, 0.25 sunset, 0.5 midnight, 0.75 sunrise.
@@ -118,45 +120,64 @@ def lerp_rgb(a, b, t):
 # Lighting
 # --------------------------------------------------------------------------
 
-# Brighter than vanilla (100) at noon, and held up much longer into the
-# afternoon: Complementary's golden hour is still strong direct light, not a
-# fade-out. The last stops copy vanilla's shape so the handover to the moon at
-# 0.292 is unchanged.
+# Where the sun actually is. Minecraft's sun does not move at a constant
+# rate: its angle is eased so days run long, so keyframe 0.25 ("sunset") still
+# has the sun about 12 degrees up. Elevation by keyframe, from the celestial
+# angle formula (evening side; the morning mirrors it about 0.5):
+#
+#   0.000  90  noon            0.250  12  golden hour (reference: 夕方)
+#   0.150  47                  0.265   7
+#   0.200  30                  0.275   3
+#   0.230  20                  0.283   0  sun on the horizon (日没); rises at 0.717 (早朝)
+#   0.300  -7  civil dusk      0.330 -17  night (夜);  0.500 midnight (深夜)
+#
+# Vanilla's own curve agrees: its sun fades to nothing between 0.282 and 0.292.
+
+# Clear, bright midday rather than midsummer glare: 110 at noon (vanilla 100).
+# The fall-off follows the air the light crosses, not sin(elevation) - the
+# engine already shades surfaces by angle - so low sun stays strong and warm.
 SUN_ILLUMINANCE = mirror({
-    0.000: 130.0,
-    0.080: 128.0,
-    0.150: 110.0,
-    0.200: 78.0,
-    0.230: 46.0,
-    0.250: 24.0,
-    0.268: 8.0,
-    0.282: 1.2,
+    0.000: 110.0,
+    0.080: 109.0,
+    0.150: 102.0,
+    0.200: 88.0,
+    0.230: 70.0,
+    0.250: 50.0,
+    0.265: 32.0,
+    0.275: 18.0,
+    0.282: 5.0,
     0.2915: 0.01,
     0.292: 0.0,
     0.500: 0.0,
 })
 
-# Warm white at noon, a long gold into deep orange at the horizon. After the
-# sun is down its colour still drives sky scattering, which is what paints the
-# rose-and-violet dusk.
+# Neutral white from late morning to mid-afternoon - no yellow cast at noon.
+# Warmth only arrives with low sun: gold below ~20 degrees, orange at a few
+# degrees, red-orange on the horizon. Dawn is pinker and turns gold faster
+# than dusk. Below the horizon the colour only feeds sky scattering, which
+# paints the rose and violet of twilight.
 SUN_COLOR = {
-    0.000: [255, 241, 222],
-    0.120: [255, 234, 206],
-    0.180: [255, 214, 166],
-    0.215: [255, 186, 120],
-    0.240: [255, 152, 78],
-    0.262: [255, 120, 52],
-    0.285: [255, 118, 92],
-    0.320: [255, 140, 150],
+    0.000: [255, 252, 246],
+    0.150: [255, 250, 242],
+    0.200: [255, 240, 220],
+    0.230: [255, 222, 180],
+    0.250: [255, 198, 135],
+    0.265: [255, 165, 95],
+    0.275: [255, 130, 65],
+    0.283: [255, 105, 50],
+    0.300: [255, 110, 120],
+    0.330: [255, 140, 150],
     0.500: [255, 110, 60],
-    0.680: [255, 140, 150],
-    0.715: [255, 124, 98],
-    0.738: [255, 130, 60],
-    0.760: [255, 164, 90],
-    0.790: [255, 196, 134],
-    0.840: [255, 224, 184],
-    0.900: [255, 236, 210],
-    1.000: [255, 241, 222],
+    0.670: [255, 140, 150],
+    0.700: [255, 120, 130],
+    0.717: [255, 115, 55],
+    0.725: [255, 140, 70],
+    0.735: [255, 175, 105],
+    0.750: [255, 205, 145],
+    0.770: [255, 228, 190],
+    0.800: [255, 242, 222],
+    0.845: [255, 250, 242],
+    1.000: [255, 252, 246],
 }
 
 # Moonlit nights you can see in, with a clear blue cast - vanilla's is 0.4.
@@ -167,21 +188,21 @@ MOON_ILLUMINANCE = {
 MOON_COLOR = [150, 178, 255]
 
 # Fallback light for caves and for surfaces with nothing to reflect. Kept at
-# vanilla strength so caves stay dark, but tinted like the sky above: cool by
-# day, deep blue at night, lilac through twilight.
+# vanilla strength so caves stay dark, pale blue-white by day like the open
+# sky, deep blue at night, lilac through twilight.
 AMBIENT_COLOR = {
-    0.000: [204, 220, 255],
-    0.220: [214, 212, 240],
-    0.280: [180, 170, 220],
-    0.360: [128, 150, 220],
-    0.640: [128, 150, 220],
-    0.720: [190, 172, 214],
-    0.780: [216, 212, 236],
-    1.000: [204, 220, 255],
+    0.000: [210, 224, 255],
+    0.230: [218, 216, 240],
+    0.290: [184, 170, 220],
+    0.340: [128, 150, 220],
+    0.660: [128, 150, 220],
+    0.710: [196, 172, 214],
+    0.770: [218, 218, 242],
+    1.000: [210, 224, 255],
 }
 AMBIENT_ILLUMINANCE = {
-    0.000: 0.022, 0.250: 0.020, 0.360: 0.017,
-    0.640: 0.017, 0.750: 0.020, 1.000: 0.022,
+    0.000: 0.022, 0.283: 0.020, 0.340: 0.017,
+    0.660: 0.017, 0.717: 0.020, 1.000: 0.022,
 }
 
 
@@ -239,14 +260,14 @@ LIGHTING = {
     "coolish_lighting.json": overworld_lighting(
         "minecraft:coolish_lighting", sun_tint=(0.985, 1.0, 1.02)),
     "warmish_lighting.json": overworld_lighting(
-        "minecraft:warmish_lighting", sun_tint=(1.0, 0.985, 0.95), moon_color=[128, 156, 255]),
+        "minecraft:warmish_lighting", sun_tint=(1.0, 0.992, 0.975), moon_color=[128, 156, 255]),
     "hot_lighting.json": overworld_lighting(
-        "minecraft:hot_lighting", sun_scale=1.04, sun_tint=(1.0, 0.97, 0.9), moon_color=[116, 146, 255]),
+        "minecraft:hot_lighting", sun_scale=1.04, sun_tint=(1.0, 0.985, 0.95), moon_color=[116, 146, 255]),
     "desert_lighting.json": overworld_lighting(
-        "minecraft:desert_lighting", sun_scale=1.06, sun_tint=(1.0, 0.975, 0.92),
+        "minecraft:desert_lighting", sun_scale=1.06, sun_tint=(1.0, 0.988, 0.955),
         moon_color=[116, 150, 255]),
     "mesa_lighting.json": overworld_lighting(
-        "minecraft:mesa_lighting", sun_scale=1.04, sun_tint=(1.0, 0.96, 0.9),
+        "minecraft:mesa_lighting", sun_scale=1.04, sun_tint=(1.0, 0.98, 0.95),
         moon_color=[128, 156, 255]),
     "ice_plains_spikes_lighting.json": overworld_lighting(
         "minecraft:ice_plains_spikes_lighting", sun_scale=0.8, sun_tint=(0.92, 0.96, 1.0),
@@ -290,15 +311,15 @@ LIGHTING = {
 
 # Rayleigh drives the depth of the blue; it is dropped through twilight as
 # vanilla does, or dusk goes muddy.
-RAYLEIGH = mirror({0.0: 12.0, 0.139: 11.5, 0.25: 6.0, 0.33: 5.5, 0.5: 5.0})
+RAYLEIGH = mirror({0.0: 12.0, 0.15: 11.5, 0.25: 7.0, 0.283: 6.0, 0.33: 5.5, 0.5: 5.0})
 
-# Vanilla has no sun haze at all during the day. Complementary has a soft
-# bright halo around the sun at every hour, flaring wide at the horizon.
-SUN_MIE = mirror({0.0: 0.30, 0.15: 0.36, 0.20: 0.55, 0.25: 1.10, 0.28: 0.60,
-                  0.35: 0.0, 0.5: 0.0})
-SUN_GLARE = mirror({0.0: 0.040, 0.15: 0.045, 0.20: 0.060, 0.25: 0.090, 0.28: 0.060,
-                    0.35: 0.0, 0.5: 0.0})
-MOON_MIE = {0.0: 0.0, 0.22: 0.0, 0.30: 0.15, 0.70: 0.15, 0.78: 0.0, 1.0: 0.0}
+# Sun halo. Kept small at midday - clear air, only a slight softness around
+# the sun - and widening as the sun gets low, into the big glow of sunset.
+SUN_MIE = mirror({0.0: 0.16, 0.15: 0.20, 0.20: 0.35, 0.25: 0.80, 0.283: 1.10,
+                  0.30: 0.55, 0.34: 0.0, 0.5: 0.0})
+SUN_GLARE = mirror({0.0: 0.030, 0.15: 0.035, 0.20: 0.050, 0.25: 0.080, 0.283: 0.095,
+                    0.30: 0.060, 0.34: 0.0, 0.5: 0.0})
+MOON_MIE = {0.0: 0.0, 0.26: 0.0, 0.33: 0.15, 0.67: 0.15, 0.74: 0.0, 1.0: 0.0}
 
 # Horizon blend: vanilla's shape, with the zenith taking over a little lower at
 # midday so the deep blue reaches further down the sky.
@@ -307,47 +328,70 @@ BLEND_START = mirror({0.0: 0.70, 0.25: 0.50, 0.301: 0.25, 0.5: 0.25})
 BLEND_MIE_START = {0.0: 0.5, 0.1: 0.5, 0.2: 1.0, 0.8: 1.0, 0.9: 0.5, 1.0: 0.5}
 BLEND_MAX = {0.0: 0.25, 1.0: 0.25}
 
-NIGHT_ZENITH = [26, 34, 62]
-NIGHT_HORIZON = [58, 82, 128]
+# Night is navy, not black: a lighter band at the horizon early in the night
+# (夜), deepening toward midnight (深夜).
+NIGHT_ZENITH = [16, 30, 74]
+NIGHT_HORIZON = [40, 54, 96]
+DEEP_NIGHT_ZENITH = [6, 12, 32]
+DEEP_NIGHT_HORIZON = [18, 26, 48]
 
 
-def sky_tables(day_zenith, day_horizon, *, dusk_zenith=(62, 86, 160),
-               twilight=None, night_zenith=NIGHT_ZENITH, night_horizon=NIGHT_HORIZON):
+def sky_tables(day_zenith, day_horizon, *, dusk_zenith=(60, 58, 120),
+               dawn_zenith=(48, 78, 168), twilight=None):
     """Zenith and horizon colour keyframes around one day palette.
 
-    Dusk and dawn get their own colours rather than a mirror: sunset is
-    orange going to rose and violet, sunrise pinker and more golden.
+    Stops sit at real sun elevations (see the table above SUN_ILLUMINANCE),
+    and follow the reference sequence: blue noon; gold, then orange at the
+    horizon with the upper sky still deep blue (夕方); red-orange horizon under
+    a violet sky at sunset (日没); rose and violet twilight; navy night.
+    Dawn has its own colours: magenta turning orange-gold under a deep blue
+    sky (早朝), then a warm cream horizon in a blue morning sky (朝).
     """
     t = twilight or {}
+    day_zenith, day_horizon = list(day_zenith), list(day_horizon)
+    dusk_zenith, dawn_zenith = list(dusk_zenith), list(dawn_zenith)
+    golden = t.get("golden", [255, 176, 100])
+    morning = t.get("morning", [252, 222, 176])
     zenith = {
         0.000: day_zenith,
-        0.190: lerp_rgb(day_zenith, list(dusk_zenith), 0.12),
-        0.250: list(dusk_zenith),
-        0.300: t.get("zenith_dusk", [44, 50, 110]),
-        0.360: night_zenith,
-        0.640: night_zenith,
-        0.700: t.get("zenith_dawn", [48, 56, 118]),
-        0.750: lerp_rgb(list(dusk_zenith), day_zenith, 0.2),
-        0.810: lerp_rgb(day_zenith, list(dusk_zenith), 0.12),
+        0.200: lerp_rgb(day_zenith, dusk_zenith, 0.1),
+        0.250: lerp_rgb(day_zenith, dusk_zenith, 0.6),
+        0.283: dusk_zenith,
+        0.300: t.get("zenith_dusk", [40, 40, 96]),
+        0.330: NIGHT_ZENITH,
+        0.400: DEEP_NIGHT_ZENITH,
+        0.600: DEEP_NIGHT_ZENITH,
+        0.670: NIGHT_ZENITH,
+        0.700: t.get("zenith_dawn", [40, 56, 128]),
+        0.717: dawn_zenith,
+        0.750: lerp_rgb(dawn_zenith, day_zenith, 0.6),
+        0.800: lerp_rgb(day_zenith, dawn_zenith, 0.1),
         1.000: day_zenith,
     }
     horizon = {
         0.000: day_horizon,
         0.167: day_horizon,
-        0.205: t.get("golden", [255, 196, 140]),
-        0.232: t.get("sunset", [255, 160, 96]),
-        0.252: t.get("sunset_deep", [255, 128, 84]),
-        0.272: t.get("rose", [206, 110, 120]),
-        0.300: t.get("violet", [150, 110, 170]),
-        0.360: t.get("blue_hour", [92, 100, 168]),
-        0.400: night_horizon,
-        0.600: night_horizon,
-        0.640: t.get("blue_hour_dawn", [96, 104, 176]),
-        0.700: t.get("pink_dawn", [196, 150, 196]),
-        0.728: t.get("sunrise", [255, 150, 120]),
-        0.748: t.get("sunrise_gold", [255, 172, 120]),
-        0.770: t.get("morning", [255, 206, 158]),
-        0.830: day_horizon,
+        0.210: lerp_rgb(day_horizon, golden, 0.35),
+        0.235: lerp_rgb(day_horizon, golden, 0.7),
+        0.250: golden,
+        0.265: t.get("sunset", [255, 150, 70]),
+        0.278: t.get("sunset_deep", [250, 112, 46]),
+        0.290: t.get("afterglow", [230, 100, 70]),
+        0.300: t.get("rose", [190, 96, 120]),
+        0.315: t.get("violet", [120, 90, 150]),
+        0.340: NIGHT_HORIZON,
+        0.400: DEEP_NIGHT_HORIZON,
+        0.600: DEEP_NIGHT_HORIZON,
+        0.660: NIGHT_HORIZON,
+        0.685: t.get("violet_dawn", [100, 86, 150]),
+        0.700: t.get("magenta_dawn", [170, 100, 140]),
+        0.712: t.get("sunrise", [245, 130, 80]),
+        0.720: t.get("sunrise_gold", [255, 160, 80]),
+        0.735: lerp_rgb(t.get("sunrise_gold", [255, 160, 80]), morning, 0.5),
+        0.750: morning,
+        0.770: lerp_rgb(morning, day_horizon, 0.6),
+        0.800: lerp_rgb(morning, day_horizon, 0.9),
+        0.833: day_horizon,
         1.000: day_horizon,
     }
     return zenith, horizon
@@ -377,9 +421,9 @@ def atmosphere(identifier, zenith, horizon, *, rayleigh=RAYLEIGH, sun_mie=SUN_MI
 
 
 def overworld_atmosphere(identifier, day_zenith, day_horizon, *, twilight=None,
-                         dusk_zenith=(62, 86, 160), **kw) -> dict:
+                         dusk_zenith=(60, 58, 120), dawn_zenith=(48, 78, 168), **kw) -> dict:
     zenith, horizon = sky_tables(day_zenith, day_horizon, dusk_zenith=dusk_zenith,
-                                 twilight=twilight)
+                                 dawn_zenith=dawn_zenith, twilight=twilight)
     return atmosphere(identifier, zenith, horizon, **kw)
 
 
@@ -402,26 +446,26 @@ def flat_atmosphere(identifier, zenith, horizon, rayleigh, *, start=0.8, mie_sta
     }
 
 
-# Deep saturated blue overhead, pale hazy blue at the horizon - the gradient
-# that makes the sky in Complementary read as "clear summer day".
-DAY_ZENITH = [58, 108, 205]
-DAY_HORIZON = [178, 206, 240]
+# Deep vivid blue overhead fading to a pale, clear blue at the horizon - a
+# clean midday gradient, saturated but short of a blue filter.
+DAY_ZENITH = [44, 104, 214]
+DAY_HORIZON = [186, 214, 244]
 
-DESERT_TWILIGHT = {"golden": [255, 200, 132], "sunset": [255, 164, 88],
-                   "sunset_deep": [255, 132, 72], "rose": [214, 116, 104]}
+DESERT_TWILIGHT = {"golden": [255, 196, 128], "sunset": [255, 164, 88],
+                   "sunset_deep": [255, 128, 60], "rose": [214, 110, 104]}
 
 ATMOSPHERICS = {
     "atmospherics.json": overworld_atmosphere(
         "minecraft:default_atmospherics", DAY_ZENITH, DAY_HORIZON),
     "warmish_atmospherics.json": overworld_atmosphere(
-        "minecraft:warmish_atmospherics", [60, 112, 204], [188, 212, 230]),
+        "minecraft:warmish_atmospherics", [46, 106, 210], [192, 216, 238]),
     "hot_atmospherics.json": overworld_atmosphere(
-        "minecraft:hot_atmospherics", [66, 122, 204], [212, 208, 190], twilight=DESERT_TWILIGHT),
+        "minecraft:hot_atmospherics", [56, 118, 208], [206, 212, 206], twilight=DESERT_TWILIGHT),
     "desert_atmospherics.json": overworld_atmosphere(
-        "minecraft:desert_atmospherics", [70, 128, 200], [214, 206, 180], twilight=DESERT_TWILIGHT,
+        "minecraft:desert_atmospherics", [60, 122, 208], [208, 210, 200], twilight=DESERT_TWILIGHT,
         mie_scale=1.15),
     "mesa_atmospherics.json": overworld_atmosphere(
-        "minecraft:mesa_atmospherics", [66, 132, 196], [216, 202, 172], twilight=DESERT_TWILIGHT,
+        "minecraft:mesa_atmospherics", [58, 126, 204], [212, 208, 192], twilight=DESERT_TWILIGHT,
         mie_scale=1.1),
     "ice_plains_spikes_atmospherics.json": overworld_atmosphere(
         "minecraft:ice_plains_spikes_atmospherics", [120, 160, 215], [204, 218, 234],
@@ -432,7 +476,7 @@ ATMOSPHERICS = {
     "swampland_atmospherics.json": overworld_atmosphere(
         "minecraft:swampland_atmospherics", [104, 138, 150], [184, 196, 188], mie_scale=0.8),
     "roofed_forest_atmospherics.json": overworld_atmosphere(
-        "minecraft:roofed_forest_atmospherics", [52, 96, 170], [172, 196, 222]),
+        "minecraft:roofed_forest_atmospherics", [44, 98, 196], [180, 204, 232]),
     "mushroom_island_atmospherics.json": overworld_atmosphere(
         "minecraft:mushroom_island_atmospherics", [110, 124, 196], [214, 212, 236],
         twilight={"sunset": [255, 120, 150], "sunset_deep": [240, 100, 150],
@@ -440,7 +484,7 @@ ATMOSPHERICS = {
     # Overcast and colourless, like vanilla intends, with no sun halo at all.
     "pale_garden_atmospherics.json": overworld_atmosphere(
         "minecraft:pale_garden_atmospherics", [128, 134, 142], [196, 196, 190],
-        dusk_zenith=(96, 100, 110), mie_scale=0.0, rayleigh_scale=0.5,
+        dusk_zenith=(96, 100, 110), dawn_zenith=(96, 100, 110), mie_scale=0.0, rayleigh_scale=0.5,
         twilight={"golden": [200, 190, 180], "sunset": [190, 170, 160],
                   "sunset_deep": [170, 150, 150], "rose": [140, 130, 140],
                   "violet": [110, 110, 130]}),
@@ -465,9 +509,13 @@ ATMOSPHERICS = {
 # Colour grading
 # --------------------------------------------------------------------------
 
-# Vanilla: contrast 1.15, saturation 1.05. Complementary is punchier and more
-# saturated, with shadows leaning cool and highlights warm.
-BASE_GRADE = {"contrast": 1.20, "saturation": 1.16, "gain": (1.02, 1.01, 1.00)}
+# Vanilla: contrast 1.15, saturation 1.05. Here: moderate contrast so shadows
+# stay readable, saturation a little above natural, and a slightly lifted
+# gamma (2.3 against the standard 2.2) for a bright exposure that still keeps
+# detail in the whites. Highlights are left neutral - direct sun is white -
+# and only the shadows lean a touch toward blue-grey.
+BASE_GRADE = {"contrast": 1.14, "saturation": 1.12, "gain": (1.0, 1.0, 1.0)}
+GAMMA = 2.3
 
 
 def grading(identifier, *, temperature=6500.0, contrast=None, saturation=None,
@@ -483,7 +531,7 @@ def grading(identifier, *, temperature=6500.0, contrast=None, saturation=None,
                 "midtones": {
                     "contrast": [c, c, c],
                     "gain": list(g),
-                    "gamma": [2.2, 2.2, 2.2],
+                    "gamma": [GAMMA, GAMMA, GAMMA],
                     "offset": [0.0, 0.0, 0.0],
                     "saturation": [s, s, s],
                 },
@@ -491,17 +539,8 @@ def grading(identifier, *, temperature=6500.0, contrast=None, saturation=None,
                     "enabled": True,
                     "shadowsMax": 0.45,
                     "contrast": [1.0, 1.0, 1.0],
-                    "gain": [0.97, 1.0, 1.05],
-                    "gamma": [2.2, 2.2, 2.2],
-                    "offset": [0.0, 0.0, 0.0],
-                    "saturation": [1.05, 1.05, 1.05],
-                },
-                "highlights": {
-                    "enabled": True,
-                    "highlightsMin": 1.6,
-                    "contrast": [1.0, 1.0, 1.0],
-                    "gain": [1.03, 1.01, 0.97],
-                    "gamma": [2.2, 2.2, 2.2],
+                    "gain": [0.98, 1.0, 1.03],
+                    "gamma": [GAMMA, GAMMA, GAMMA],
                     "offset": [0.0, 0.0, 0.0],
                     "saturation": [1.0, 1.0, 1.0],
                 },
@@ -516,43 +555,44 @@ def grading(identifier, *, temperature=6500.0, contrast=None, saturation=None,
     }
 
 
-def toward_neutral(kelvin: float, keep: float = 0.6) -> float:
-    """Vanilla tints biomes hard (desert 4400 K, ice spikes 11000 K).
-    Complementary barely tints at all; keep 60 % of vanilla's shift."""
+def toward_neutral(kelvin: float, keep: float = 0.4) -> float:
+    """Vanilla tints biomes hard (desert 4400 K, ice spikes 11000 K), which
+    puts a colour filter over the whole screen. Keep 40 % of vanilla's shift:
+    enough for a biome to feel different, not enough to tint daylight."""
     return round(6500.0 + (kelvin - 6500.0) * keep)
 
 
 COLOR_GRADING = {
     "color_grading.json": grading("minecraft:default_color_grading"),
     "cold_color_grading.json": grading(
-        "minecraft:cold_color_grading", temperature=toward_neutral(10000), saturation=1.10),
+        "minecraft:cold_color_grading", temperature=toward_neutral(10000), saturation=1.08),
     "coolish_color_grading.json": grading(
-        "minecraft:coolish_color_grading", temperature=toward_neutral(9000), saturation=1.13),
+        "minecraft:coolish_color_grading", temperature=toward_neutral(9000), saturation=1.10),
     "warmish_color_grading.json": grading(
-        "minecraft:warmish_color_grading", temperature=toward_neutral(4800), saturation=1.18),
+        "minecraft:warmish_color_grading", temperature=toward_neutral(4800), saturation=1.13),
     "hot_color_grading.json": grading(
-        "minecraft:hot_color_grading", temperature=toward_neutral(4000), contrast=1.26),
+        "minecraft:hot_color_grading", temperature=toward_neutral(4000), contrast=1.18),
     "desert_color_grading.json": grading(
-        "minecraft:desert_color_grading", temperature=toward_neutral(4400), saturation=1.12),
+        "minecraft:desert_color_grading", temperature=toward_neutral(4400), saturation=1.10),
     "mesa_color_grading.json": grading(
-        "minecraft:mesa_color_grading", temperature=toward_neutral(4800), saturation=1.14),
+        "minecraft:mesa_color_grading", temperature=toward_neutral(4800), saturation=1.12),
     "ice_plains_spikes_color_grading.json": grading(
         "minecraft:ice_plains_spikes_color_grading", temperature=toward_neutral(11000),
-        saturation=1.08),
+        saturation=1.06),
     "lush_caves_color_grading.json": grading(
-        "minecraft:lush_caves_color_grading", temperature=toward_neutral(4800), contrast=1.24,
-        saturation=1.22),
+        "minecraft:lush_caves_color_grading", temperature=toward_neutral(4800), contrast=1.18,
+        saturation=1.16),
     "mangrove_swamp_color_grading.json": grading(
         "minecraft:mangrove_swamp_color_grading", temperature=toward_neutral(5125)),
     "mushroom_island_color_grading.json": grading(
-        "minecraft:mushroom_island_color_grading", saturation=1.22),
+        "minecraft:mushroom_island_color_grading", saturation=1.16),
     "pale_garden_color_grading.json": grading(
         "minecraft:pale_garden_color_grading", temperature=toward_neutral(9000),
-        saturation=0.85, contrast=1.16),
+        saturation=0.85, contrast=1.12),
     "roofed_forest_color_grading.json": grading(
-        "minecraft:roofed_forest_color_grading", contrast=1.24, saturation=1.12),
+        "minecraft:roofed_forest_color_grading", contrast=1.18, saturation=1.10),
     "swampland_color_grading.json": grading(
-        "minecraft:swampland_color_grading", saturation=1.08),
+        "minecraft:swampland_color_grading", saturation=1.06),
 }
 
 
@@ -618,17 +658,20 @@ def haze(density, scattering, g, *, absorption=(0.0, 0.0, 0.0), floor=64.0, ceil
     }
 
 
+# Clear air first: just enough haze to soften the far distance and let the
+# light read as passing through air, never enough to grey the picture. Humid
+# and swampy biomes keep a little more, as their character.
 HAZE = {
-    "clear": haze(0.08, (0.030, 0.036, 0.044), 0.72),
-    "humid": haze(0.10, (0.050, 0.056, 0.056), 0.55, ceiling=256.0),
-    "swamp": haze(0.10, (0.050, 0.056, 0.050), 0.50, absorption=(0.25, 0.13, 0.19),
+    "clear": haze(0.03, (0.030, 0.036, 0.044), 0.72, ceiling=200.0),
+    "humid": haze(0.05, (0.050, 0.056, 0.056), 0.55, ceiling=240.0),
+    "swamp": haze(0.06, (0.050, 0.056, 0.050), 0.50, absorption=(0.25, 0.13, 0.19),
                   ceiling=240.0),
-    "temperate": haze(0.08, (0.036, 0.042, 0.050), 0.65, ceiling=240.0),
-    "roofed": haze(0.10, (0.038, 0.046, 0.042), 0.70, ceiling=240.0),
-    "cold": haze(0.06, (0.030, 0.037, 0.048), 0.70),
-    "ice_spikes": haze(0.07, (0.028, 0.034, 0.046), 0.45),
-    "dry": haze(0.045, (0.036, 0.032, 0.026), 0.78, ceiling=200.0),
-    "mushroom": haze(0.07, (0.042, 0.030, 0.046), 0.40, absorption=(0.042, 0.137, 0.012)),
+    "temperate": haze(0.035, (0.036, 0.042, 0.050), 0.65, ceiling=220.0),
+    "roofed": haze(0.05, (0.038, 0.046, 0.042), 0.70, ceiling=220.0),
+    "cold": haze(0.03, (0.030, 0.037, 0.048), 0.70, ceiling=200.0),
+    "ice_spikes": haze(0.035, (0.028, 0.034, 0.046), 0.45, ceiling=200.0),
+    "dry": haze(0.02, (0.036, 0.032, 0.026), 0.78, ceiling=180.0),
+    "mushroom": haze(0.04, (0.042, 0.030, 0.046), 0.40, absorption=(0.042, 0.137, 0.012)),
     # The End is fogged at every height, as in vanilla, but violet.
     "end": haze(0.25, (0.026, 0.016, 0.034), 0.80, floor=320.0, ceiling=320.0),
 }
@@ -859,19 +902,23 @@ PBR = {
 #  - sky light: clouds take on the colour of the sky around them
 #  - directional light: they turn gold and pink at sunset with the sun
 #  - atmospheric scattering: distant clouds fade into the horizon haze
-#  - ambient: a small floor, lowest at night so moonlit clouds stay dim
-#    grey instead of glowing
+#  - ambient: a small floor. Lowest late at night, so moonlit clouds stay
+#    dim blue-grey instead of glowing (夜, 深夜); low at dawn, when clouds are
+#    dark silhouettes against the brightening sky (早朝); highest with the
+#    low golden sun of late afternoon (夕方). Keyframes sit at real sun
+#    elevations, as in the lighting tables.
 CLOUD_CUBEMAP = {
     "format_version": CUBEMAP_FORMAT,
     "minecraft:cubemap_settings": {
         "description": {"identifier": "minecraft:default_cubemap"},
         "lighting": {
             "ambient_light_illuminance": keyframes({
-                0.00: 2.5, 0.22: 3.0, 0.28: 2.0, 0.36: 1.0,
-                0.64: 1.0, 0.72: 2.0, 0.78: 3.0, 1.00: 2.5,
+                0.000: 2.5, 0.250: 3.0, 0.283: 2.2, 0.300: 1.6, 0.330: 1.1,
+                0.400: 0.7, 0.600: 0.7, 0.670: 1.1, 0.700: 1.0, 0.717: 1.2,
+                0.750: 2.6, 1.000: 2.5,
             }),
             "sky_light_contribution": 1.0,
-            "directional_light_contribution": 0.3,
+            "directional_light_contribution": 0.4,
             "affected_by_atmospheric_scattering": True,
             "affected_by_volumetric_scattering": True,
         },

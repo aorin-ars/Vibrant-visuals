@@ -42,18 +42,18 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 
 | | Vanilla Vibrant Visuals | Vibrant Unbound |
 |---|---|---|
-| Sunlight | Whitish, fades early in the afternoon | Warm white, 130 at noon (vanilla 100), strong golden light all afternoon |
-| Sunset / sunrise | Muted | Orange to red at the horizon, rose to violet above; pink and gold at dawn |
-| Sky | Dull blue-grey | Deep blue zenith, pale hazy horizon, a glow around the sun at all hours |
-| Shadows | Grey | Filled with sky blue; moonlit blue at night (moon 0.7, vanilla 0.4) |
-| Haze and light shafts | Uniform fog in some biomes | **Valley haze** in every biome — thickest at y64, thinning with height — with shafts toward the sun |
+| Sunlight | Whitish, fades early in the afternoon | **Neutral white at noon, no yellow cast**, 110 (vanilla 100); gold as the sun gets low, orange to red on the horizon |
+| Sky through the day | Muted | Following a reference sequence: early morning (magenta turning orange-gold under deep blue) → morning (warm cream horizon in a blue sky) → noon (deep to pale blue) → late afternoon (gold to orange) → sunset (red-orange horizon under violet) → night (navy) → late night (deep navy). Starry navy nights, never black |
+| Sky | Dull blue-grey | Deep blue zenith, pale clear blue horizon; only a slight glow around the midday sun |
+| Shadows | Grey | Short and crisp at noon (sun 78° up); filled with sky light, blue-grey rather than black; moonlit blue at night (moon 0.7, vanilla 0.4) |
+| Air | Uniform fog in some biomes | **Clear air**: only a thin haze softening the far distance (densest low, thinning with height); a little more in humid forests and swamps |
 | Rain | — | Haze thickens |
 | Water | No waves | Waves, stronger caustics, nearly clear, tinted by the biome's water colour (green swamps, turquoise warm oceans) |
 | Underwater | — | Clear blue-green, ~30 blocks visibility |
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
 | Sun and moon | Squares | **Round sun** with a soft corona, **round moon** with craters and all 8 phases |
 | Clouds | Flat blocky slabs | **Cumulus and cirrus painted into the sky** (a skybox), turning gold at sunset. [See below](#sky-clouds-skybox) |
-| Grading | Contrast 1.15 / saturation 1.05 | 1.20 / 1.16; shadows lean slightly cool, highlights slightly warm |
+| Grading | Contrast 1.15 / saturation 1.05 | Contrast 1.14 (moderate) / saturation 1.12 (a little above natural); neutral highlights, only the shadows lean slightly blue; gamma 2.3 for a bright exposure |
 
 ### Why every biome is covered
 
@@ -99,9 +99,9 @@ Worth knowing:
 
 The face order (0–3 the sides from left to right, 4 the top, 5 the bottom) was
 confirmed by matching the edges between faces of several working skyboxes. The
-clouds are a pattern on a plane above the viewer, projected along each view
-direction, so they are large overhead, crowd together toward the horizon, and
-join across the image edges.
+clouds are separate fair-weather cumulus heaps on a layer that curves with the
+planet, projected along each view direction, so they are large overhead, crowd
+together toward the horizon, and join across the image edges.
 
 ## What a resource pack cannot do
 

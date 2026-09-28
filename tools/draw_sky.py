@@ -35,10 +35,10 @@ the next face's left edge), 4 is the top and 5 the bottom. The top's lower
 edge meets face 0's top; the bottom's upper edge meets face 0's bottom.
 
 The clouds are a layer in perspective: every pixel's view direction is
-projected onto a plane above the viewer and the cloud density is looked up
-there, so clouds are large overhead and crowd together toward the horizon,
-and the six faces join without seams because they sample one continuous
-field.
+projected onto a curved layer above the viewer and the cloud density is
+looked up there, so clouds are larger overhead and crowd together toward the
+horizon, and the six faces join without seams because they sample one
+continuous field.
 """
 
 from __future__ import annotations
@@ -184,7 +184,7 @@ FACES = [(_F, _R, -_U), (_R, -_F, -_U), (-_F, -_R, -_U), (-_R, _F, -_U),
 CLOUD_VARIANTS = {
     # Complementary Unbound's fair-weather sky: puffy cumulus with a few
     # high streaks above them. Meant to replace the game's own clouds.
-    "unbound_clouds": {"coverage": 0.35, "cirrus": 0.5},
+    "unbound_clouds": {"coverage": 0.40, "cirrus": 0.5},
     # Only the high streaks, for keeping the game's 3D clouds (which cast
     # shadows in Vibrant Visuals) and still getting a fuller sky above them.
     "high_clouds": {"coverage": 0.0, "cirrus": 0.85},
@@ -257,16 +257,34 @@ def cellular(x, y, seed, octaves=3):
     return total / norm
 
 
+# Cloud layers are curved like the real sky: a shell around a planet whose
+# radius is this many cumulus altitudes. A flat layer would stretch without
+# limit toward the horizon, forcing either huge clouds overhead or noise at
+# the horizon; on a curved layer the horizon is a finite distance away.
+EARTH_RADIUS = 20.0
+
+
+def layer_hit(d: np.ndarray, altitude: float):
+    """Horizontal offset at which view directions d meet a cloud layer
+    `altitude` above the viewer (in cumulus altitudes)."""
+    up = np.clip(d[..., 1], 0.0, 1.0)
+    r = EARTH_RADIUS
+    dist = np.sqrt((r + altitude) ** 2 - r * r * (1.0 - up * up)) - r * up
+    return d[..., 0] * dist, d[..., 2] * dist
+
+
 def cumulus_density(d: np.ndarray, seed: int):
-    """Raw density of the cumulus layer (a plane one unit above the viewer)."""
-    height = np.clip(d[..., 1], 1e-3, None)
-    px, pz = d[..., 0] / height, d[..., 2] / height
+    """Raw density of the cumulus layer, and how far away the point is."""
+    px, pz = layer_hit(d, 1.0)
     # Domain warp breaks up the grid-aligned look of plain noise.
-    qx = px + 0.45 * fbm(px * 0.7 + 5.2, pz * 0.7 + 1.3, 3, seed + 11)
-    qz = pz + 0.45 * fbm(px * 0.7 + 1.7, pz * 0.7 + 9.2, 3, seed + 23)
-    # Perlin-Worley: the fbm sets where clouds are, the cellular noise
-    # carves their outline into billows.
-    density = fbm(qx * 0.8, qz * 0.8, 5, seed) + 0.32 * (cellular(qx * 2.4, qz * 2.4, seed + 77) - 0.57)
+    qx = px + 0.22 * fbm(px * 1.6 + 5.2, pz * 1.6 + 1.3, 3, seed + 11)
+    qz = pz + 0.22 * fbm(px * 1.6 + 1.7, pz * 1.6 + 9.2, 3, seed + 23)
+    # Fair-weather cumulus come as separate heaps, so the base shape is
+    # cellular: one round cell per cloud, roughened by fbm so no two match,
+    # and a finer cellular layer carving the outline into billows.
+    heaps = cellular(qx * 1.7, qz * 1.7, seed + 51, octaves=1)
+    density = (0.62 * heaps + 0.38 * (0.5 + fbm(qx * 2.2, qz * 2.2, 5, seed))
+               + 0.30 * (cellular(qx * 5.0, qz * 5.0, seed + 77) - 0.57))
     return density, np.hypot(px, pz)
 
 
@@ -284,7 +302,6 @@ def coverage_thresholds(coverage: float, seed: int) -> tuple[float, float]:
 def cloud_layer(d: np.ndarray, coverage: float, cirrus: float, seed: int = SEED):
     """Straight-alpha colour and opacity of the clouds for view directions d."""
     above = d[..., 1] > 0
-    height = np.clip(d[..., 1], 1e-3, None)
     white = np.array([1.0, 1.0, 1.0])
     base_grey = np.array([0.64, 0.69, 0.80])
 
@@ -292,10 +309,9 @@ def cloud_layer(d: np.ndarray, coverage: float, cirrus: float, seed: int = SEED)
         lo, hi = coverage_thresholds(coverage, seed)
         density, dist = cumulus_density(d, seed)
         depth = np.clip((density - lo) / (hi - lo), 0.0, 1.0)
-        a_cu = smoothstep(0.0, 0.12, depth)
-        # Fade out toward the horizon, where distant clouds would only be
-        # sub-pixel noise; the game's haze takes over from there.
-        a_cu *= smoothstep(0.025, 0.18, d[..., 1]) * np.exp(-dist / 20.0) * above
+        a_cu = smoothstep(0.0, 0.08, depth)
+        # Thin out toward the horizon, where the game's haze takes over.
+        a_cu *= smoothstep(0.012, 0.10, d[..., 1]) * np.exp(-dist / 12.0) * above
 
         # Seen from below, a cumulus shows its flat grey base on the side
         # toward the viewer and its sunlit top on the far side. Look a little
@@ -313,13 +329,13 @@ def cloud_layer(d: np.ndarray, coverage: float, cirrus: float, seed: int = SEED)
         a_cu = np.zeros(d.shape[:-1])
         rgb_cu = np.broadcast_to(white, d.shape).copy()
 
-    # Cirrus: a higher plane, stretched along one wind direction into streaks.
-    cx, cz = d[..., 0] / height * 3.0, d[..., 2] / height * 3.0
+    # Cirrus: a higher layer, stretched along one wind direction into streaks.
+    cx, cz = layer_hit(d, 3.0)
     sx = cx * np.cos(0.6) - cz * np.sin(0.6)
     sz = cx * np.sin(0.6) + cz * np.cos(0.6)
     streaks = fbm(sx * 0.12, sz * 0.9, 5, seed + 301) + 0.35 * fbm(sx * 0.05 + 3.3, sz * 0.05 - 1.1, 2, seed + 401)
     a_ci = smoothstep(0.08, 0.45, streaks) * cirrus
-    a_ci *= smoothstep(0.03, 0.25, d[..., 1]) * np.exp(-np.hypot(cx, cz) / 60.0) * above
+    a_ci *= smoothstep(0.03, 0.25, d[..., 1]) * above
     rgb_ci = np.array([0.97, 0.98, 1.0])
 
     # Cumulus in front of cirrus.
