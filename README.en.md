@@ -42,18 +42,20 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 
 | | Vanilla Vibrant Visuals | Vibrant Unbound |
 |---|---|---|
-| Sunlight | Whitish, fades early in the afternoon | **Strong, clear white** at noon, 125 (vanilla 100), for a firm step between sun and shade; gold as the sun gets low, orange to red on the horizon |
-| Sky through the day | Muted | Following a reference sequence: early morning (magenta turning orange-gold under deep blue) → morning (warm cream horizon in a blue sky) → noon (deep to pale blue) → late afternoon (gold to orange) → sunset (red-orange horizon under violet) → night (navy) → late night (deep navy). Starry navy nights, never black |
-| Sky | Dull blue-grey | Vivid deep blue zenith, a horizon that stays blue instead of hazing white; a small sun with only a slight glow |
-| Shadows | Grey | Short and crisp at noon (sun 78° up); filled with sky light, blue-grey rather than black; moonlit blue at night (moon 0.7, vanilla 0.4) |
-| Air | Uniform fog in some biomes | **Clear air**: only a thin haze softening the far distance (densest low, thinning with height); a little more in humid forests and swamps |
+| Picture | "generic" tone mapping | **ACES (filmic) tone mapping**: firm shade, rich midtones, bright skies and sunsets rolling smoothly into white. A different look from stock Vibrant Visuals at the root |
+| Sunlight | Whitish, fades early in the afternoon | **Strong, clear white** at noon, 125 (vanilla 100); gold as the sun gets low, orange to red on the horizon |
+| Sky through the day | Muted | Early morning (magenta turning orange-gold) → morning (warm cream horizon in a blue sky) → noon (blue sky paling to an almost white horizon) → late afternoon (gold to peach horizon) → sunset (lavender above a coral-pink horizon — the whole sky goes pastel, like Complementary's sunsets) → night (navy) → late night (deep navy). Never black |
+| Sky | Nearly one even blue (Rayleigh 10) | Rayleigh down to 1.3, so the sky is a real gradient from the blue zenith to a pale horizon; a **bright halo gathered around the sun** instead of vanilla's milky haze over half the sky; a faint halo around the moon at night |
+| Shadows | Grey (full sky light) | Sky light cut to 60 %, for a clear step between sun and shade; shade stays blue-grey, never black. Short shadows (noon sun 78° up). More sky light at sunset, so the coloured sky fills the shade |
+| Night | Moonlight 0.4 | **Moonlight 1.0**, blue: moonlit faces stand out and the valley haze glows blue |
+| Air | Uniform fog in some biomes | **Air you can see**: distant terrain fades to pale blue, haze gathers in valleys and caves (densest low, gone around y=170), glows gold toward a low sun and blue under the moon, and falls in light shafts through leaves and cave openings. Mistier in humid forests, swamps and savannas, clearer in deserts; none in the Nether |
 | Rain | — | Haze thickens |
 | Water | No waves, the old water pattern | **Clear water**: vanilla's water pattern (white streaks) and its normal map are replaced, leaving only gentle ripples, so the sky and shore reflect cleanly; a hint of the biome's water colour |
 | Underwater | — | The game's own (an earlier underwater fog made the player's shadow show up as a dark shape, so it was removed) |
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
-| Sun and moon | Squares | **Round sun** with a soft corona, **round moon** with craters and all 8 phases |
+| Sun and moon | Squares | **Small round sun** (its halo comes from the sky's scattering), **round moon** with craters and all 8 phases |
 | Clouds | Flat blocky slabs | **Cumulus and cirrus painted into the sky** (a skybox), turning gold at sunset. [See below](#sky-clouds-skybox) |
-| Grading | Contrast 1.15 / saturation 1.05 | Contrast 1.24 / saturation 1.28 — rich, firm colour clearly apart from stock Vibrant Visuals; shadows lean slightly cool, highlights slightly warm |
+| Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.10 / saturation 1.16 / gain 1.08, for Complementary's vivid greens and blues; shadows lean slightly cool, highlights slightly warm |
 
 ### Why every biome is covered
 
@@ -185,12 +187,15 @@ JSON directly works too, but regenerating overwrites it).
 | Goal | In `tools/generate_bedrock.py` |
 |---|---|
 | Stronger / weaker sun | `SUN_ILLUMINANCE` |
-| Sunset colours | `SUN_COLOR` (the light) and `golden` / `sunset` etc. in `sky_tables` (the sky) |
+| Sunset colours | `SUN_COLOR` (the light) and `golden` / `sunset` etc. in `sky_tables` and `DUSK_ZENITH` (the sky) |
 | Bluer sky | `DAY_ZENITH` and `RAYLEIGH` |
-| Darker / lighter shadows | `AMBIENT_ILLUMINANCE` |
+| Halo around the sun | `SUN_MIE` (brightness) and `SUN_GLARE` (higher keeps it closer to the sun) |
+| Darker / lighter shadows | `SKY_INTENSITY` (sky light, 0.1–1.0; lower is darker shade) |
+| Darker / lighter caves | `AMBIENT_ILLUMINANCE` |
 | Brighter nights | `MOON_ILLUMINANCE` |
 | Less / more haze | first number of each `HAZE` entry (density) |
 | Stronger light shafts | third number of each `HAZE` entry (forward scattering; closer to 1 concentrates it toward the sun) |
+| Overall character | `TONE_MAP` (`aces`, `generic`, `hable`, ...) |
 | Calmer colour | `saturation` / `contrast` in `BASE_GRADE` |
 | Still water | `waves.enabled` in `WATER` → `False` |
 | More biome colour in water | `biome_water_color_contribution` in `WATER` (0–1) |

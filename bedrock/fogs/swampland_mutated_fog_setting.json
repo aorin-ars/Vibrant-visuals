@@ -27,20 +27,20 @@
     "volumetric": {
       "density": {
         "air": {
-          "max_density": 0.06,
-          "max_density_height": 64.0,
-          "zero_density_height": 240.0
+          "max_density": 0.1,
+          "max_density_height": 62.0,
+          "zero_density_height": 150.0
         }
       },
       "media_coefficients": {
         "air": {
-          "scattering": [0.05, 0.056, 0.05],
-          "absorption": [0.25, 0.13, 0.19]
+          "scattering": [0.046, 0.054, 0.044],
+          "absorption": [0.06, 0.06, 0.06]
         }
       },
       "henyey_greenstein_g": {
         "air": {
-          "henyey_greenstein_g": 0.5
+          "henyey_greenstein_g": 0.4
         }
       }
     }

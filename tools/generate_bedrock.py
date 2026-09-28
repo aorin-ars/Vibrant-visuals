@@ -3,10 +3,11 @@
 
     tools/generate_bedrock.py --vanilla <bedrock-samples>/resource_pack
 
-The look is modelled on Complementary Unbound: a warm, strong sun with long
-golden hours, deep blue zenith over a pale hazy horizon, blue-filled shadows,
-low valley haze that turns into light shafts toward the sun, clear blue water
-with real waves, and coloured block light.
+The look is modelled on Complementary Unbound: a filmic (ACES) picture, a
+strong sun against deeper blue-grey shade, a blue sky that pales toward the
+horizon with a bright halo around the sun, pastel pink and lavender sunsets,
+dark navy moonlit nights, a visible haze that fills valleys and caves and
+turns into light shafts, clear water, and coloured block light.
 
 Why a generator and not hand-written JSON: since 1.21.90 the vanilla pack
 assigns *per-biome* lighting, atmosphere and colour grading to most biomes
@@ -53,7 +54,11 @@ CUBEMAP_FORMAT = "1.21.130"
 # 12 degrees: the noon sun stands high (78 degrees up) so shadows are short,
 # but not straight overhead, where blocks would hide their own shadows.
 ORBITAL_OFFSET = 12.0
-TONE_MAP = "generic"
+# ACES, not vanilla's "generic": the filmic curve is most of what makes a
+# picture read as "shader" rather than stock Vibrant Visuals - a firm toe for
+# shade, rich midtones, and bright skies and sunsets rolling off smoothly
+# instead of flattening out.
+TONE_MAP = "aces"
 
 # Time of day: 0.0 noon, 0.25 sunset, 0.5 midnight, 0.75 sunrise.
 
@@ -181,12 +186,25 @@ SUN_COLOR = {
     1.000: [255, 248, 236],
 }
 
-# Moonlit nights you can see in, with a clear blue cast - vanilla's is 0.4.
+# Strong blue moonlight - vanilla's is 0.4. With the reduced sky fill below
+# it is what nights are seen by: moonlit faces stand out blue against dark
+# shade, and the valley haze glows a faint blue, as in Complementary's nights.
 MOON_ILLUMINANCE = {
-    0.000: 0.0, 0.200: 0.0, 0.225: 0.5, 0.300: 0.7,
-    0.700: 0.7, 0.735: 0.5, 0.750: 0.0, 1.000: 0.0,
+    0.000: 0.0, 0.200: 0.0, 0.225: 0.6, 0.300: 1.0,
+    0.700: 1.0, 0.735: 0.6, 0.750: 0.0, 1.000: 0.0,
 }
-MOON_COLOR = [150, 178, 255]
+MOON_COLOR = [124, 160, 255]
+
+# How much the sky lights the shade (0.1-1.0; vanilla 1.0 all day). Full sky
+# light is what gives stock Vibrant Visuals its flat, evenly grey look; well
+# under half the gap between sunlit and shaded faces is back at 0.6, so
+# shadows read as shadows while staying blue-grey rather than black. More sky
+# light at sunset, when the glowing sky is the main light; least at night,
+# when the moon should do the lighting.
+SKY_INTENSITY = mirror({
+    0.000: 0.60, 0.200: 0.62, 0.250: 0.68, 0.283: 0.75, 0.300: 0.72,
+    0.330: 0.58, 0.400: 0.50, 0.500: 0.50,
+})
 
 # Fallback light for caves and for surfaces with nothing to reflect. Kept at
 # vanilla strength so caves stay dark, pale blue-white by day like the open
@@ -209,7 +227,7 @@ AMBIENT_ILLUMINANCE = {
 
 def overworld_lighting(identifier: str, *, sun_scale=1.0, sun_tint=(1, 1, 1),
                        moon_color=MOON_COLOR, ambient_tint=(1, 1, 1),
-                       sun_color_override=None) -> dict:
+                       sun_color_override=None, sky=None) -> dict:
     sun_color = ({t: sun_color_override for t in (0.0, 1.0)} if sun_color_override
                  else {t: scale_rgb(c, sun_tint) for t, c in SUN_COLOR.items()})
     return lighting_file(
@@ -220,6 +238,7 @@ def overworld_lighting(identifier: str, *, sun_scale=1.0, sun_tint=(1, 1, 1),
         moon_color=keyframes({0.0: moon_color, 1.0: moon_color}),
         ambient_color=keyframes({t: scale_rgb(c, ambient_tint) for t, c in AMBIENT_COLOR.items()}),
         ambient_illuminance=keyframes(AMBIENT_ILLUMINANCE),
+        sky=keyframes(SKY_INTENSITY) if sky is None else sky,
     )
 
 
@@ -261,15 +280,15 @@ LIGHTING = {
     "coolish_lighting.json": overworld_lighting(
         "minecraft:coolish_lighting", sun_tint=(0.985, 1.0, 1.02)),
     "warmish_lighting.json": overworld_lighting(
-        "minecraft:warmish_lighting", sun_tint=(1.0, 0.992, 0.975), moon_color=[128, 156, 255]),
+        "minecraft:warmish_lighting", sun_tint=(1.0, 0.992, 0.975), moon_color=[118, 152, 255]),
     "hot_lighting.json": overworld_lighting(
-        "minecraft:hot_lighting", sun_scale=1.04, sun_tint=(1.0, 0.985, 0.95), moon_color=[116, 146, 255]),
+        "minecraft:hot_lighting", sun_scale=1.04, sun_tint=(1.0, 0.985, 0.95), moon_color=[108, 142, 255]),
     "desert_lighting.json": overworld_lighting(
         "minecraft:desert_lighting", sun_scale=1.06, sun_tint=(1.0, 0.988, 0.955),
-        moon_color=[116, 150, 255]),
+        moon_color=[108, 146, 255]),
     "mesa_lighting.json": overworld_lighting(
         "minecraft:mesa_lighting", sun_scale=1.04, sun_tint=(1.0, 0.98, 0.95),
-        moon_color=[128, 156, 255]),
+        moon_color=[118, 152, 255]),
     "ice_plains_spikes_lighting.json": overworld_lighting(
         "minecraft:ice_plains_spikes_lighting", sun_scale=0.8, sun_tint=(0.92, 0.96, 1.0),
         ambient_tint=(0.96, 0.99, 1.0)),
@@ -285,11 +304,12 @@ LIGHTING = {
     "roofed_forest_lighting.json": overworld_lighting(
         "minecraft:roofed_forest_lighting", sun_scale=0.8, sun_tint=(1.0, 1.0, 0.97)),
     # The Pale Garden is meant to be sunless and grey; vanilla gives it 5 lux.
-    # Keep the mood, just enough light to see the shapes.
+    # Keep the mood, just enough light to see the shapes - and full sky
+    # light, since an overcast sky is the only light it has.
     "pale_garden_lighting.json": overworld_lighting(
         "minecraft:pale_garden_lighting", sun_scale=0.08,
         sun_color_override=[200, 214, 240], moon_color=[210, 220, 255],
-        ambient_tint=(0.98, 1.0, 1.0)),
+        ambient_tint=(0.98, 1.0, 1.0), sky=1.0),
     # Nether and End: vanilla drives them with constant 100 lux "sun" and
     # "moon"; only the colour of the fill light changes here.
     "nether_lighting.json": lighting_file(
@@ -310,17 +330,24 @@ LIGHTING = {
 # Atmospherics
 # --------------------------------------------------------------------------
 
-# Rayleigh drives the depth of the blue; it is dropped through twilight as
-# vanilla does, or dusk goes muddy.
-RAYLEIGH = mirror({0.0: 12.0, 0.15: 11.5, 0.25: 7.0, 0.283: 6.0, 0.33: 5.5, 0.5: 5.0})
+# Rayleigh strength. Vanilla runs it at 10 by day, which saturates the whole
+# dome into one flat, even blue - a large part of the stock look. Around 1
+# (the scale of Mojang's own documentation example) the zenith and horizon
+# colours below come through as a real gradient: blue overhead, paling toward
+# the horizon, and lit by the sun's colour, so sunsets tint the whole sky.
+RAYLEIGH = mirror({0.0: 1.30, 0.15: 1.30, 0.20: 1.20, 0.25: 1.00, 0.283: 0.85,
+                   0.30: 0.90, 0.33: 1.30, 0.40: 1.60, 0.5: 1.60})
 
-# Sun halo. Kept small at midday - clear air, only a slight softness around
-# the sun - and widening as the sun gets low, into the big glow of sunset.
-SUN_MIE = mirror({0.0: 0.16, 0.15: 0.20, 0.20: 0.35, 0.25: 0.80, 0.283: 1.10,
-                  0.30: 0.55, 0.34: 0.0, 0.5: 0.0})
-SUN_GLARE = mirror({0.0: 0.030, 0.15: 0.035, 0.20: 0.050, 0.25: 0.080, 0.283: 0.095,
-                    0.30: 0.060, 0.34: 0.0, 0.5: 0.0})
-MOON_MIE = {0.0: 0.0, 0.26: 0.0, 0.33: 0.15, 0.67: 0.15, 0.74: 0.0, 1.0: 0.0}
+# The glow around the sun. sun_glare_shape is the tightness of that lobe:
+# vanilla's ~0.05 spreads it over half the sky as a milky haze; values of a
+# few units gather it into a bright halo around the sun, as in
+# Complementary - tight at noon, spreading into a big warm glow as the sun
+# sets. The same lobe shapes the moon's glow at night.
+SUN_MIE = mirror({0.0: 0.45, 0.15: 0.50, 0.20: 0.65, 0.25: 1.00, 0.283: 1.50,
+                  0.30: 0.80, 0.34: 0.0, 0.5: 0.0})
+SUN_GLARE = mirror({0.0: 8.0, 0.15: 7.0, 0.20: 5.5, 0.25: 4.0, 0.283: 3.0,
+                    0.30: 3.5, 0.34: 5.0, 0.5: 5.0})
+MOON_MIE = {0.0: 0.0, 0.27: 0.0, 0.33: 0.40, 0.67: 0.40, 0.73: 0.0, 1.0: 0.0}
 
 # Horizon blend: vanilla's shape, with the zenith taking over a little lower at
 # midday so the deep blue reaches further down the sky.
@@ -330,40 +357,46 @@ BLEND_MIE_START = {0.0: 0.5, 0.1: 0.5, 0.2: 1.0, 0.8: 1.0, 0.9: 0.5, 1.0: 0.5}
 BLEND_MAX = {0.0: 0.25, 1.0: 0.25}
 
 # Night is navy, not black: a lighter band at the horizon early in the night
-# (夜), deepening toward midnight (深夜).
-NIGHT_ZENITH = [16, 30, 74]
-NIGHT_HORIZON = [40, 54, 96]
-DEEP_NIGHT_ZENITH = [6, 12, 32]
-DEEP_NIGHT_HORIZON = [18, 26, 48]
+# (夜), deepening toward midnight (深夜). A little brighter than the colours
+# would need at vanilla's night Rayleigh (5), since this pack's is 1.6.
+NIGHT_ZENITH = [20, 36, 92]
+NIGHT_HORIZON = [46, 64, 118]
+DEEP_NIGHT_ZENITH = [10, 18, 50]
+DEEP_NIGHT_HORIZON = [24, 36, 70]
+
+# Complementary's sunset: the whole sky turns pastel - lavender overhead,
+# peach to coral-pink at the horizon, rose and violet after the sun is gone.
+DUSK_ZENITH = (120, 102, 164)
+DAWN_ZENITH = (96, 104, 180)
 
 
-def sky_tables(day_zenith, day_horizon, *, dusk_zenith=(60, 58, 120),
-               dawn_zenith=(48, 78, 168), twilight=None):
+def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
+               dawn_zenith=DAWN_ZENITH, twilight=None):
     """Zenith and horizon colour keyframes around one day palette.
 
-    Stops sit at real sun elevations (see the table above SUN_ILLUMINANCE),
-    and follow the reference sequence: blue noon; gold, then orange at the
-    horizon with the upper sky still deep blue (夕方); red-orange horizon under
-    a violet sky at sunset (日没); rose and violet twilight; navy night.
-    Dawn has its own colours: magenta turning orange-gold under a deep blue
-    sky (早朝), then a warm cream horizon in a blue morning sky (朝).
+    Stops sit at real sun elevations (see the table above SUN_ILLUMINANCE):
+    blue noon; a gold, then peach horizon under a softening blue as the sun
+    gets low (夕方); coral-pink horizon under a lavender sky with the sun on
+    the horizon (日没); rose and violet twilight; navy night. Dawn has its own
+    colours: magenta turning orange-gold under a blue-violet sky (早朝), then
+    a warm cream horizon in a blue morning sky (朝).
     """
     t = twilight or {}
     day_zenith, day_horizon = list(day_zenith), list(day_horizon)
     dusk_zenith, dawn_zenith = list(dusk_zenith), list(dawn_zenith)
-    golden = t.get("golden", [255, 176, 100])
-    morning = t.get("morning", [252, 222, 176])
+    golden = t.get("golden", [255, 190, 130])
+    morning = t.get("morning", [252, 220, 184])
     zenith = {
         0.000: day_zenith,
         0.200: lerp_rgb(day_zenith, dusk_zenith, 0.1),
-        0.250: lerp_rgb(day_zenith, dusk_zenith, 0.6),
+        0.250: lerp_rgb(day_zenith, dusk_zenith, 0.55),
         0.283: dusk_zenith,
-        0.300: t.get("zenith_dusk", [40, 40, 96]),
+        0.300: t.get("zenith_dusk", [64, 56, 124]),
         0.330: NIGHT_ZENITH,
         0.400: DEEP_NIGHT_ZENITH,
         0.600: DEEP_NIGHT_ZENITH,
         0.670: NIGHT_ZENITH,
-        0.700: t.get("zenith_dawn", [40, 56, 128]),
+        0.700: t.get("zenith_dawn", [48, 60, 132]),
         0.717: dawn_zenith,
         0.750: lerp_rgb(dawn_zenith, day_zenith, 0.6),
         0.800: lerp_rgb(day_zenith, dawn_zenith, 0.1),
@@ -375,20 +408,20 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=(60, 58, 120),
         0.210: lerp_rgb(day_horizon, golden, 0.35),
         0.235: lerp_rgb(day_horizon, golden, 0.7),
         0.250: golden,
-        0.265: t.get("sunset", [255, 150, 70]),
-        0.278: t.get("sunset_deep", [250, 112, 46]),
-        0.290: t.get("afterglow", [230, 100, 70]),
-        0.300: t.get("rose", [190, 96, 120]),
-        0.315: t.get("violet", [120, 90, 150]),
+        0.265: t.get("sunset", [255, 160, 116]),
+        0.278: t.get("sunset_deep", [255, 132, 104]),
+        0.290: t.get("afterglow", [236, 112, 124]),
+        0.300: t.get("rose", [188, 100, 150]),
+        0.315: t.get("violet", [118, 88, 162]),
         0.340: NIGHT_HORIZON,
         0.400: DEEP_NIGHT_HORIZON,
         0.600: DEEP_NIGHT_HORIZON,
         0.660: NIGHT_HORIZON,
-        0.685: t.get("violet_dawn", [100, 86, 150]),
-        0.700: t.get("magenta_dawn", [170, 100, 140]),
-        0.712: t.get("sunrise", [245, 130, 80]),
-        0.720: t.get("sunrise_gold", [255, 160, 80]),
-        0.735: lerp_rgb(t.get("sunrise_gold", [255, 160, 80]), morning, 0.5),
+        0.685: t.get("violet_dawn", [100, 88, 160]),
+        0.700: t.get("magenta_dawn", [180, 104, 146]),
+        0.712: t.get("sunrise", [250, 140, 110]),
+        0.720: t.get("sunrise_gold", [255, 170, 110]),
+        0.735: lerp_rgb(t.get("sunrise_gold", [255, 170, 110]), morning, 0.5),
         0.750: morning,
         0.770: lerp_rgb(morning, day_horizon, 0.6),
         0.800: lerp_rgb(morning, day_horizon, 0.9),
@@ -422,7 +455,7 @@ def atmosphere(identifier, zenith, horizon, *, rayleigh=RAYLEIGH, sun_mie=SUN_MI
 
 
 def overworld_atmosphere(identifier, day_zenith, day_horizon, *, twilight=None,
-                         dusk_zenith=(60, 58, 120), dawn_zenith=(48, 78, 168), **kw) -> dict:
+                         dusk_zenith=DUSK_ZENITH, dawn_zenith=DAWN_ZENITH, **kw) -> dict:
     zenith, horizon = sky_tables(day_zenith, day_horizon, dusk_zenith=dusk_zenith,
                                  dawn_zenith=dawn_zenith, twilight=twilight)
     return atmosphere(identifier, zenith, horizon, **kw)
@@ -447,41 +480,41 @@ def flat_atmosphere(identifier, zenith, horizon, rayleigh, *, start=0.8, mie_sta
     }
 
 
-# Deep vivid blue overhead fading to a pale, clear blue at the horizon - a
-# clean midday gradient, saturated but short of a blue filter.
-DAY_ZENITH = [30, 96, 228]
-DAY_HORIZON = [160, 200, 244]
+# Complementary's clear-day sky: a clean mid blue overhead fading to a pale,
+# almost white blue at the horizon, with a bright halo around the sun.
+DAY_ZENITH = [76, 140, 232]
+DAY_HORIZON = [190, 216, 244]
 
-DESERT_TWILIGHT = {"golden": [255, 196, 128], "sunset": [255, 164, 88],
-                   "sunset_deep": [255, 128, 60], "rose": [214, 110, 104]}
+DESERT_TWILIGHT = {"golden": [255, 204, 146], "sunset": [255, 176, 112],
+                   "sunset_deep": [255, 146, 96], "rose": [212, 112, 128]}
 
 ATMOSPHERICS = {
     "atmospherics.json": overworld_atmosphere(
         "minecraft:default_atmospherics", DAY_ZENITH, DAY_HORIZON),
     "warmish_atmospherics.json": overworld_atmosphere(
-        "minecraft:warmish_atmospherics", [34, 98, 224], [166, 204, 240]),
+        "minecraft:warmish_atmospherics", [80, 142, 228], [194, 218, 240]),
     "hot_atmospherics.json": overworld_atmosphere(
-        "minecraft:hot_atmospherics", [48, 112, 220], [184, 206, 226], twilight=DESERT_TWILIGHT),
+        "minecraft:hot_atmospherics", [92, 150, 226], [206, 220, 232], twilight=DESERT_TWILIGHT),
     "desert_atmospherics.json": overworld_atmosphere(
-        "minecraft:desert_atmospherics", [52, 116, 220], [190, 208, 224], twilight=DESERT_TWILIGHT,
+        "minecraft:desert_atmospherics", [96, 152, 224], [212, 222, 230], twilight=DESERT_TWILIGHT,
         mie_scale=1.15),
     "mesa_atmospherics.json": overworld_atmosphere(
-        "minecraft:mesa_atmospherics", [50, 120, 214], [196, 206, 212], twilight=DESERT_TWILIGHT,
+        "minecraft:mesa_atmospherics", [96, 150, 220], [214, 216, 216], twilight=DESERT_TWILIGHT,
         mie_scale=1.1),
     "ice_plains_spikes_atmospherics.json": overworld_atmosphere(
-        "minecraft:ice_plains_spikes_atmospherics", [104, 152, 224], [190, 212, 238],
-        twilight={"golden": [236, 214, 214], "sunset": [226, 180, 190],
-                  "sunset_deep": [206, 160, 200], "rose": [168, 140, 200]}),
+        "minecraft:ice_plains_spikes_atmospherics", [120, 164, 230], [206, 224, 244],
+        twilight={"golden": [240, 216, 214], "sunset": [232, 186, 196],
+                  "sunset_deep": [212, 164, 204], "rose": [172, 140, 204]}),
     "mangrove_swamp_atmospherics.json": overworld_atmosphere(
-        "minecraft:mangrove_swamp_atmospherics", [80, 134, 206], [172, 200, 220]),
+        "minecraft:mangrove_swamp_atmospherics", [104, 146, 200], [186, 206, 214]),
     "swampland_atmospherics.json": overworld_atmosphere(
-        "minecraft:swampland_atmospherics", [96, 134, 160], [172, 190, 190], mie_scale=0.8),
+        "minecraft:swampland_atmospherics", [110, 140, 166], [184, 196, 192], mie_scale=0.8),
     "roofed_forest_atmospherics.json": overworld_atmosphere(
-        "minecraft:roofed_forest_atmospherics", [30, 92, 210], [156, 196, 238]),
+        "minecraft:roofed_forest_atmospherics", [74, 136, 226], [184, 212, 240]),
     "mushroom_island_atmospherics.json": overworld_atmosphere(
-        "minecraft:mushroom_island_atmospherics", [110, 124, 196], [214, 212, 236],
-        twilight={"sunset": [255, 120, 150], "sunset_deep": [240, 100, 150],
-                  "rose": [200, 100, 170], "violet": [140, 90, 190]}),
+        "minecraft:mushroom_island_atmospherics", [124, 136, 204], [222, 216, 238],
+        twilight={"sunset": [255, 130, 160], "sunset_deep": [244, 108, 160],
+                  "rose": [204, 104, 176], "violet": [144, 92, 194]}),
     # Overcast and colourless, like vanilla intends, with no sun halo at all.
     "pale_garden_atmospherics.json": overworld_atmosphere(
         "minecraft:pale_garden_atmospherics", [128, 134, 142], [196, 196, 190],
@@ -510,13 +543,14 @@ ATMOSPHERICS = {
 # Colour grading
 # --------------------------------------------------------------------------
 
-# Vanilla: contrast 1.15, saturation 1.05. This is deliberately far from it:
-# rich, saturated colour and firm contrast - deep blue sky, strong greens,
-# sunlit faces against deep shade - which is what separates the reference
-# look from stock Vibrant Visuals. Standard gamma: a lifted gamma washed the
-# picture out in game. Shadows lean cool, highlights a touch warm, as in the
-# sunlit reference.
-BASE_GRADE = {"contrast": 1.24, "saturation": 1.28, "gain": (1.0, 1.0, 1.0)}
+# Vanilla: contrast 1.15, saturation 1.05 through the "generic" curve. The
+# ACES curve (TONE_MAP) already deepens contrast and enriches midtone colour,
+# so the grade on top of it is milder than a "generic" one would need: a
+# touch more contrast and saturation for Complementary's vivid greens and
+# blues, and a little gain because ACES sits darker in the midtones. Standard
+# gamma: a lifted gamma washed the picture out in game. Shadows lean cool,
+# highlights a touch warm, as in the sunlit reference.
+BASE_GRADE = {"contrast": 1.10, "saturation": 1.16, "gain": (1.08, 1.08, 1.08)}
 GAMMA = 2.2
 
 
@@ -541,16 +575,16 @@ def grading(identifier, *, temperature=6500.0, contrast=None, saturation=None,
                     "enabled": True,
                     "shadowsMax": 0.45,
                     "contrast": [1.0, 1.0, 1.0],
-                    "gain": [0.97, 1.0, 1.05],
+                    "gain": [0.96, 1.0, 1.07],
                     "gamma": [GAMMA, GAMMA, GAMMA],
                     "offset": [0.0, 0.0, 0.0],
-                    "saturation": [1.05, 1.05, 1.05],
+                    "saturation": [1.04, 1.04, 1.04],
                 },
                 "highlights": {
                     "enabled": True,
-                    "highlightsMin": 1.6,
+                    "highlightsMin": 1.8,
                     "contrast": [1.0, 1.0, 1.0],
-                    "gain": [1.02, 1.01, 0.98],
+                    "gain": [1.03, 1.01, 0.97],
                     "gamma": [GAMMA, GAMMA, GAMMA],
                     "offset": [0.0, 0.0, 0.0],
                     "saturation": [1.0, 1.0, 1.0],
@@ -576,34 +610,34 @@ def toward_neutral(kelvin: float, keep: float = 0.4) -> float:
 COLOR_GRADING = {
     "color_grading.json": grading("minecraft:default_color_grading"),
     "cold_color_grading.json": grading(
-        "minecraft:cold_color_grading", temperature=toward_neutral(10000), saturation=1.22),
+        "minecraft:cold_color_grading", temperature=toward_neutral(10000), saturation=1.10),
     "coolish_color_grading.json": grading(
-        "minecraft:coolish_color_grading", temperature=toward_neutral(9000), saturation=1.25),
+        "minecraft:coolish_color_grading", temperature=toward_neutral(9000), saturation=1.13),
     "warmish_color_grading.json": grading(
-        "minecraft:warmish_color_grading", temperature=toward_neutral(4800), saturation=1.30),
+        "minecraft:warmish_color_grading", temperature=toward_neutral(4800), saturation=1.18),
     "hot_color_grading.json": grading(
-        "minecraft:hot_color_grading", temperature=toward_neutral(4000), contrast=1.28),
+        "minecraft:hot_color_grading", temperature=toward_neutral(4000), contrast=1.14),
     "desert_color_grading.json": grading(
-        "minecraft:desert_color_grading", temperature=toward_neutral(4400), saturation=1.24),
+        "minecraft:desert_color_grading", temperature=toward_neutral(4400), saturation=1.12),
     "mesa_color_grading.json": grading(
-        "minecraft:mesa_color_grading", temperature=toward_neutral(4800), saturation=1.26),
+        "minecraft:mesa_color_grading", temperature=toward_neutral(4800), saturation=1.14),
     "ice_plains_spikes_color_grading.json": grading(
         "minecraft:ice_plains_spikes_color_grading", temperature=toward_neutral(11000),
-        saturation=1.20),
+        saturation=1.08),
     "lush_caves_color_grading.json": grading(
-        "minecraft:lush_caves_color_grading", temperature=toward_neutral(4800), contrast=1.28,
-        saturation=1.32),
+        "minecraft:lush_caves_color_grading", temperature=toward_neutral(4800), contrast=1.14,
+        saturation=1.20),
     "mangrove_swamp_color_grading.json": grading(
         "minecraft:mangrove_swamp_color_grading", temperature=toward_neutral(5125)),
     "mushroom_island_color_grading.json": grading(
-        "minecraft:mushroom_island_color_grading", saturation=1.32),
+        "minecraft:mushroom_island_color_grading", saturation=1.20),
     "pale_garden_color_grading.json": grading(
         "minecraft:pale_garden_color_grading", temperature=toward_neutral(9000),
-        saturation=0.95, contrast=1.18),
+        saturation=0.90, contrast=1.06),
     "roofed_forest_color_grading.json": grading(
-        "minecraft:roofed_forest_color_grading", contrast=1.28, saturation=1.24),
+        "minecraft:roofed_forest_color_grading", contrast=1.14, saturation=1.12),
     "swampland_color_grading.json": grading(
-        "minecraft:swampland_color_grading", saturation=1.20),
+        "minecraft:swampland_color_grading", saturation=1.08),
 }
 
 
@@ -654,38 +688,55 @@ WATER = {
 # Fog (volumetric haze and light shafts)
 # --------------------------------------------------------------------------
 
-def haze(density, scattering, g, *, absorption=(0.0, 0.0, 0.0), floor=64.0, ceiling=224.0):
+def haze(density, scattering, g, *, absorption=0.0, floor=62.0, ceiling=170.0):
     """Air fog that is thickest in valleys and thins out with height.
 
-    max_density_height is where it is thickest, zero_density_height where it
-    is gone. Vanilla sets both to 320, which is uniform fog everywhere below
-    the build limit; the gradient is what lets mountain tops stand out of the
-    haze and light shafts fall into it.
+    max_density_height is where it is thickest (sea level, and everything
+    below it: caves get the full density), zero_density_height where it is
+    gone. Vanilla sets both to 320, which is uniform fog everywhere below the
+    build limit; the gradient is what lets mountain tops stand out of the
+    haze and light shafts fall into valleys and caves.
+
+    How thick it looks goes roughly with density x (scattering + absorption)
+    per block: 0.09 x 0.048 is about 0.0043, a haze that takes a quarter of
+    the colour out of terrain 60 blocks away at sea level and half at 150 -
+    the atmospheric depth of Complementary's landscapes. Vanilla has
+    0.05 x 0.06 in a few biomes, evenly at every height, and none elsewhere.
+
+    Vibrant Visuals uses only the brightness of an absorption colour, so it
+    is given as one number. The colour of the haze comes from scattering:
+    slightly blue for clear air, as real haze is.
     """
     return {
         "density": {"max_density": density, "max_density_height": floor,
                     "zero_density_height": ceiling},
-        "media": {"scattering": list(scattering), "absorption": list(absorption)},
+        "media": {"scattering": list(scattering), "absorption": [absorption] * 3},
         "g": g,
     }
 
 
-# Clear air first: just enough haze to soften the far distance and let the
-# light read as passing through air, never enough to grey the picture. Humid
-# and swampy biomes keep a little more, as their character.
+# Complementary's air: a visible haze that softens distance to a pale blue,
+# glows gold toward a low sun and faint blue under the moon, fills valleys
+# and caves, and turns into light shafts where the light falls through
+# leaves or cave openings. g about 0.5 lights it all around the sky, not only
+# toward the sun (vanilla's 0.75 left it invisible looking away). Humid
+# forests and swamps are mistier, deserts clearer.
 HAZE = {
-    "clear": haze(0.02, (0.030, 0.036, 0.044), 0.72, ceiling=200.0),
-    "humid": haze(0.05, (0.050, 0.056, 0.056), 0.55, ceiling=240.0),
-    "swamp": haze(0.06, (0.050, 0.056, 0.050), 0.50, absorption=(0.25, 0.13, 0.19),
-                  ceiling=240.0),
-    "temperate": haze(0.025, (0.036, 0.042, 0.050), 0.65, ceiling=220.0),
-    "roofed": haze(0.05, (0.038, 0.046, 0.042), 0.70, ceiling=220.0),
-    "cold": haze(0.02, (0.030, 0.037, 0.048), 0.70, ceiling=200.0),
-    "ice_spikes": haze(0.035, (0.028, 0.034, 0.046), 0.45, ceiling=200.0),
-    "dry": haze(0.015, (0.036, 0.032, 0.026), 0.78, ceiling=180.0),
-    "mushroom": haze(0.04, (0.042, 0.030, 0.046), 0.40, absorption=(0.042, 0.137, 0.012)),
+    "clear": haze(0.09, (0.040, 0.047, 0.058), 0.50),
+    "humid": haze(0.12, (0.048, 0.054, 0.056), 0.45, ceiling=190.0),
+    "swamp": haze(0.10, (0.046, 0.054, 0.044), 0.40, absorption=0.06, ceiling=150.0),
+    "temperate": haze(0.09, (0.040, 0.047, 0.056), 0.50, ceiling=180.0),
+    "roofed": haze(0.12, (0.042, 0.050, 0.046), 0.55),
+    "cold": haze(0.08, (0.040, 0.048, 0.062), 0.50),
+    "ice_spikes": haze(0.10, (0.042, 0.050, 0.064), 0.40),
+    "dry": haze(0.06, (0.050, 0.045, 0.036), 0.45, ceiling=150.0),
+    # Complementary's savanna: bright, warm haze over the whole distance.
+    "savanna": haze(0.10, (0.050, 0.047, 0.040), 0.45),
+    "mushroom": haze(0.08, (0.050, 0.036, 0.052), 0.40, absorption=0.02, ceiling=160.0),
     # The End is fogged at every height, as in vanilla, but violet.
     "end": haze(0.25, (0.026, 0.016, 0.034), 0.80, floor=320.0, ceiling=320.0),
+    # No air fog at all, which is what vanilla's Nether has.
+    "none": haze(0.0, (0.0, 0.0, 0.0), 0.75, floor=320.0, ceiling=320.0),
 }
 
 # Every vanilla fog file that carries a volumetric block, by the haze it gets.
@@ -717,6 +768,16 @@ FOG_CLASS = {
     "fog_pale_garden": None, "fog_sulfur_caves": None,
 }
 
+# Vanilla fog files *without* a volumetric block that get one here. A biome
+# fog is read on top of fog_default, so without an entry of their own the
+# Nether biomes would inherit the Overworld haze; they get explicitly none,
+# as in vanilla. Savannas get their own warm haze.
+FOG_EXTRA = {
+    "fog_savanna": "savanna", "fog_savanna_mutated": "savanna", "fog_savanna_plateau": "savanna",
+    "fog_hell": "none", "fog_crimson_forest": "none", "fog_warped_forest": "none",
+    "fog_soulsand_valley": "none", "fog_basalt_deltas": "none",
+}
+
 
 def volumetric(style: dict, *, with_defaults: bool) -> dict:
     vol = {
@@ -737,6 +798,7 @@ def volumetric(style: dict, *, with_defaults: bool) -> dict:
 
 def build_fogs(vanilla: Path) -> dict[str, dict]:
     out: dict[str, dict] = {}
+    extra_seen = set()
     for path in sorted((vanilla / "fogs").glob("*.json")):
         data = json.loads(path.read_text())
         settings = data["minecraft:fog_settings"]
@@ -745,12 +807,18 @@ def build_fogs(vanilla: Path) -> dict[str, dict]:
         if ident == "fog_default":
             style, defaults = HAZE["clear"], True
         elif "volumetric" in settings:
+            if ident in FOG_EXTRA:
+                sys.exit(f"{path.name}: vanilla fog {ident} now has a volumetric block - "
+                         f"move it from FOG_EXTRA to FOG_CLASS")
             if ident not in FOG_CLASS:
                 sys.exit(f"{path.name}: vanilla fog {ident} has a volumetric block but no "
                          f"entry in FOG_CLASS - classify it")
             if FOG_CLASS[ident] is None:
                 continue
             style, defaults = HAZE[FOG_CLASS[ident]], False
+        elif ident in FOG_EXTRA:
+            extra_seen.add(ident)
+            style, defaults = HAZE[FOG_EXTRA[ident]], False
         else:
             continue
 
@@ -762,6 +830,8 @@ def build_fogs(vanilla: Path) -> dict[str, dict]:
                 "volumetric": volumetric(style, with_defaults=defaults),
             },
         }
+    if set(FOG_EXTRA) - extra_seen:
+        sys.exit(f"FOG_EXTRA names fogs vanilla does not have: {sorted(set(FOG_EXTRA) - extra_seen)}")
     return out
 
 
