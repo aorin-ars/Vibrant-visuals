@@ -55,7 +55,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
 | Sun and moon | Squares | **Small round sun** (its halo comes from the sky's scattering), **round moon** with craters and all 8 phases |
 | Clouds | Flat blocky slabs | **Cotton-wool cumulus painted into the sky** (a skybox): bright white tops, blue-grey shaded undersides, with thin cirrus above; tinted by the sun at sunset. [See below](#sky-clouds-skybox) |
-| Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.12 / saturation 1.20 / gain 1.02, for Complementary's deep greens and blues; shadows lean slightly cool, highlights slightly warm |
+| Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.10 / saturation 1.10 / gain 1.02, and a slightly cool white balance (6100 K) — the clean, faintly blue cast of Complementary's daytime (leaves blue-green rather than lime); shadows lean slightly cool, highlights slightly warm |
 
 ### Why every biome is covered
 
@@ -100,18 +100,21 @@ Worth knowing:
 The face order (0–3 the sides from left to right, 4 the top, 5 the bottom) was
 confirmed by matching the edges between faces of several working skyboxes.
 
-**The game does not wrap the six images round the player as a cube.** In an
-in-game screenshot the edges of the top image show as straight lines meeting
-at a right angle; working the field of view out from their vanishing points,
-the top image covered everything above about 21° (15° at its corners), where
-a cube's top would stop at 45° (35°). That is a flat box, 0.38 times as tall
-as it is wide, and the clouds are painted for that box so they keep their
-proper size and spacing in game (`BOX_HEIGHT` in `tools/draw_sky.py`).
+**The eye is not at the centre of the sky cube.** The six images form an
+ordinary cube, but the eye sits 0.40 half-widths below its centre. So eye
+level (the horizon) falls **70 % of the way down the side images**, not
+across their middle; the side images' middle row shows about 22° up, and
+the top image covers only the sky above 45–55°.
 
-In the same screenshot none of the clouds in the upper halves of the side
-images appeared above the horizon, which fits the game showing the sides
-upside down. The side images are therefore painted **mirror symmetric** about
-the horizon: upright or flipped, the same clouds show above it.
+This was worked out from two in-game screenshots: the middle row of the side
+images shows as a straight line in the sky that bends at the cube's corners,
+and the vanishing points of those bends fix the field of view and eye level.
+A published skybox that draws its horizon 70 % of the way down its side
+images agrees. The clouds are painted pixel by pixel for this arrangement,
+so they keep their proper size and spacing in game (`EYE_BELOW_CENTRE` in
+`tools/draw_sky.py`). Two earlier versions got it wrong: painted for an eye
+at the centre, the clouds stopped in a square overhead; painted for a flat
+box, they came out stretched tall, with a mirrored copy below the horizon.
 
 The clouds themselves are fair-weather cumulus heaps — flat bases, rounded,
 billowing tops — ray-marched pixel by pixel: the lower a point sits in its
@@ -215,7 +218,7 @@ JSON directly works too, but regenerating overwrites it).
 | Block light colours | `LIGHT_COLORS` |
 | Cloud brightness and sunset tint | `ambient_light_illuminance` (brightness) and `directional_light_contribution` (how much the sun colours them) in `CLOUD_CUBEMAP` |
 | Amount of cloud | `coverage` (share of the sky) in `CLOUD_VARIANTS`, in `tools/draw_sky.py` |
-| How the game places the sky images (if clouds sit wrong) | `BOX_HEIGHT` (box height ÷ width) and `MIRROR_SIDES`, in `tools/draw_sky.py` |
+| How the game places the sky images (if clouds sit wrong) | `EYE_BELOW_CENTRE` (how far below the cube's centre the eye is), in `tools/draw_sky.py` |
 | Tilt of the sun's path | `ORBITAL_OFFSET` (degrees) |
 
 ```bash

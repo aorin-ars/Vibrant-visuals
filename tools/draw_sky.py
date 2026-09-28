@@ -34,10 +34,10 @@ Face layout, confirmed by matching the edges of several working skyboxes:
 the next face's left edge), 4 is the top and 5 the bottom. The top's lower
 edge meets face 0's top; the bottom's upper edge meets face 0's bottom.
 
-The game shows the faces as a flat box rather than a cube, and apparently
-with the sides upside down (measured in game; see BOX_HEIGHT and
-MIRROR_SIDES). Every pixel is painted for the direction it is actually seen
-in, and the sides are mirror symmetric about the horizon.
+The game places the cube with the eye below its centre, so eye level falls
+70 % of the way down the side images (measured in game; see
+EYE_BELOW_CENTRE). Every pixel is painted for the direction it is actually
+seen in.
 
 The clouds are fair-weather cumulus heaps on a layer that curves with the
 planet, ray-marched along each pixel's view direction: large overhead,
@@ -183,21 +183,18 @@ _U = np.array([0.0, 1.0, 0.0])
 FACES = [(_F, _R, -_U), (_R, -_F, -_U), (-_F, -_R, -_U), (-_R, _F, -_U),
          (_U, _R, _F), (-_U, _R, -_F)]
 
-# The game does not wrap the six images round the player as a cube. Measured
-# in an in-game screenshot (the edges of the top image are straight lines in
-# the sky meeting at a right angle, so their vanishing points fix the camera):
-# the top image fills everything above about 21 degrees (15 at its corners),
-# where a cube's top would stop at 45 (35). That is a box whose height is
-# 0.38 of its width, and every face here is painted for that box, so the
-# clouds keep their proper size and spacing in game.
-BOX_HEIGHT = 0.38
-
-# In the same screenshot nothing of the side images showed above the horizon
-# although they held clouds in their upper halves - consistent with the game
-# showing the sides upside down. The sides are therefore painted mirror
-# symmetric about the horizon: upright or flipped, the part above the
-# horizon is the same.
-MIRROR_SIDES = True
+# Where the game puts the six images. They form a plain cube, but the eye is
+# not at its centre: it sits this many half-widths below it, so eye level
+# falls 70 % of the way down the side images rather than across their
+# middle, the side images' middle row shows about 22 degrees up, and the top
+# image covers only the sky above 45-55 degrees. Measured in two in-game
+# screenshots - the middle row of the side images shows as a straight line
+# in the sky that bends at the cube's corners, and the vanishing points of
+# those bends fix the camera - and matching a published skybox, which draws
+# its horizon 70 % of the way down its side images. Two earlier versions of
+# this pack got it wrong: painted for a centred cube, the clouds stopped in
+# a square overhead; painted for a flat box, they came out stretched tall.
+EYE_BELOW_CENTRE = 0.40
 
 # Each variant becomes a subpack the player picks in the pack's settings.
 # coverage: share of the sky above ~10 degrees covered by cumulus.
@@ -221,13 +218,19 @@ REPLACES_VANILLA_CLOUDS = {"unbound_clouds"}
 
 def face_dirs(face: int, n: int, rows: slice = slice(None)) -> np.ndarray:
     """View direction in game of each pixel of a face (n x n), for the rows
-    given: the pixel's point on the flattened sky box, seen from its centre."""
+    given: the pixel's point on the sky cube, seen from the eye below its
+    centre."""
     centre, right, down = FACES[face]
     t = (np.arange(n) + 0.5) / n * 2.0 - 1.0
     v, u = np.meshgrid(t[rows], t, indexing="ij")
     p = centre + u[..., None] * right + v[..., None] * down
-    p[..., 1] *= BOX_HEIGHT
+    p[..., 1] += EYE_BELOW_CENTRE
     return p / np.linalg.norm(p, axis=-1, keepdims=True)
+
+
+def eye_level_row(n: int) -> int:
+    """First row of a side image (of n) that lies wholly below eye level."""
+    return int(np.ceil(n * (1.0 + EYE_BELOW_CENTRE) / 2.0))
 
 
 def _hash(ix, iy, seed):
@@ -342,6 +345,7 @@ class Cumulus:
         xs = ((np.arange(n) + 0.5) / n * 2 - 1) * FIELD_EXTENT
         shape = np.empty((n, n), np.float32)
         billow = np.empty((n, n), np.float32)
+        regional = np.empty((n, n), np.float32)
         self.wisp = np.empty((n, n), np.float32)
         for r in range(0, n, 256):
             z, x = np.meshgrid(xs[r:r + 256], xs, indexing="ij")
@@ -354,7 +358,12 @@ class Cumulus:
                                 + 0.40 * (0.5 + fbm(qx * 1.4, qz * 1.4, 5, seed))
                                 + 0.22 * (cellular(qx * 3.2, qz * 3.2, seed + 77) - 0.57))
             billow[r:r + 256] = 0.5 + fbm(qx * 4.5, qz * 4.5, 4, seed + 131)
-            self.wisp[r:r + 256] = 0.5 + fbm(qx * 16.0, qz * 16.0, 3, seed + 171)
+            # Some heaps tall, some flat and thin, as in a real fair-weather sky.
+            regional[r:r + 256] = 0.5 + fbm(qx * 0.45 + 2.1, qz * 0.45 - 4.4, 2, seed + 211)
+            # Fine and medium noise fray the surface into wisps and thin
+            # patches instead of a cut-out edge.
+            self.wisp[r:r + 256] = (0.6 * (0.5 + fbm(qx * 16.0, qz * 16.0, 3, seed + 171))
+                                    + 0.4 * (0.5 + fbm(qx * 6.0, qz * 6.0, 3, seed + 191)))
 
         # Where clouds start, so that `coverage` of the sky above about 10
         # degrees is cloud, and the density of the thickest cores.
@@ -368,7 +377,8 @@ class Cumulus:
 
         depth = np.clip((shape - lo) / (hi - lo), 0.0, 1.0)
         dome = 1.0 - (1.0 - depth) ** 2          # steep sides, a broad rounded top
-        self.height = (CLOUD_DEPTH * dome * (0.7 + 0.6 * billow)).astype(np.float32)
+        thickness = np.clip(0.45 + 1.0 * regional, 0.35, 1.0)
+        self.height = (CLOUD_DEPTH * dome * thickness * (0.7 + 0.6 * billow)).astype(np.float32)
         self.height[depth <= 0] = -0.02
 
     def render(self, d: np.ndarray, rng: np.random.Generator):
@@ -378,8 +388,8 @@ class Cumulus:
         t0 = shell_distance(up, CLOUD_BASE)
         dt = (shell_distance(up, CLOUD_BASE + CLOUD_DEPTH) - t0) / MARCH_STEPS
         jitter = rng.random(len(d))
-        shade = np.array([0.52, 0.58, 0.71])     # the underside, lit by the blue sky
-        lit = np.array([1.0, 0.995, 0.98])
+        shade = np.array([0.50, 0.56, 0.68])     # the underside, lit by the blue sky
+        lit = np.array([1.0, 0.995, 0.985])
         colour = np.zeros((len(d), 3))
         seen = np.ones(len(d))                    # transmittance so far
         weighted_distance = np.zeros(len(d))
@@ -390,9 +400,11 @@ class Cumulus:
             # Fine noise sheared with height roughens the surface into
             # wisps instead of a smooth shell.
             inside = (lookup(self.height, px, pz) - h
-                      - 0.05 * (lookup(self.wisp, px + 0.6 * h, pz - 0.4 * h) - 0.5))
-            density = np.clip(inside / 0.06, 0.0, 1.0) * np.clip(h / 0.03 + 0.3, 0.0, 1.0)
-            a = (1.0 - np.exp(-36.0 * density * dt)) * above
+                      - 0.09 * (lookup(self.wisp, px + 0.6 * h, pz - 0.4 * h) - 0.5))
+            # A soft surface: density builds up over the outer 0.1, so edges
+            # are translucent, as in Complementary's clouds.
+            density = np.clip(inside / 0.10, 0.0, 1.0) * np.clip(h / 0.04 + 0.25, 0.0, 1.0)
+            a = (1.0 - np.exp(-24.0 * density * dt)) * above
             if not a.any():
                 continue
             # Light from above, dimmed by the cloud over the point, and
@@ -447,18 +459,17 @@ def draw_cloud_face(face: int, cumulus: Cumulus | None, cirrus_strength: float) 
         return Image.new("RGBA", (FACE_SIZE, FACE_SIZE), (230, 230, 230, 0))
     n = FACE_SIZE * SUPERSAMPLE
     rng = np.random.default_rng(SEED * 100 + face)
-    # Sides above the horizon only, then mirrored (see MIRROR_SIDES).
-    last = n // 2 if face < 4 and MIRROR_SIDES else n
-    pre = np.concatenate([render_face_rows(face, slice(r, min(r + 128, last)), n, cumulus,
-                                           cirrus_strength, rng)
-                          for r in range(0, last, 128)])
+    # A side image below eye level stays empty: the ground covers it, and
+    # from a height any clouds there would hang below the horizon.
+    last = n if face == 4 else -(-eye_level_row(n) // SUPERSAMPLE) * SUPERSAMPLE
+    pre = np.zeros((n, n, 4))
+    for r in range(0, last, 128):
+        rows = slice(r, min(r + 128, last))
+        pre[rows] = render_face_rows(face, rows, n, cumulus, cirrus_strength, rng)
     # Downsample in premultiplied space, then store straight alpha. The colour
     # under transparent pixels stays cloud-coloured, so texture filtering
     # never pulls a dark fringe into the cloud edges.
-    rows = last // SUPERSAMPLE
-    pre = pre.reshape(rows, SUPERSAMPLE, FACE_SIZE, SUPERSAMPLE, 4).mean(axis=(1, 3))
-    if last < n:
-        pre = np.concatenate([pre, pre[::-1]])
+    pre = pre.reshape(FACE_SIZE, SUPERSAMPLE, FACE_SIZE, SUPERSAMPLE, 4).mean(axis=(1, 3))
     a = pre[..., 3]
     straight = np.where(a[..., None] > 1e-4, pre[..., :3] / np.maximum(a, 1e-6)[..., None], 0.9)
     return Image.fromarray(np.dstack([to_u8(np.clip(straight, 0, 1)), to_u8(a)]), "RGBA")

@@ -486,8 +486,8 @@ def flat_atmosphere(identifier, zenith, horizon, rayleigh, *, start=0.8, mie_sta
 
 # Complementary's clear-day sky: a clean mid blue overhead fading to a pale
 # blue at the horizon, with a small bright halo around the sun.
-DAY_ZENITH = [76, 140, 232]
-DAY_HORIZON = [180, 210, 244]
+DAY_ZENITH = [88, 146, 224]
+DAY_HORIZON = [184, 208, 236]
 
 DESERT_TWILIGHT = {"golden": [255, 204, 146], "sunset": [255, 176, 112],
                    "sunset_deep": [255, 146, 96], "rose": [212, 112, 128]}
@@ -550,16 +550,20 @@ ATMOSPHERICS = {
 # Vanilla: contrast 1.15, saturation 1.05 through the "generic" curve. The
 # ACES curve (TONE_MAP) already deepens contrast and enriches midtone colour,
 # so the grade on top of it is milder than a "generic" one would need: a
-# touch more contrast and saturation for Complementary's deep greens and
-# blues. Almost no extra gain: at 1.08 sunlit grass rolled off into pastel
-# in the first in-game test. Standard gamma: a lifted gamma washed the
+# touch more contrast and saturation - less than it first had: next to
+# Complementary's screenshots, 1.20 turned leaves lime. Almost no extra gain:
+# at 1.08 sunlit grass rolled off into pastel in the first in-game test. Standard gamma: a lifted gamma washed the
 # picture out in game. Shadows lean cool, highlights a touch warm, as in the
 # sunlit reference.
-BASE_GRADE = {"contrast": 1.12, "saturation": 1.20, "gain": (1.02, 1.02, 1.02)}
+BASE_GRADE = {"contrast": 1.10, "saturation": 1.10, "gain": (1.02, 1.02, 1.02)}
 GAMMA = 2.2
+# A little cooler than neutral daylight (6500 K), for the clean, slightly
+# blue cast of Complementary's daytime: greens lean toward blue-green instead
+# of lime, stone and water read cool.
+BASE_TEMPERATURE = 6100.0
 
 
-def grading(identifier, *, temperature=6500.0, contrast=None, saturation=None,
+def grading(identifier, *, temperature=BASE_TEMPERATURE, contrast=None, saturation=None,
             gain=None) -> dict:
     c = BASE_GRADE["contrast"] if contrast is None else contrast
     s = BASE_GRADE["saturation"] if saturation is None else saturation
@@ -609,40 +613,40 @@ def toward_neutral(kelvin: float, keep: float = 0.4) -> float:
     """Vanilla tints biomes hard (desert 4400 K, ice spikes 11000 K), which
     puts a colour filter over the whole screen. Keep 40 % of vanilla's shift:
     enough for a biome to feel different, not enough to tint daylight."""
-    return round(6500.0 + (kelvin - 6500.0) * keep)
+    return round(BASE_TEMPERATURE + (kelvin - 6500.0) * keep)
 
 
 COLOR_GRADING = {
     "color_grading.json": grading("minecraft:default_color_grading"),
     "cold_color_grading.json": grading(
-        "minecraft:cold_color_grading", temperature=toward_neutral(10000), saturation=1.10),
+        "minecraft:cold_color_grading", temperature=toward_neutral(10000), saturation=1.00),
     "coolish_color_grading.json": grading(
-        "minecraft:coolish_color_grading", temperature=toward_neutral(9000), saturation=1.13),
+        "minecraft:coolish_color_grading", temperature=toward_neutral(9000), saturation=1.03),
     "warmish_color_grading.json": grading(
-        "minecraft:warmish_color_grading", temperature=toward_neutral(4800), saturation=1.18),
+        "minecraft:warmish_color_grading", temperature=toward_neutral(4800), saturation=1.08),
     "hot_color_grading.json": grading(
-        "minecraft:hot_color_grading", temperature=toward_neutral(4000), contrast=1.14),
+        "minecraft:hot_color_grading", temperature=toward_neutral(4000), contrast=1.12),
     "desert_color_grading.json": grading(
-        "minecraft:desert_color_grading", temperature=toward_neutral(4400), saturation=1.12),
+        "minecraft:desert_color_grading", temperature=toward_neutral(4400), saturation=1.02),
     "mesa_color_grading.json": grading(
-        "minecraft:mesa_color_grading", temperature=toward_neutral(4800), saturation=1.14),
+        "minecraft:mesa_color_grading", temperature=toward_neutral(4800), saturation=1.04),
     "ice_plains_spikes_color_grading.json": grading(
         "minecraft:ice_plains_spikes_color_grading", temperature=toward_neutral(11000),
-        saturation=1.08),
+        saturation=0.98),
     "lush_caves_color_grading.json": grading(
-        "minecraft:lush_caves_color_grading", temperature=toward_neutral(4800), contrast=1.14,
-        saturation=1.20),
+        "minecraft:lush_caves_color_grading", temperature=toward_neutral(4800), contrast=1.12,
+        saturation=1.10),
     "mangrove_swamp_color_grading.json": grading(
         "minecraft:mangrove_swamp_color_grading", temperature=toward_neutral(5125)),
     "mushroom_island_color_grading.json": grading(
-        "minecraft:mushroom_island_color_grading", saturation=1.20),
+        "minecraft:mushroom_island_color_grading", saturation=1.10),
     "pale_garden_color_grading.json": grading(
         "minecraft:pale_garden_color_grading", temperature=toward_neutral(9000),
-        saturation=0.90, contrast=1.06),
+        saturation=0.80, contrast=1.04),
     "roofed_forest_color_grading.json": grading(
-        "minecraft:roofed_forest_color_grading", contrast=1.14, saturation=1.12),
+        "minecraft:roofed_forest_color_grading", contrast=1.12, saturation=1.02),
     "swampland_color_grading.json": grading(
-        "minecraft:swampland_color_grading", saturation=1.08),
+        "minecraft:swampland_color_grading", saturation=0.98),
 }
 
 
@@ -989,7 +993,8 @@ PBR = {
 # decide how the clouds are lit; the sky behind them is the atmosphere.
 #  - sky light: clouds take on the colour of the sky around them
 #  - directional light: they turn gold and pink at sunset with the sun, and
-#    the moon gives them a dim silver at night
+#    the moon gives them a dim silver at night. Kept low: at 0.45 the
+#    noon sun turned the clouds flat white in game, erasing their shading
 #  - no atmospheric or volumetric scattering: with it on, the game haze
 #    erased every cloud below about 20 degrees, so the sky looked painted
 #    only overhead. Distance haze is drawn into the images instead.
@@ -1003,12 +1008,12 @@ CLOUD_CUBEMAP = {
         "description": {"identifier": "minecraft:default_cubemap"},
         "lighting": {
             "ambient_light_illuminance": keyframes({
-                0.000: 2.0, 0.250: 1.8, 0.283: 1.1, 0.300: 0.5, 0.330: 0.12,
+                0.000: 1.8, 0.250: 1.6, 0.283: 1.1, 0.300: 0.5, 0.330: 0.12,
                 0.400: 0.04, 0.600: 0.04, 0.670: 0.12, 0.700: 0.3, 0.717: 0.6,
-                0.750: 1.6, 1.000: 2.0,
+                0.750: 1.4, 1.000: 1.8,
             }),
             "sky_light_contribution": 1.0,
-            "directional_light_contribution": 0.45,
+            "directional_light_contribution": 0.22,
             "affected_by_atmospheric_scattering": False,
             "affected_by_volumetric_scattering": False,
         },

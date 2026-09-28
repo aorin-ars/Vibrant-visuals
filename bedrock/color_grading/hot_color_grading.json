@@ -6,11 +6,11 @@
     },
     "color_grading": {
       "midtones": {
-        "contrast": [1.14, 1.14, 1.14],
+        "contrast": [1.12, 1.12, 1.12],
         "gain": [1.02, 1.02, 1.02],
         "gamma": [2.2, 2.2, 2.2],
         "offset": [0.0, 0.0, 0.0],
-        "saturation": [1.2, 1.2, 1.2]
+        "saturation": [1.1, 1.1, 1.1]
       },
       "shadows": {
         "enabled": true,
@@ -32,7 +32,7 @@
       },
       "temperature": {
         "enabled": true,
-        "temperature": 5500,
+        "temperature": 5100,
         "type": "color_temperature"
       }
     },
