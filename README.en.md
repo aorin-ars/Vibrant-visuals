@@ -52,6 +52,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | Underwater | — | Clear blue-green, ~30 blocks visibility |
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
 | Sun and moon | Squares | **Round sun** with a soft corona, **round moon** with craters and all 8 phases |
+| Clouds | Flat blocky slabs | **Cumulus and cirrus painted into the sky** (a skybox), turning gold at sunset. [See below](#sky-clouds-skybox) |
 | Grading | Contrast 1.15 / saturation 1.05 | 1.20 / 1.16; shadows lean slightly cool, highlights slightly warm |
 
 ### Why every biome is covered
@@ -67,13 +68,48 @@ This pack overrides **every identifier the vanilla biomes use** (15 lighting,
 the same wherever you are, with small deliberate differences on top — a warmer
 desert, a whiter snowfield.
 
+## Sky clouds (skybox)
+
+Bedrock can redraw the Overworld sky from six images
+(`textures/environment/overworld_cubemap/cubemap_0..5.png`), and since 1.21.130
+Vibrant Visuals lights those images with the sun and sky
+(`cubemaps/default_cubemap.json`).
+
+This pack uses that to paint **clouds on a transparent background** into the
+sky. Everywhere else the normal Vibrant Visuals sky shows through, so its
+colours, sunsets and nights still follow the time of day, and only the clouds
+take on the light — white at noon, gold to pink at sunset.
+
+**Choose the clouds in the pack's settings**: world Settings → Resource Packs →
+tap the active Vibrant Unbound → the gear (⚙).
+
+| Option | What it is | The game's own clouds |
+|---|---|---|
+| **Sky: Unbound clouds** (default) | Puffy cumulus with thin high cirrus above | Turn **off** "Render Clouds" in Video Settings, or the blocky clouds draw over them |
+| Sky: high clouds only | Just the thin cirrus | Keep them on — for pairing with the shadow-casting vanilla clouds |
+| Sky: no clouds | Nothing painted | Up to you |
+
+Worth knowing:
+
+- Painted clouds **do not move**; they are fixed to the sky
+- Only the Overworld has them; the Nether and the End are unchanged
+- The cloud lighting values follow a published pack that paints clouds the
+  same way; this pack's clouds have not been checked in game yet. Reports of
+  how they look at noon, sunset and night will let them be tuned
+
+The face order (0–3 the sides from left to right, 4 the top, 5 the bottom) was
+confirmed by matching the edges between faces of several working skyboxes. The
+clouds are a pattern on a plane above the viewer, projected along each view
+direction, so they are large overhead, crowd together toward the horizon, and
+join across the image edges.
+
 ## What a resource pack cannot do
 
 Vibrant Visuals' shaders belong to the engine; a resource pack only supplies
 numbers and textures. These Complementary features cannot be reproduced:
 
 - Grass and leaves waving in the wind
-- Volumetric cumulus clouds, auroras, nebulae
+- **Moving** volumetric clouds, auroras, nebulae (static clouds painted into the sky are possible — see above)
 - Rain puddles and wet-surface reflections
 - Depth of field, motion blur, lens flare
 
@@ -158,6 +194,8 @@ JSON directly works too, but regenerating overwrites it).
 | Still water | `waves.enabled` in `WATER` → `False` |
 | More biome colour in water | `biome_water_color_contribution` in `WATER` (0–1) |
 | Block light colours | `LIGHT_COLORS` |
+| Cloud brightness and sunset tint | `ambient_light_illuminance` (brightness) and `directional_light_contribution` (how much the sun colours them) in `CLOUD_CUBEMAP` |
+| Amount of cloud | `coverage` (share of the sky) in `CLOUD_VARIANTS`, in `tools/draw_sky.py` |
 | Tilt of the sun's path | `ORBITAL_OFFSET` (degrees) |
 
 ```bash
@@ -198,7 +236,7 @@ pip install pillow numpy
 V=bedrock-samples/resource_pack
 
 python3 tools/generate_bedrock.py --vanilla $V   # settings files (bedrock/ and diagnostic/)
-python3 tools/draw_sky.py                        # round sun and moon
+python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes)
 python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
 tools/package.sh --vanilla $V                    # distributables, including the relief add-on
 

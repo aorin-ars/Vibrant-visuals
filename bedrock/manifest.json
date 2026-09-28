@@ -4,7 +4,7 @@
     "name": "pack.name",
     "description": "pack.description",
     "uuid": "0e682665-2038-4c85-9402-d8e77c5c7e65",
-    "version": [3, 0, 0],
+    "version": [3, 1, 0],
     "min_engine_version": [1, 26, 0]
   },
   "modules": [
@@ -12,7 +12,24 @@
       "type": "resources",
       "description": "pack.description",
       "uuid": "eac9213d-21ec-48bf-bafb-e30430db73e4",
-      "version": [3, 0, 0]
+      "version": [3, 1, 0]
+    }
+  ],
+  "subpacks": [
+    {
+      "folder_name": "no_clouds",
+      "name": "空: 雲なし / Sky: no clouds",
+      "memory_tier": 0
+    },
+    {
+      "folder_name": "high_clouds",
+      "name": "空: 高い雲だけ / Sky: high clouds only",
+      "memory_tier": 0
+    },
+    {
+      "folder_name": "unbound_clouds",
+      "name": "空: Unbound の雲 / Sky: Unbound clouds",
+      "memory_tier": 0
     }
   ],
   "capabilities": ["pbr"],

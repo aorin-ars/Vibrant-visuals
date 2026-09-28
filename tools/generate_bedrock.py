@@ -46,6 +46,7 @@ FOG_FORMAT = "1.21.90"          # henyey_greenstein_g needs 1.21.90
 LOCAL_LIGHT_FORMAT = "1.21.120"
 SHADOW_FORMAT = "1.21.80"
 PBR_FORMAT = "1.21.40"
+CUBEMAP_FORMAT = "1.21.130"
 
 # Mojang: orbital offset and tone mapping operator cannot be blended between
 # biomes, so every file in the pack has to agree on them.
@@ -845,6 +846,66 @@ PBR = {
 
 
 # --------------------------------------------------------------------------
+# Sky cubemap lighting (the cloud skyboxes drawn by tools/draw_sky.py)
+# --------------------------------------------------------------------------
+
+# How Vibrant Visuals lights the custom Overworld sky. Every biome without a
+# minecraft:cubemap_identifier - all vanilla biomes - uses
+# minecraft:default_cubemap, so no client biome files are needed; this is how
+# shipping sky packs apply their settings too.
+#
+# The skyboxes are clouds on a transparent background, so these values only
+# decide how the clouds are lit; the sky behind them is the atmosphere.
+#  - sky light: clouds take on the colour of the sky around them
+#  - directional light: they turn gold and pink at sunset with the sun
+#  - atmospheric scattering: distant clouds fade into the horizon haze
+#  - ambient: a small floor, lowest at night so moonlit clouds stay dim
+#    grey instead of glowing
+CLOUD_CUBEMAP = {
+    "format_version": CUBEMAP_FORMAT,
+    "minecraft:cubemap_settings": {
+        "description": {"identifier": "minecraft:default_cubemap"},
+        "lighting": {
+            "ambient_light_illuminance": keyframes({
+                0.00: 2.5, 0.22: 3.0, 0.28: 2.0, 0.36: 1.0,
+                0.64: 1.0, 0.72: 2.0, 0.78: 3.0, 1.00: 2.5,
+            }),
+            "sky_light_contribution": 1.0,
+            "directional_light_contribution": 0.3,
+            "affected_by_atmospheric_scattering": True,
+            "affected_by_volumetric_scattering": True,
+        },
+    },
+}
+
+# The engine's own defaults (Mojang's cubemap documentation). The no-clouds
+# subpack carries these so it has a file at all - a subpack folder must
+# exist, and git does not keep empty ones - and so that choosing it restores
+# exactly the unmodified behaviour.
+DEFAULT_CUBEMAP = {
+    "format_version": CUBEMAP_FORMAT,
+    "minecraft:cubemap_settings": {
+        "description": {"identifier": "minecraft:default_cubemap"},
+        "lighting": {
+            "ambient_light_illuminance": keyframes({0.0: 5.625, 1.0: 5.625}),
+            "sky_light_contribution": 1.0,
+            "directional_light_contribution": 0.0,
+            "affected_by_atmospheric_scattering": False,
+            "affected_by_volumetric_scattering": True,
+        },
+    },
+}
+
+# Subpack folder -> cubemap settings. The folders and their order live in
+# bedrock/manifest.json; the images come from tools/draw_sky.py.
+SKY_SUBPACKS = {
+    "no_clouds": DEFAULT_CUBEMAP,
+    "high_clouds": CLOUD_CUBEMAP,
+    "unbound_clouds": CLOUD_CUBEMAP,
+}
+
+
+# --------------------------------------------------------------------------
 # Diagnostic pack: every lighting identifier turned magenta
 # --------------------------------------------------------------------------
 
@@ -928,6 +989,8 @@ def main() -> int:
     write(PACK / "local_lighting/local_lighting.json", local_lighting(known_blocks))
     write(PACK / "shadows/global.json", SHADOWS)
     write(PACK / "pbr/global.json", PBR)
+    for subpack, settings in SKY_SUBPACKS.items():
+        write(PACK / "subpacks" / subpack / "cubemaps/default_cubemap.json", settings)
 
     for old in (DIAG / "lighting").glob("*.json"):
         old.unlink()
@@ -937,7 +1000,7 @@ def main() -> int:
 
     print(f"bedrock/: {len(LIGHTING)} lighting, {len(ATMOSPHERICS)} atmospherics, "
           f"{len(COLOR_GRADING)} colour grading, {len(fogs)} fog, 1 water, "
-          f"{len(LIGHT_COLORS)} coloured lights")
+          f"{len(LIGHT_COLORS)} coloured lights, {len(SKY_SUBPACKS)} sky subpacks")
     print(f"diagnostic/: {len(LIGHTING)} lighting")
     return 0
 

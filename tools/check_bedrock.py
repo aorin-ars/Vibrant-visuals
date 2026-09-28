@@ -140,15 +140,46 @@ ENVIRONMENT_TEXTURES = {
 }
 
 
+SKY_FACES = [f"textures/environment/overworld_cubemap/cubemap_{i}.png" for i in range(6)]
+
+
 class Checker:
-    def __init__(self, pack: Path):
+    """Checks one effective pack: the base pack, or the base pack with one
+    subpack laid over it (a subpack's files replace the base's at the same
+    path, which is how the game applies them)."""
+
+    def __init__(self, pack: Path, subpack: str | None = None):
         self.pack = pack
+        self.overlay = pack / "subpacks" / subpack if subpack else None
         self.problems: list[str] = []
         self.notes: list[str] = []
         self.min_engine: tuple[int, ...] = (0, 0, 0)
 
     def fail(self, msg: str) -> None:
         self.problems.append(msg)
+
+    # -- file layering ----------------------------------------------------------
+
+    def resolve(self, rel: str) -> Path | None:
+        for base in ([self.overlay] if self.overlay else []) + [self.pack]:
+            if (base / rel).is_file():
+                return base / rel
+        return None
+
+    def layered(self, folder: str, pattern: str) -> list[Path]:
+        found = {p.name: p for p in (self.pack / folder).glob(pattern)}
+        if self.overlay:
+            found.update({p.name: p for p in (self.overlay / folder).glob(pattern)})
+        return sorted(found.values())
+
+    def layered_rglob(self, pattern: str) -> list[Path]:
+        subpacks = self.pack / "subpacks"
+        found = {p.relative_to(self.pack).as_posix(): p for p in self.pack.rglob(pattern)
+                 if subpacks not in p.parents}
+        if self.overlay:
+            found.update({p.relative_to(self.overlay).as_posix(): p
+                          for p in self.overlay.rglob(pattern)})
+        return sorted(found.values())
 
     # -- value helpers ----------------------------------------------------
 
@@ -267,10 +298,33 @@ class Checker:
                                for line in lang.read_text(encoding="utf-8").splitlines()):
                         self.fail(f"{lang.name} has no entry for {key}")
 
+        # Subpacks: every listed folder has to exist (the game cannot apply a
+        # missing one), and a folder nobody lists is dead weight in the pack.
+        self.subpacks: list[str] = []
+        folders = ({p.name for p in (self.pack / "subpacks").iterdir() if p.is_dir()}
+                   if (self.pack / "subpacks").is_dir() else set())
+        for i, entry in enumerate(manifest.get("subpacks", [])):
+            name = entry.get("folder_name") if isinstance(entry, dict) else None
+            if not isinstance(name, str) or not name:
+                self.fail(f"subpacks[{i}]: folder_name is missing")
+                continue
+            if name in self.subpacks:
+                self.fail(f"subpacks[{i}]: folder {name} is listed twice")
+            self.subpacks.append(name)
+            if name not in folders:
+                self.fail(f"subpacks[{i}]: folder subpacks/{name} does not exist")
+            if not isinstance(entry.get("name"), str) or not entry["name"].strip():
+                self.fail(f"subpacks[{i}]: name, shown to the player, is missing")
+            tier = entry.get("memory_tier", 0)
+            if not isinstance(tier, int) or tier < 0:
+                self.fail(f"subpacks[{i}]: memory_tier must be a non-negative integer")
+        for name in sorted(folders - set(self.subpacks)):
+            self.fail(f"subpacks/{name} is not listed in the manifest, so it can never be chosen")
+
     # -- settings files ---------------------------------------------------------
 
     def settings_files(self) -> list[Path]:
-        return sorted(p for folder in SETTINGS for p in (self.pack / folder).glob("*.json"))
+        return sorted(p for folder in SETTINGS for p in self.layered(folder, "*.json"))
 
     def settings(self) -> dict[str, dict[str, str]]:
         identifiers: dict[str, dict[str, str]] = {folder: {} for folder in SETTINGS}
@@ -463,7 +517,18 @@ class Checker:
             self.number(f"{rel}:henyey_greenstein_g.{medium}", g.get("henyey_greenstein_g"), -1, 1)
 
     def check_cubemaps(self, rel, body, fmt):
-        pass
+        if fmt < (1, 21, 130):
+            self.fail(f"{rel}: cubemap settings need format_version 1.21.130")
+        light = body.get("lighting") or {}
+        if "ambient_light_illuminance" in light:
+            self.keyframed(f"{rel}:ambient_light_illuminance", light["ambient_light_illuminance"],
+                           "number", 0, 100000)
+        for key in ("sky_light_contribution", "directional_light_contribution"):
+            if key in light:
+                self.number(f"{rel}:{key}", light[key], 0, 1)
+        for key in ("affected_by_atmospheric_scattering", "affected_by_volumetric_scattering"):
+            if key in light and not isinstance(light[key], bool):
+                self.fail(f"{rel}: {key} must be true or false")
 
     def check_local_lighting(self, rel, body, fmt):
         self.local_blocks = set(body)
@@ -506,7 +571,7 @@ class Checker:
         not in the same pack, mixes normal and height map, or a layer has the
         wrong number of channels."""
         count = 0
-        for path in sorted(self.pack.rglob("*.texture_set.json")):
+        for path in self.layered_rglob("*.texture_set.json"):
             count += 1
             rel = path.relative_to(self.pack).as_posix()
             ts = json.loads(path.read_text()).get("minecraft:texture_set", {})
@@ -534,8 +599,8 @@ class Checker:
 
     def environment(self) -> None:
         for rel, (mode, aspect) in ENVIRONMENT_TEXTURES.items():
-            path = self.pack / rel
-            if not path.is_file():
+            path = self.resolve(rel)
+            if path is None:
                 continue
             img = Image.open(path)
             if mode and img.mode != mode:
@@ -543,6 +608,25 @@ class Checker:
             w, h = img.size
             if abs(w / h - aspect) > 1e-6:
                 self.fail(f"{rel}: must be {aspect:g}:1 like vanilla, is {w}x{h}")
+
+        # A custom sky needs all six faces: with one missing the game draws
+        # the whole sky black. Faces of one cubemap must match in size.
+        faces = [self.resolve(rel) for rel in SKY_FACES]
+        present = [f for f in faces if f]
+        if present and len(present) < 6:
+            missing = [rel.rsplit("/", 1)[1] for rel, f in zip(SKY_FACES, faces) if not f]
+            self.fail(f"sky cubemap is missing {', '.join(missing)} - the game would draw a "
+                      f"black sky")
+        elif present:
+            sizes = {Image.open(f).size for f in present}
+            if len(sizes) > 1:
+                self.fail(f"sky cubemap faces differ in size: {sorted(sizes)}")
+            for rel, f in zip(SKY_FACES, faces):
+                img = Image.open(f)
+                if img.size[0] != img.size[1]:
+                    self.fail(f"{rel}: cubemap faces must be square, is {img.size}")
+                if img.mode not in ("RGB", "RGBA"):
+                    self.fail(f"{rel}: must be RGB or RGBA, is {img.mode}")
 
     def misc(self) -> None:
         icon = self.pack / "pack_icon.png"
@@ -596,17 +680,32 @@ def main() -> int:
         c.vanilla(args.vanilla, identifiers)
     if not c.settings_files() and not texture_sets:
         c.fail("the pack has no settings files and no texture sets, so it changes nothing")
+    problems, notes = list(c.problems), list(c.notes)
 
-    for note in c.notes:
+    # Each subpack is its own effective pack: the base with the subpack laid
+    # over it. Report only what a subpack adds, labelled with its folder.
+    for subpack in c.subpacks:
+        if not (args.pack / "subpacks" / subpack).is_dir():
+            continue
+        s = Checker(args.pack, subpack)
+        s.min_engine = c.min_engine
+        s.settings()
+        s.texture_sets()
+        s.environment()
+        problems += [f"[subpack {subpack}] {p}" for p in s.problems if p not in c.problems]
+        notes += [f"[subpack {subpack}] {n}" for n in s.notes if n not in c.notes]
+
+    for note in notes:
         print(f"  note: {note}")
-    if c.problems:
-        print("\n".join(f"  {p}" for p in c.problems))
-        print(f"\n{len(c.problems)} problem(s)")
+    if problems:
+        print("\n".join(f"  {p}" for p in problems))
+        print(f"\n{len(problems)} problem(s)")
         return 1
 
     files = sum(1 for p in args.pack.rglob("*") if p.is_file())
+    extra = f", {len(c.subpacks)} subpacks" if c.subpacks else ""
     print(f"{args.pack}: OK - {files} files, {len(c.settings_files())} settings files, "
-          f"{texture_sets} texture sets, all keys known to the engine")
+          f"{texture_sets} texture sets{extra}, all keys known to the engine")
     return 0
 
 
