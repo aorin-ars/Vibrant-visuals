@@ -42,18 +42,18 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 
 | | Vanilla Vibrant Visuals | Vibrant Unbound |
 |---|---|---|
-| Sunlight | Whitish, fades early in the afternoon | **Neutral white at noon, no yellow cast**, 110 (vanilla 100); gold as the sun gets low, orange to red on the horizon |
+| Sunlight | Whitish, fades early in the afternoon | **Strong, clear white** at noon, 125 (vanilla 100), for a firm step between sun and shade; gold as the sun gets low, orange to red on the horizon |
 | Sky through the day | Muted | Following a reference sequence: early morning (magenta turning orange-gold under deep blue) → morning (warm cream horizon in a blue sky) → noon (deep to pale blue) → late afternoon (gold to orange) → sunset (red-orange horizon under violet) → night (navy) → late night (deep navy). Starry navy nights, never black |
-| Sky | Dull blue-grey | Deep blue zenith, pale clear blue horizon; only a slight glow around the midday sun |
+| Sky | Dull blue-grey | Vivid deep blue zenith, a horizon that stays blue instead of hazing white; a small sun with only a slight glow |
 | Shadows | Grey | Short and crisp at noon (sun 78° up); filled with sky light, blue-grey rather than black; moonlit blue at night (moon 0.7, vanilla 0.4) |
 | Air | Uniform fog in some biomes | **Clear air**: only a thin haze softening the far distance (densest low, thinning with height); a little more in humid forests and swamps |
 | Rain | — | Haze thickens |
-| Water | No waves | Waves, stronger caustics, nearly clear, tinted by the biome's water colour (green swamps, turquoise warm oceans) |
-| Underwater | — | Clear blue-green, ~30 blocks visibility |
+| Water | No waves, the old water pattern | **Clear water**: vanilla's water pattern (white streaks) and its normal map are replaced, leaving only gentle ripples, so the sky and shore reflect cleanly; a hint of the biome's water colour |
+| Underwater | — | The game's own (an earlier underwater fog made the player's shadow show up as a dark shape, so it was removed) |
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
 | Sun and moon | Squares | **Round sun** with a soft corona, **round moon** with craters and all 8 phases |
 | Clouds | Flat blocky slabs | **Cumulus and cirrus painted into the sky** (a skybox), turning gold at sunset. [See below](#sky-clouds-skybox) |
-| Grading | Contrast 1.15 / saturation 1.05 | Contrast 1.14 (moderate) / saturation 1.12 (a little above natural); neutral highlights, only the shadows lean slightly blue; gamma 2.3 for a bright exposure |
+| Grading | Contrast 1.15 / saturation 1.05 | Contrast 1.24 / saturation 1.28 — rich, firm colour clearly apart from stock Vibrant Visuals; shadows lean slightly cool, highlights slightly warm |
 
 ### Why every biome is covered
 
@@ -85,13 +85,14 @@ tap the active Vibrant Unbound → the gear (⚙).
 
 | Option | What it is | The game's own clouds |
 |---|---|---|
-| **Sky: Unbound clouds** (default) | Puffy cumulus with thin high cirrus above | Turn **off** "Render Clouds" in Video Settings, or the blocky clouds draw over them |
+| **Sky: Unbound clouds** (default) | Puffy cumulus with thin high cirrus above | **Hidden automatically** (no flat blocky clouds) |
 | Sky: high clouds only | Just the thin cirrus | Keep them on — for pairing with the shadow-casting vanilla clouds |
 | Sky: no clouds | Nothing painted | Up to you |
 
 Worth knowing:
 
 - Painted clouds **do not move**; they are fixed to the sky
+- Clouds reach down to the horizon; distant ones fade to pale blue inside the images (the game's haze erased the low clouds entirely)
 - Only the Overworld has them; the Nether and the End are unchanged
 - The cloud lighting values follow a published pack that paints clouds the
   same way; this pack's clouds have not been checked in game yet. Reports of
@@ -237,6 +238,7 @@ V=bedrock-samples/resource_pack
 
 python3 tools/generate_bedrock.py --vanilla $V   # settings files (bedrock/ and diagnostic/)
 python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes)
+python3 tools/draw_water.py                      # plain water textures
 python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
 tools/package.sh --vanilla $V                    # distributables, including the relief add-on
 

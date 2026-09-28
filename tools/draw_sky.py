@@ -54,7 +54,9 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "bedrock/textures/environment"
 
 CELL = 128                 # 4x vanilla's 32px cell
-RADIUS = 18.0              # a circle with the area of vanilla's 8/32 square, at 4x
+RADIUS = 18.0              # the moon: a circle with the area of vanilla's 8/32 square, at 4x
+SUN_RADIUS = 10.0          # the sun: about 60 % of vanilla's width. Bloom and the
+                           # atmosphere's own halo already make it read larger in game
 
 
 def grid(size: int):
@@ -76,21 +78,21 @@ def sun_layers():
     """Returns (rgb in 0..1, coverage of the disc, corona strength)."""
     x, y = grid(CELL)
     d = np.hypot(x, y)
-    disc = 1.0 - smoothstep(RADIUS - 0.8, RADIUS + 0.8, d)
+    disc = 1.0 - smoothstep(SUN_RADIUS - 0.8, SUN_RADIUS + 0.8, d)
 
     # Limb darkening: the edge of a real sun is dimmer and warmer than its
     # centre, which is what makes it read as a ball rather than a sticker.
-    mu = np.sqrt(np.clip(1.0 - (d / RADIUS) ** 2, 0.0, 1.0))
+    mu = np.sqrt(np.clip(1.0 - (d / SUN_RADIUS) ** 2, 0.0, 1.0))
     centre = np.array([1.0, 0.99, 0.95])
     limb = np.array([1.0, 0.93, 0.76])
     rgb = limb + (centre - limb) * mu[..., None] ** 0.6
     rgb *= (0.88 + 0.12 * mu)[..., None]
 
-    # Corona: a tight bright ring and a wide faint bloom, faded to nothing
-    # before the edge of the quad so the square never shows.
-    r = np.clip(d - RADIUS, 0.0, None)
-    corona = 0.55 * np.exp(-r / 4.0) + 0.18 * np.exp(-r / 16.0)
-    corona *= 1.0 - smoothstep(CELL * 0.36, CELL * 0.49, d)
+    # Only a thin rim of glow. Vibrant Visuals draws the sun in HDR, so any
+    # semi-transparent corona is multiplied up to full white and bloomed: an
+    # earlier wide corona made the sun look several times its size in game.
+    r = np.clip(d - SUN_RADIUS, 0.0, None)
+    corona = 0.25 * np.exp(-r / 1.5)
     corona *= 1.0 - disc
     return rgb, disc, corona
 
@@ -190,6 +192,12 @@ CLOUD_VARIANTS = {
     "high_clouds": {"coverage": 0.0, "cirrus": 0.85},
 }
 SEED = 7
+HORIZON_HAZE = np.array([0.80, 0.87, 0.97])   # what distant clouds fade toward
+
+# Subpacks whose painted clouds replace the game's own: they also get a fully
+# transparent clouds.png, which removes the flat block clouds without the
+# player having to find the video setting.
+REPLACES_VANILLA_CLOUDS = {"unbound_clouds"}
 
 
 def face_dirs(face: int, n: int) -> np.ndarray:
@@ -310,8 +318,11 @@ def cloud_layer(d: np.ndarray, coverage: float, cirrus: float, seed: int = SEED)
         density, dist = cumulus_density(d, seed)
         depth = np.clip((density - lo) / (hi - lo), 0.0, 1.0)
         a_cu = smoothstep(0.0, 0.08, depth)
-        # Thin out toward the horizon, where the game's haze takes over.
-        a_cu *= smoothstep(0.012, 0.10, d[..., 1]) * np.exp(-dist / 12.0) * above
+        # Clouds run all the way down to the horizon. The game's own haze is
+        # switched off for the skybox (it erased everything below ~20
+        # degrees), so distance is drawn in here: far clouds thin out a
+        # little and fade toward the pale blue of the horizon.
+        a_cu *= smoothstep(0.0, 0.035, d[..., 1]) * (0.55 + 0.45 * np.exp(-dist / 5.0)) * above
 
         # Seen from below, a cumulus shows its flat grey base on the side
         # toward the viewer and its sunlit top on the far side. Look a little
@@ -325,6 +336,8 @@ def cloud_layer(d: np.ndarray, coverage: float, cirrus: float, seed: int = SEED)
         light = 1.0 - 0.34 * core * (1.0 - 0.75 * top) + 0.05 * (1.0 - smoothstep(0.0, 0.15, depth))
         k = np.clip((light - 0.62) / 0.43, 0.0, 1.0)[..., None]
         rgb_cu = base_grey + (white - base_grey) * k
+        haze = (1.0 - np.exp(-dist / 4.0))[..., None] * 0.45
+        rgb_cu = rgb_cu * (1.0 - haze) + HORIZON_HAZE * haze
     else:
         a_cu = np.zeros(d.shape[:-1])
         rgb_cu = np.broadcast_to(white, d.shape).copy()
@@ -370,6 +383,9 @@ def draw_skyboxes() -> None:
         out.mkdir(parents=True, exist_ok=True)
         for face in range(6):
             draw_cloud_face(face, **params).save(out / f"cubemap_{face}.png", optimize=True)
+        if name in REPLACES_VANILLA_CLOUDS:
+            # Same size as vanilla's cloud map (256x256), nothing in it.
+            Image.new("RGBA", (256, 256), (255, 255, 255, 0)).save(out.parent / "clouds.png")
         size = sum((out / f"cubemap_{f}.png").stat().st_size for f in range(6))
         print(f"{out}: 6 faces {FACE_SIZE}x{FACE_SIZE} RGBA, {size / 1e6:.1f} MB")
 

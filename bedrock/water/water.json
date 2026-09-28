@@ -5,20 +5,20 @@
       "identifier": "minecraft:default_water"
     },
     "particle_concentrations": {
-      "chlorophyll": 0.2,
+      "chlorophyll": 0.1,
       "suspended_sediment": 0.0,
-      "cdom": 0.1
+      "cdom": 0.0
     },
     "waves": {
       "enabled": true,
-      "depth": 0.85,
-      "frequency": 1.0,
-      "frequency_scaling": 1.18,
+      "depth": 0.35,
+      "frequency": 1.2,
+      "frequency_scaling": 1.15,
       "mix": 0.25,
-      "octaves": 24,
+      "octaves": 20,
       "pull": 0.3,
-      "shape": 1.4,
-      "speed": 1.6,
+      "shape": 1.3,
+      "speed": 1.2,
       "speed_scaling": 1.04
     },
     "caustics": {
@@ -27,6 +27,6 @@
       "power": 2,
       "scale": 0.5
     },
-    "biome_water_color_contribution": 0.35
+    "biome_water_color_contribution": 0.12
   }
 }

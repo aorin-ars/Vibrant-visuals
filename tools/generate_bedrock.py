@@ -133,19 +133,20 @@ def lerp_rgb(a, b, t):
 #
 # Vanilla's own curve agrees: its sun fades to nothing between 0.282 and 0.292.
 
-# Clear, bright midday rather than midsummer glare: 110 at noon (vanilla 100).
-# The fall-off follows the air the light crosses, not sin(elevation) - the
-# engine already shades surfaces by angle - so low sun stays strong and warm.
+# Strong, clear sun: 125 at noon (vanilla 100), for the bright sunlit faces
+# and deep shade of the reference. The fall-off follows the air the light
+# crosses, not sin(elevation) - the engine already shades surfaces by angle -
+# so low sun stays strong and warm.
 SUN_ILLUMINANCE = mirror({
-    0.000: 110.0,
-    0.080: 109.0,
-    0.150: 102.0,
-    0.200: 88.0,
-    0.230: 70.0,
-    0.250: 50.0,
-    0.265: 32.0,
-    0.275: 18.0,
-    0.282: 5.0,
+    0.000: 125.0,
+    0.080: 124.0,
+    0.150: 116.0,
+    0.200: 100.0,
+    0.230: 80.0,
+    0.250: 57.0,
+    0.265: 36.0,
+    0.275: 20.0,
+    0.282: 5.5,
     0.2915: 0.01,
     0.292: 0.0,
     0.500: 0.0,
@@ -157,8 +158,8 @@ SUN_ILLUMINANCE = mirror({
 # than dusk. Below the horizon the colour only feeds sky scattering, which
 # paints the rose and violet of twilight.
 SUN_COLOR = {
-    0.000: [255, 252, 246],
-    0.150: [255, 250, 242],
+    0.000: [255, 248, 236],
+    0.150: [255, 246, 232],
     0.200: [255, 240, 220],
     0.230: [255, 222, 180],
     0.250: [255, 198, 135],
@@ -176,8 +177,8 @@ SUN_COLOR = {
     0.750: [255, 205, 145],
     0.770: [255, 228, 190],
     0.800: [255, 242, 222],
-    0.845: [255, 250, 242],
-    1.000: [255, 252, 246],
+    0.845: [255, 246, 232],
+    1.000: [255, 248, 236],
 }
 
 # Moonlit nights you can see in, with a clear blue cast - vanilla's is 0.4.
@@ -448,8 +449,8 @@ def flat_atmosphere(identifier, zenith, horizon, rayleigh, *, start=0.8, mie_sta
 
 # Deep vivid blue overhead fading to a pale, clear blue at the horizon - a
 # clean midday gradient, saturated but short of a blue filter.
-DAY_ZENITH = [44, 104, 214]
-DAY_HORIZON = [186, 214, 244]
+DAY_ZENITH = [30, 96, 228]
+DAY_HORIZON = [160, 200, 244]
 
 DESERT_TWILIGHT = {"golden": [255, 196, 128], "sunset": [255, 164, 88],
                    "sunset_deep": [255, 128, 60], "rose": [214, 110, 104]}
@@ -458,25 +459,25 @@ ATMOSPHERICS = {
     "atmospherics.json": overworld_atmosphere(
         "minecraft:default_atmospherics", DAY_ZENITH, DAY_HORIZON),
     "warmish_atmospherics.json": overworld_atmosphere(
-        "minecraft:warmish_atmospherics", [46, 106, 210], [192, 216, 238]),
+        "minecraft:warmish_atmospherics", [34, 98, 224], [166, 204, 240]),
     "hot_atmospherics.json": overworld_atmosphere(
-        "minecraft:hot_atmospherics", [56, 118, 208], [206, 212, 206], twilight=DESERT_TWILIGHT),
+        "minecraft:hot_atmospherics", [48, 112, 220], [184, 206, 226], twilight=DESERT_TWILIGHT),
     "desert_atmospherics.json": overworld_atmosphere(
-        "minecraft:desert_atmospherics", [60, 122, 208], [208, 210, 200], twilight=DESERT_TWILIGHT,
+        "minecraft:desert_atmospherics", [52, 116, 220], [190, 208, 224], twilight=DESERT_TWILIGHT,
         mie_scale=1.15),
     "mesa_atmospherics.json": overworld_atmosphere(
-        "minecraft:mesa_atmospherics", [58, 126, 204], [212, 208, 192], twilight=DESERT_TWILIGHT,
+        "minecraft:mesa_atmospherics", [50, 120, 214], [196, 206, 212], twilight=DESERT_TWILIGHT,
         mie_scale=1.1),
     "ice_plains_spikes_atmospherics.json": overworld_atmosphere(
-        "minecraft:ice_plains_spikes_atmospherics", [120, 160, 215], [204, 218, 234],
+        "minecraft:ice_plains_spikes_atmospherics", [104, 152, 224], [190, 212, 238],
         twilight={"golden": [236, 214, 214], "sunset": [226, 180, 190],
                   "sunset_deep": [206, 160, 200], "rose": [168, 140, 200]}),
     "mangrove_swamp_atmospherics.json": overworld_atmosphere(
-        "minecraft:mangrove_swamp_atmospherics", [96, 142, 196], [190, 206, 214]),
+        "minecraft:mangrove_swamp_atmospherics", [80, 134, 206], [172, 200, 220]),
     "swampland_atmospherics.json": overworld_atmosphere(
-        "minecraft:swampland_atmospherics", [104, 138, 150], [184, 196, 188], mie_scale=0.8),
+        "minecraft:swampland_atmospherics", [96, 134, 160], [172, 190, 190], mie_scale=0.8),
     "roofed_forest_atmospherics.json": overworld_atmosphere(
-        "minecraft:roofed_forest_atmospherics", [44, 98, 196], [180, 204, 232]),
+        "minecraft:roofed_forest_atmospherics", [30, 92, 210], [156, 196, 238]),
     "mushroom_island_atmospherics.json": overworld_atmosphere(
         "minecraft:mushroom_island_atmospherics", [110, 124, 196], [214, 212, 236],
         twilight={"sunset": [255, 120, 150], "sunset_deep": [240, 100, 150],
@@ -509,13 +510,14 @@ ATMOSPHERICS = {
 # Colour grading
 # --------------------------------------------------------------------------
 
-# Vanilla: contrast 1.15, saturation 1.05. Here: moderate contrast so shadows
-# stay readable, saturation a little above natural, and a slightly lifted
-# gamma (2.3 against the standard 2.2) for a bright exposure that still keeps
-# detail in the whites. Highlights are left neutral - direct sun is white -
-# and only the shadows lean a touch toward blue-grey.
-BASE_GRADE = {"contrast": 1.14, "saturation": 1.12, "gain": (1.0, 1.0, 1.0)}
-GAMMA = 2.3
+# Vanilla: contrast 1.15, saturation 1.05. This is deliberately far from it:
+# rich, saturated colour and firm contrast - deep blue sky, strong greens,
+# sunlit faces against deep shade - which is what separates the reference
+# look from stock Vibrant Visuals. Standard gamma: a lifted gamma washed the
+# picture out in game. Shadows lean cool, highlights a touch warm, as in the
+# sunlit reference.
+BASE_GRADE = {"contrast": 1.24, "saturation": 1.28, "gain": (1.0, 1.0, 1.0)}
+GAMMA = 2.2
 
 
 def grading(identifier, *, temperature=6500.0, contrast=None, saturation=None,
@@ -539,7 +541,16 @@ def grading(identifier, *, temperature=6500.0, contrast=None, saturation=None,
                     "enabled": True,
                     "shadowsMax": 0.45,
                     "contrast": [1.0, 1.0, 1.0],
-                    "gain": [0.98, 1.0, 1.03],
+                    "gain": [0.97, 1.0, 1.05],
+                    "gamma": [GAMMA, GAMMA, GAMMA],
+                    "offset": [0.0, 0.0, 0.0],
+                    "saturation": [1.05, 1.05, 1.05],
+                },
+                "highlights": {
+                    "enabled": True,
+                    "highlightsMin": 1.6,
+                    "contrast": [1.0, 1.0, 1.0],
+                    "gain": [1.02, 1.01, 0.98],
                     "gamma": [GAMMA, GAMMA, GAMMA],
                     "offset": [0.0, 0.0, 0.0],
                     "saturation": [1.0, 1.0, 1.0],
@@ -565,34 +576,34 @@ def toward_neutral(kelvin: float, keep: float = 0.4) -> float:
 COLOR_GRADING = {
     "color_grading.json": grading("minecraft:default_color_grading"),
     "cold_color_grading.json": grading(
-        "minecraft:cold_color_grading", temperature=toward_neutral(10000), saturation=1.08),
+        "minecraft:cold_color_grading", temperature=toward_neutral(10000), saturation=1.22),
     "coolish_color_grading.json": grading(
-        "minecraft:coolish_color_grading", temperature=toward_neutral(9000), saturation=1.10),
+        "minecraft:coolish_color_grading", temperature=toward_neutral(9000), saturation=1.25),
     "warmish_color_grading.json": grading(
-        "minecraft:warmish_color_grading", temperature=toward_neutral(4800), saturation=1.13),
+        "minecraft:warmish_color_grading", temperature=toward_neutral(4800), saturation=1.30),
     "hot_color_grading.json": grading(
-        "minecraft:hot_color_grading", temperature=toward_neutral(4000), contrast=1.18),
+        "minecraft:hot_color_grading", temperature=toward_neutral(4000), contrast=1.28),
     "desert_color_grading.json": grading(
-        "minecraft:desert_color_grading", temperature=toward_neutral(4400), saturation=1.10),
+        "minecraft:desert_color_grading", temperature=toward_neutral(4400), saturation=1.24),
     "mesa_color_grading.json": grading(
-        "minecraft:mesa_color_grading", temperature=toward_neutral(4800), saturation=1.12),
+        "minecraft:mesa_color_grading", temperature=toward_neutral(4800), saturation=1.26),
     "ice_plains_spikes_color_grading.json": grading(
         "minecraft:ice_plains_spikes_color_grading", temperature=toward_neutral(11000),
-        saturation=1.06),
+        saturation=1.20),
     "lush_caves_color_grading.json": grading(
-        "minecraft:lush_caves_color_grading", temperature=toward_neutral(4800), contrast=1.18,
-        saturation=1.16),
+        "minecraft:lush_caves_color_grading", temperature=toward_neutral(4800), contrast=1.28,
+        saturation=1.32),
     "mangrove_swamp_color_grading.json": grading(
         "minecraft:mangrove_swamp_color_grading", temperature=toward_neutral(5125)),
     "mushroom_island_color_grading.json": grading(
-        "minecraft:mushroom_island_color_grading", saturation=1.16),
+        "minecraft:mushroom_island_color_grading", saturation=1.32),
     "pale_garden_color_grading.json": grading(
         "minecraft:pale_garden_color_grading", temperature=toward_neutral(9000),
-        saturation=0.85, contrast=1.12),
+        saturation=0.95, contrast=1.18),
     "roofed_forest_color_grading.json": grading(
-        "minecraft:roofed_forest_color_grading", contrast=1.18, saturation=1.10),
+        "minecraft:roofed_forest_color_grading", contrast=1.28, saturation=1.24),
     "swampland_color_grading.json": grading(
-        "minecraft:swampland_color_grading", saturation=1.06),
+        "minecraft:swampland_color_grading", saturation=1.20),
 }
 
 
@@ -604,26 +615,26 @@ WATER = {
     "format_version": WATER_FORMAT,
     "minecraft:water_settings": {
         "description": {"identifier": "minecraft:default_water"},
-        # Nearly clear water: a trace of chlorophyll and organic matter gives
-        # the shallow teal, the biome's own water colour does the rest.
+        # Clear water: only a trace of chlorophyll, for the faint green of
+        # the reference, so the bottom and plants show through.
         "particle_concentrations": {
-            "chlorophyll": 0.2,
+            "chlorophyll": 0.1,
             "suspended_sediment": 0.0,
-            "cdom": 0.1,
+            "cdom": 0.0,
         },
-        # Waves are off in vanilla. Tuned for a lively but not stormy surface:
-        # shallower than vanilla's depth 1, slower, a few octaves fewer so it
-        # stays cheap on phones.
+        # Gentle ripples. With vanilla's normal map gone (tools/draw_water.py)
+        # these are the only thing shaping the surface, and small, slow
+        # waves bend reflections of the sky and shore without breaking them.
         "waves": {
             "enabled": True,
-            "depth": 0.85,
-            "frequency": 1.0,
-            "frequency_scaling": 1.18,
+            "depth": 0.35,
+            "frequency": 1.2,
+            "frequency_scaling": 1.15,
             "mix": 0.25,
-            "octaves": 24,
+            "octaves": 20,
             "pull": 0.3,
-            "shape": 1.4,
-            "speed": 1.6,
+            "shape": 1.3,
+            "speed": 1.2,
             "speed_scaling": 1.04,
         },
         "caustics": {
@@ -632,8 +643,9 @@ WATER = {
             "power": 2,
             "scale": 0.5,
         },
-        # Swamps come out green, warm oceans turquoise, cold ones deep blue.
-        "biome_water_color_contribution": 0.35,
+        # A hint of the biome's water colour (swamps greener, warm oceans
+        # more turquoise) without turning oceans an opaque navy.
+        "biome_water_color_contribution": 0.12,
     },
 }
 
@@ -662,15 +674,15 @@ def haze(density, scattering, g, *, absorption=(0.0, 0.0, 0.0), floor=64.0, ceil
 # light read as passing through air, never enough to grey the picture. Humid
 # and swampy biomes keep a little more, as their character.
 HAZE = {
-    "clear": haze(0.03, (0.030, 0.036, 0.044), 0.72, ceiling=200.0),
+    "clear": haze(0.02, (0.030, 0.036, 0.044), 0.72, ceiling=200.0),
     "humid": haze(0.05, (0.050, 0.056, 0.056), 0.55, ceiling=240.0),
     "swamp": haze(0.06, (0.050, 0.056, 0.050), 0.50, absorption=(0.25, 0.13, 0.19),
                   ceiling=240.0),
-    "temperate": haze(0.035, (0.036, 0.042, 0.050), 0.65, ceiling=220.0),
+    "temperate": haze(0.025, (0.036, 0.042, 0.050), 0.65, ceiling=220.0),
     "roofed": haze(0.05, (0.038, 0.046, 0.042), 0.70, ceiling=220.0),
-    "cold": haze(0.03, (0.030, 0.037, 0.048), 0.70, ceiling=200.0),
+    "cold": haze(0.02, (0.030, 0.037, 0.048), 0.70, ceiling=200.0),
     "ice_spikes": haze(0.035, (0.028, 0.034, 0.046), 0.45, ceiling=200.0),
-    "dry": haze(0.02, (0.036, 0.032, 0.026), 0.78, ceiling=180.0),
+    "dry": haze(0.015, (0.036, 0.032, 0.026), 0.78, ceiling=180.0),
     "mushroom": haze(0.04, (0.042, 0.030, 0.046), 0.40, absorption=(0.042, 0.137, 0.012)),
     # The End is fogged at every height, as in vanilla, but violet.
     "end": haze(0.25, (0.026, 0.016, 0.034), 0.80, floor=320.0, ceiling=320.0),
@@ -714,14 +726,12 @@ def volumetric(style: dict, *, with_defaults: bool) -> dict:
     }
     if with_defaults:
         # Rain thickens the haze (it uses the air coefficients of the biome
-        # you are in). Underwater gets a clear teal-blue with ~30 blocks of
-        # visibility. Biome fogs define neither, so these apply everywhere.
+        # you are in). Biome fogs do not define it, so this applies
+        # everywhere. Underwater is deliberately left to the game: a
+        # volumetric water medium made the player's own shadow show up as a
+        # dark shape in front of the camera when swimming.
         vol["density"]["weather"] = {"max_density": 0.22, "max_density_height": 64.0,
                                      "zero_density_height": 280.0}
-        vol["density"]["water"] = {"max_density": 0.22, "uniform": True}
-        vol["media_coefficients"]["water"] = {"scattering": [0.014, 0.026, 0.034],
-                                              "absorption": [0.12, 0.06, 0.05]}
-        vol["henyey_greenstein_g"]["water"] = {"henyey_greenstein_g": 0.6}
     return vol
 
 
@@ -900,27 +910,29 @@ PBR = {
 # The skyboxes are clouds on a transparent background, so these values only
 # decide how the clouds are lit; the sky behind them is the atmosphere.
 #  - sky light: clouds take on the colour of the sky around them
-#  - directional light: they turn gold and pink at sunset with the sun
-#  - atmospheric scattering: distant clouds fade into the horizon haze
-#  - ambient: a small floor. Lowest late at night, so moonlit clouds stay
-#    dim blue-grey instead of glowing (夜, 深夜); low at dawn, when clouds are
-#    dark silhouettes against the brightening sky (早朝); highest with the
-#    low golden sun of late afternoon (夕方). Keyframes sit at real sun
-#    elevations, as in the lighting tables.
+#  - directional light: they turn gold and pink at sunset with the sun, and
+#    the moon gives them a dim silver at night
+#  - no atmospheric or volumetric scattering: with it on, the game haze
+#    erased every cloud below about 20 degrees, so the sky looked painted
+#    only overhead. Distance haze is drawn into the images instead.
+#  - ambient: a small floor. In game this scale is strong - 0.7 made clouds
+#    glow white at midnight - so night sits near zero and moonlight does the
+#    rest; low at dawn, when clouds are dark silhouettes (早朝). Keyframes
+#    sit at real sun elevations, as in the lighting tables.
 CLOUD_CUBEMAP = {
     "format_version": CUBEMAP_FORMAT,
     "minecraft:cubemap_settings": {
         "description": {"identifier": "minecraft:default_cubemap"},
         "lighting": {
             "ambient_light_illuminance": keyframes({
-                0.000: 2.5, 0.250: 3.0, 0.283: 2.2, 0.300: 1.6, 0.330: 1.1,
-                0.400: 0.7, 0.600: 0.7, 0.670: 1.1, 0.700: 1.0, 0.717: 1.2,
-                0.750: 2.6, 1.000: 2.5,
+                0.000: 2.5, 0.250: 2.5, 0.283: 1.2, 0.300: 0.5, 0.330: 0.12,
+                0.400: 0.04, 0.600: 0.04, 0.670: 0.12, 0.700: 0.3, 0.717: 0.6,
+                0.750: 2.0, 1.000: 2.5,
             }),
             "sky_light_contribution": 1.0,
-            "directional_light_contribution": 0.4,
-            "affected_by_atmospheric_scattering": True,
-            "affected_by_volumetric_scattering": True,
+            "directional_light_contribution": 0.35,
+            "affected_by_atmospheric_scattering": False,
+            "affected_by_volumetric_scattering": False,
         },
     },
 }

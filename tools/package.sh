@@ -28,10 +28,31 @@ mkdir -p build
 python3 tools/check_bedrock.py bedrock ${vanilla:+--vanilla "$vanilla"}
 python3 tools/check_bedrock.py diagnostic >/dev/null
 
+# Bedrock refuses to re-import a pack whose uuid and version it already has:
+# it keeps the installed copy and says nothing useful, so a rebuilt pack with
+# an unchanged version silently never reaches the game. The build therefore
+# stamps the patch number with the commit count, which rises with every
+# commit. The repository copy keeps its hand-set major.minor.
+stage="build/stage/bedrock"
+rm -rf build/stage
+mkdir -p build/stage
+cp -r bedrock "$stage"
+patch="$(git rev-list --count HEAD 2>/dev/null || echo 0)"
+python3 - "$stage/manifest.json" "$patch" <<'EOF'
+import json, sys
+path, patch = sys.argv[1], int(sys.argv[2])
+manifest = json.load(open(path, encoding="utf-8"))
+for entry in [manifest["header"]] + manifest["modules"]:
+    entry["version"] = entry["version"][:2] + [patch]
+open(path, "w", encoding="utf-8").write(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+print("pack version", ".".join(map(str, manifest["header"]["version"])))
+EOF
+
 # Bedrock: manifest.json has to sit at the archive root, so zip from inside.
 bedrock="build/VibrantUnbound-${version}.mcpack"
 rm -f "$bedrock"
-(cd bedrock && zip -r -q "../$bedrock" . -x '.*')
+(cd "$stage" && zip -r -q "../../../$bedrock" . -x '.*')
+rm -rf build/stage
 echo "$bedrock"
 
 if [[ -n "$vanilla" ]]; then
