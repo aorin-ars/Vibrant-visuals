@@ -159,26 +159,28 @@ SUN_ILLUMINANCE = mirror({
 
 # Neutral white from late morning to mid-afternoon - no yellow cast at noon.
 # Warmth only arrives with low sun: gold below ~20 degrees, orange at a few
-# degrees, red-orange on the horizon. Dawn is pinker and turns gold faster
-# than dusk. Below the horizon the colour only feeds sky scattering, which
-# paints the rose and violet of twilight.
+# degrees, deep orange on the horizon - golden rather than red, as in
+# Complementary's sunsets, where the land glows warm instead of dimming.
+# Dawn is pinker and turns gold faster than dusk. Below the horizon the
+# colour only feeds sky scattering, which paints the rose and violet of
+# twilight.
 SUN_COLOR = {
     0.000: [255, 248, 236],
     0.150: [255, 246, 232],
     0.200: [255, 240, 220],
     0.230: [255, 222, 180],
     0.250: [255, 198, 135],
-    0.265: [255, 165, 95],
-    0.275: [255, 130, 65],
-    0.283: [255, 105, 50],
+    0.265: [255, 172, 104],
+    0.275: [255, 146, 84],
+    0.283: [255, 124, 70],
     0.300: [255, 110, 120],
     0.330: [255, 140, 150],
     0.500: [255, 110, 60],
     0.670: [255, 140, 150],
     0.700: [255, 120, 130],
-    0.717: [255, 115, 55],
-    0.725: [255, 140, 70],
-    0.735: [255, 175, 105],
+    0.717: [255, 128, 72],
+    0.725: [255, 150, 86],
+    0.735: [255, 180, 112],
     0.750: [255, 205, 145],
     0.770: [255, 228, 190],
     0.800: [255, 242, 222],
@@ -335,17 +337,19 @@ LIGHTING = {
 # (the scale of Mojang's own documentation example) the zenith and horizon
 # colours below come through as a real gradient: blue overhead, paling toward
 # the horizon, and lit by the sun's colour, so sunsets tint the whole sky.
-RAYLEIGH = mirror({0.0: 1.30, 0.15: 1.30, 0.20: 1.20, 0.25: 1.00, 0.283: 0.85,
-                   0.30: 0.90, 0.33: 1.30, 0.40: 1.60, 0.5: 1.60})
+RAYLEIGH = mirror({0.0: 1.30, 0.15: 1.30, 0.20: 1.20, 0.25: 1.15, 0.283: 1.15,
+                   0.30: 1.05, 0.33: 1.30, 0.40: 1.60, 0.5: 1.60})
 
 # The glow around the sun. sun_glare_shape is the tightness of that lobe:
 # vanilla's ~0.05 spreads it over half the sky as a milky haze; values of a
 # few units gather it into a bright halo around the sun, as in
-# Complementary - tight at noon, spreading into a big warm glow as the sun
-# sets. The same lobe shapes the moon's glow at night.
-SUN_MIE = mirror({0.0: 0.45, 0.15: 0.50, 0.20: 0.65, 0.25: 1.00, 0.283: 1.50,
+# Complementary - small at noon (at 8 and twice this strength the first
+# in-game test showed a large white blotch round the sun), spreading into a
+# big warm glow as the sun sets. The same lobe shapes the moon's glow at
+# night.
+SUN_MIE = mirror({0.0: 0.22, 0.15: 0.26, 0.20: 0.40, 0.25: 0.90, 0.283: 1.50,
                   0.30: 0.80, 0.34: 0.0, 0.5: 0.0})
-SUN_GLARE = mirror({0.0: 8.0, 0.15: 7.0, 0.20: 5.5, 0.25: 4.0, 0.283: 3.0,
+SUN_GLARE = mirror({0.0: 12.0, 0.15: 10.0, 0.20: 7.0, 0.25: 4.5, 0.283: 3.2,
                     0.30: 3.5, 0.34: 5.0, 0.5: 5.0})
 MOON_MIE = {0.0: 0.0, 0.27: 0.0, 0.33: 0.40, 0.67: 0.40, 0.73: 0.0, 1.0: 0.0}
 
@@ -366,8 +370,8 @@ DEEP_NIGHT_HORIZON = [24, 36, 70]
 
 # Complementary's sunset: the whole sky turns pastel - lavender overhead,
 # peach to coral-pink at the horizon, rose and violet after the sun is gone.
-DUSK_ZENITH = (120, 102, 164)
-DAWN_ZENITH = (96, 104, 180)
+DUSK_ZENITH = (126, 110, 184)
+DAWN_ZENITH = (104, 116, 192)
 
 
 def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
@@ -384,14 +388,14 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
     t = twilight or {}
     day_zenith, day_horizon = list(day_zenith), list(day_horizon)
     dusk_zenith, dawn_zenith = list(dusk_zenith), list(dawn_zenith)
-    golden = t.get("golden", [255, 190, 130])
-    morning = t.get("morning", [252, 220, 184])
+    golden = t.get("golden", [255, 196, 128])
+    morning = t.get("morning", [255, 222, 186])
     zenith = {
         0.000: day_zenith,
         0.200: lerp_rgb(day_zenith, dusk_zenith, 0.1),
         0.250: lerp_rgb(day_zenith, dusk_zenith, 0.55),
         0.283: dusk_zenith,
-        0.300: t.get("zenith_dusk", [64, 56, 124]),
+        0.300: t.get("zenith_dusk", [70, 62, 138]),
         0.330: NIGHT_ZENITH,
         0.400: DEEP_NIGHT_ZENITH,
         0.600: DEEP_NIGHT_ZENITH,
@@ -408,20 +412,20 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
         0.210: lerp_rgb(day_horizon, golden, 0.35),
         0.235: lerp_rgb(day_horizon, golden, 0.7),
         0.250: golden,
-        0.265: t.get("sunset", [255, 160, 116]),
-        0.278: t.get("sunset_deep", [255, 132, 104]),
-        0.290: t.get("afterglow", [236, 112, 124]),
-        0.300: t.get("rose", [188, 100, 150]),
-        0.315: t.get("violet", [118, 88, 162]),
+        0.265: t.get("sunset", [255, 166, 112]),
+        0.278: t.get("sunset_deep", [255, 136, 100]),
+        0.290: t.get("afterglow", [246, 116, 120]),
+        0.300: t.get("rose", [200, 104, 150]),
+        0.315: t.get("violet", [128, 92, 170]),
         0.340: NIGHT_HORIZON,
         0.400: DEEP_NIGHT_HORIZON,
         0.600: DEEP_NIGHT_HORIZON,
         0.660: NIGHT_HORIZON,
         0.685: t.get("violet_dawn", [100, 88, 160]),
-        0.700: t.get("magenta_dawn", [180, 104, 146]),
-        0.712: t.get("sunrise", [250, 140, 110]),
-        0.720: t.get("sunrise_gold", [255, 170, 110]),
-        0.735: lerp_rgb(t.get("sunrise_gold", [255, 170, 110]), morning, 0.5),
+        0.700: t.get("magenta_dawn", [184, 108, 152]),
+        0.712: t.get("sunrise", [255, 146, 112]),
+        0.720: t.get("sunrise_gold", [255, 178, 116]),
+        0.735: lerp_rgb(t.get("sunrise_gold", [255, 178, 116]), morning, 0.5),
         0.750: morning,
         0.770: lerp_rgb(morning, day_horizon, 0.6),
         0.800: lerp_rgb(morning, day_horizon, 0.9),
@@ -480,10 +484,10 @@ def flat_atmosphere(identifier, zenith, horizon, rayleigh, *, start=0.8, mie_sta
     }
 
 
-# Complementary's clear-day sky: a clean mid blue overhead fading to a pale,
-# almost white blue at the horizon, with a bright halo around the sun.
+# Complementary's clear-day sky: a clean mid blue overhead fading to a pale
+# blue at the horizon, with a small bright halo around the sun.
 DAY_ZENITH = [76, 140, 232]
-DAY_HORIZON = [190, 216, 244]
+DAY_HORIZON = [180, 210, 244]
 
 DESERT_TWILIGHT = {"golden": [255, 204, 146], "sunset": [255, 176, 112],
                    "sunset_deep": [255, 146, 96], "rose": [212, 112, 128]}
@@ -546,11 +550,12 @@ ATMOSPHERICS = {
 # Vanilla: contrast 1.15, saturation 1.05 through the "generic" curve. The
 # ACES curve (TONE_MAP) already deepens contrast and enriches midtone colour,
 # so the grade on top of it is milder than a "generic" one would need: a
-# touch more contrast and saturation for Complementary's vivid greens and
-# blues, and a little gain because ACES sits darker in the midtones. Standard
-# gamma: a lifted gamma washed the picture out in game. Shadows lean cool,
-# highlights a touch warm, as in the sunlit reference.
-BASE_GRADE = {"contrast": 1.10, "saturation": 1.16, "gain": (1.08, 1.08, 1.08)}
+# touch more contrast and saturation for Complementary's deep greens and
+# blues. Almost no extra gain: at 1.08 sunlit grass rolled off into pastel
+# in the first in-game test. Standard gamma: a lifted gamma washed the
+# picture out in game. Shadows lean cool, highlights a touch warm, as in the
+# sunlit reference.
+BASE_GRADE = {"contrast": 1.12, "saturation": 1.20, "gain": (1.02, 1.02, 1.02)}
 GAMMA = 2.2
 
 
@@ -649,10 +654,10 @@ WATER = {
     "format_version": WATER_FORMAT,
     "minecraft:water_settings": {
         "description": {"identifier": "minecraft:default_water"},
-        # Clear water: only a trace of chlorophyll, for the faint green of
-        # the reference, so the bottom and plants show through.
+        # Clear water: nothing in it but water, so the bottom and plants
+        # show through and only depth tints it blue.
         "particle_concentrations": {
-            "chlorophyll": 0.1,
+            "chlorophyll": 0.0,
             "suspended_sediment": 0.0,
             "cdom": 0.0,
         },
@@ -698,10 +703,10 @@ def haze(density, scattering, g, *, absorption=0.0, floor=62.0, ceiling=170.0):
     haze and light shafts fall into valleys and caves.
 
     How thick it looks goes roughly with density x (scattering + absorption)
-    per block: 0.09 x 0.048 is about 0.0043, a haze that takes a quarter of
-    the colour out of terrain 60 blocks away at sea level and half at 150 -
-    the atmospheric depth of Complementary's landscapes. Vanilla has
-    0.05 x 0.06 in a few biomes, evenly at every height, and none elsewhere.
+    per block: 0.045 x 0.049 is about 0.0022, a haze that takes a quarter of
+    the colour out of terrain 130 blocks away at sea level - the clear but
+    deep air of Complementary's landscapes. Vanilla has 0.05 x 0.06 in a few
+    biomes, evenly at every height, and none elsewhere.
 
     Vibrant Visuals uses only the brightness of an absorption colour, so it
     is given as one number. The colour of the haze comes from scattering:
@@ -715,24 +720,27 @@ def haze(density, scattering, g, *, absorption=0.0, floor=62.0, ceiling=170.0):
     }
 
 
-# Complementary's air: a visible haze that softens distance to a pale blue,
-# glows gold toward a low sun and faint blue under the moon, fills valleys
-# and caves, and turns into light shafts where the light falls through
-# leaves or cave openings. g about 0.5 lights it all around the sky, not only
-# toward the sun (vanilla's 0.75 left it invisible looking away). Humid
-# forests and swamps are mistier, deserts clearer.
+# Complementary's air: a haze that softens distance to a clear blue, glows
+# gold toward a low sun and faint blue under the moon, fills valleys and
+# caves, and turns into light shafts where the light falls through leaves or
+# cave openings. g about 0.5 lights it all around the sky, not only toward
+# the sun (vanilla's 0.75 left it invisible looking away). Blue scatters
+# about twice as much as red, as in real air, so distance turns blue rather
+# than milky white - at twice this density the first in-game test washed
+# nearby hills out to white. Humid forests and swamps are mistier, deserts
+# clearer.
 HAZE = {
-    "clear": haze(0.09, (0.040, 0.047, 0.058), 0.50),
-    "humid": haze(0.12, (0.048, 0.054, 0.056), 0.45, ceiling=190.0),
+    "clear": haze(0.045, (0.032, 0.046, 0.068), 0.50),
+    "humid": haze(0.08, (0.042, 0.052, 0.062), 0.45, ceiling=190.0),
     "swamp": haze(0.10, (0.046, 0.054, 0.044), 0.40, absorption=0.06, ceiling=150.0),
-    "temperate": haze(0.09, (0.040, 0.047, 0.056), 0.50, ceiling=180.0),
-    "roofed": haze(0.12, (0.042, 0.050, 0.046), 0.55),
-    "cold": haze(0.08, (0.040, 0.048, 0.062), 0.50),
-    "ice_spikes": haze(0.10, (0.042, 0.050, 0.064), 0.40),
-    "dry": haze(0.06, (0.050, 0.045, 0.036), 0.45, ceiling=150.0),
-    # Complementary's savanna: bright, warm haze over the whole distance.
-    "savanna": haze(0.10, (0.050, 0.047, 0.040), 0.45),
-    "mushroom": haze(0.08, (0.050, 0.036, 0.052), 0.40, absorption=0.02, ceiling=160.0),
+    "temperate": haze(0.05, (0.032, 0.046, 0.066), 0.50, ceiling=180.0),
+    "roofed": haze(0.09, (0.040, 0.050, 0.052), 0.55),
+    "cold": haze(0.045, (0.034, 0.047, 0.070), 0.50),
+    "ice_spikes": haze(0.07, (0.038, 0.050, 0.070), 0.40),
+    "dry": haze(0.04, (0.046, 0.046, 0.044), 0.45, ceiling=150.0),
+    # Complementary's savanna: a warmer, brighter haze over the distance.
+    "savanna": haze(0.07, (0.048, 0.048, 0.046), 0.45),
+    "mushroom": haze(0.06, (0.050, 0.036, 0.052), 0.40, absorption=0.02, ceiling=160.0),
     # The End is fogged at every height, as in vanilla, but violet.
     "end": haze(0.25, (0.026, 0.016, 0.034), 0.80, floor=320.0, ceiling=320.0),
     # No air fog at all, which is what vanilla's Nether has.
@@ -995,12 +1003,12 @@ CLOUD_CUBEMAP = {
         "description": {"identifier": "minecraft:default_cubemap"},
         "lighting": {
             "ambient_light_illuminance": keyframes({
-                0.000: 2.5, 0.250: 2.5, 0.283: 1.2, 0.300: 0.5, 0.330: 0.12,
+                0.000: 2.0, 0.250: 1.8, 0.283: 1.1, 0.300: 0.5, 0.330: 0.12,
                 0.400: 0.04, 0.600: 0.04, 0.670: 0.12, 0.700: 0.3, 0.717: 0.6,
-                0.750: 2.0, 1.000: 2.5,
+                0.750: 1.6, 1.000: 2.0,
             }),
             "sky_light_contribution": 1.0,
-            "directional_light_contribution": 0.35,
+            "directional_light_contribution": 0.45,
             "affected_by_atmospheric_scattering": False,
             "affected_by_volumetric_scattering": False,
         },

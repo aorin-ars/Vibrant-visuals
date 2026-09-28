@@ -44,18 +44,18 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 |---|---|---|
 | Picture | "generic" tone mapping | **ACES (filmic) tone mapping**: firm shade, rich midtones, bright skies and sunsets rolling smoothly into white. A different look from stock Vibrant Visuals at the root |
 | Sunlight | Whitish, fades early in the afternoon | **Strong, clear white** at noon, 125 (vanilla 100); gold as the sun gets low, orange to red on the horizon |
-| Sky through the day | Muted | Early morning (magenta turning orange-gold) → morning (warm cream horizon in a blue sky) → noon (blue sky paling to an almost white horizon) → late afternoon (gold to peach horizon) → sunset (lavender above a coral-pink horizon — the whole sky goes pastel, like Complementary's sunsets) → night (navy) → late night (deep navy). Never black |
-| Sky | Nearly one even blue (Rayleigh 10) | Rayleigh down to 1.3, so the sky is a real gradient from the blue zenith to a pale horizon; a **bright halo gathered around the sun** instead of vanilla's milky haze over half the sky; a faint halo around the moon at night |
+| Sky through the day | Muted | A low sun lights the land gold to orange instead of turning red and dim. Early morning (magenta turning orange-gold) → morning (warm cream horizon in a blue sky) → noon (blue sky paling to an almost white horizon) → late afternoon (gold to peach horizon) → sunset (lavender above a coral-pink horizon — the whole sky goes pastel, like Complementary's sunsets) → night (navy) → late night (deep navy). Never black |
+| Sky | Nearly one even blue (Rayleigh 10) | Rayleigh down to 1.3, so the sky is a real gradient from the blue zenith to a pale horizon; a **small halo gathered around the sun** instead of vanilla's milky haze over half the sky; a faint halo around the moon at night |
 | Shadows | Grey (full sky light) | Sky light cut to 60 %, for a clear step between sun and shade; shade stays blue-grey, never black. Short shadows (noon sun 78° up). More sky light at sunset, so the coloured sky fills the shade |
 | Night | Moonlight 0.4 | **Moonlight 1.0**, blue: moonlit faces stand out and the valley haze glows blue |
-| Air | Uniform fog in some biomes | **Air you can see**: distant terrain fades to pale blue, haze gathers in valleys and caves (densest low, gone around y=170), glows gold toward a low sun and blue under the moon, and falls in light shafts through leaves and cave openings. Mistier in humid forests, swamps and savannas, clearer in deserts; none in the Nether |
+| Air | Uniform fog in some biomes | **Clear air with depth**: distant terrain fades to blue rather than milky white, haze gathers in valleys and caves (densest low, gone around y=170), glows gold toward a low sun and blue under the moon, and falls in light shafts through leaves and cave openings. Mistier in humid forests, swamps and savannas, clearer in deserts; none in the Nether |
 | Rain | — | Haze thickens |
-| Water | No waves, the old water pattern | **Clear water**: vanilla's water pattern (white streaks) and its normal map are replaced, leaving only gentle ripples, so the sky and shore reflect cleanly; a hint of the biome's water colour |
+| Water | No waves, the old water pattern | **Clear water**: nothing in it but water (no plankton, no silt) and a more transparent surface than vanilla's, so the bottom and water plants show through; vanilla's water pattern (white streaks) and its normal map are replaced, leaving only gentle ripples, so the sky and shore reflect cleanly; a hint of the biome's water colour |
 | Underwater | — | The game's own (an earlier underwater fog made the player's shadow show up as a dark shape, so it was removed) |
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
 | Sun and moon | Squares | **Small round sun** (its halo comes from the sky's scattering), **round moon** with craters and all 8 phases |
-| Clouds | Flat blocky slabs | **Cumulus and cirrus painted into the sky** (a skybox), turning gold at sunset. [See below](#sky-clouds-skybox) |
-| Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.10 / saturation 1.16 / gain 1.08, for Complementary's vivid greens and blues; shadows lean slightly cool, highlights slightly warm |
+| Clouds | Flat blocky slabs | **Cotton-wool cumulus painted into the sky** (a skybox): bright white tops, blue-grey shaded undersides, with thin cirrus above; tinted by the sun at sunset. [See below](#sky-clouds-skybox) |
+| Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.12 / saturation 1.20 / gain 1.02, for Complementary's deep greens and blues; shadows lean slightly cool, highlights slightly warm |
 
 ### Why every biome is covered
 
@@ -87,24 +87,37 @@ tap the active Vibrant Unbound → the gear (⚙).
 
 | Option | What it is | The game's own clouds |
 |---|---|---|
-| **Sky: Unbound clouds** (default) | Puffy cumulus with thin high cirrus above | **Hidden automatically** (no flat blocky clouds) |
+| **Sky: Unbound clouds** (default) | Cotton-wool cumulus with thin high cirrus above | **Hidden automatically** (no flat blocky clouds) |
 | Sky: high clouds only | Just the thin cirrus | Keep them on — for pairing with the shadow-casting vanilla clouds |
 | Sky: no clouds | Nothing painted | Up to you |
 
 Worth knowing:
 
 - Painted clouds **do not move**; they are fixed to the sky
-- Clouds reach down to the horizon; distant ones fade to pale blue inside the images (the game's haze erased the low clouds entirely)
+- Distant clouds fade to pale blue inside the images (the game's haze erased the low clouds entirely)
 - Only the Overworld has them; the Nether and the End are unchanged
-- The cloud lighting values follow a published pack that paints clouds the
-  same way; this pack's clouds have not been checked in game yet. Reports of
-  how they look at noon, sunset and night will let them be tuned
 
 The face order (0–3 the sides from left to right, 4 the top, 5 the bottom) was
-confirmed by matching the edges between faces of several working skyboxes. The
-clouds are separate fair-weather cumulus heaps on a layer that curves with the
-planet, projected along each view direction, so they are large overhead, crowd
-together toward the horizon, and join across the image edges.
+confirmed by matching the edges between faces of several working skyboxes.
+
+**The game does not wrap the six images round the player as a cube.** In an
+in-game screenshot the edges of the top image show as straight lines meeting
+at a right angle; working the field of view out from their vanishing points,
+the top image covered everything above about 21° (15° at its corners), where
+a cube's top would stop at 45° (35°). That is a flat box, 0.38 times as tall
+as it is wide, and the clouds are painted for that box so they keep their
+proper size and spacing in game (`BOX_HEIGHT` in `tools/draw_sky.py`).
+
+In the same screenshot none of the clouds in the upper halves of the side
+images appeared above the horizon, which fits the game showing the sides
+upside down. The side images are therefore painted **mirror symmetric** about
+the horizon: upright or flipped, the same clouds show above it.
+
+The clouds themselves are fair-weather cumulus heaps — flat bases, rounded,
+billowing tops — ray-marched pixel by pixel: the lower a point sits in its
+heap, the more cloud above shades it, so tops are bright white and undersides
+blue-grey, like cotton wool. No sun direction is baked in (the real one
+moves); the game adds the sun's colour.
 
 ## What a resource pack cannot do
 
@@ -202,6 +215,7 @@ JSON directly works too, but regenerating overwrites it).
 | Block light colours | `LIGHT_COLORS` |
 | Cloud brightness and sunset tint | `ambient_light_illuminance` (brightness) and `directional_light_contribution` (how much the sun colours them) in `CLOUD_CUBEMAP` |
 | Amount of cloud | `coverage` (share of the sky) in `CLOUD_VARIANTS`, in `tools/draw_sky.py` |
+| How the game places the sky images (if clouds sit wrong) | `BOX_HEIGHT` (box height ÷ width) and `MIRROR_SIDES`, in `tools/draw_sky.py` |
 | Tilt of the sun's path | `ORBITAL_OFFSET` (degrees) |
 
 ```bash

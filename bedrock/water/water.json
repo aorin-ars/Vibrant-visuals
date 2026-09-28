@@ -5,7 +5,7 @@
       "identifier": "minecraft:default_water"
     },
     "particle_concentrations": {
-      "chlorophyll": 0.1,
+      "chlorophyll": 0.0,
       "suspended_sediment": 0.0,
       "cdom": 0.0
     },

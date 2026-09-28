@@ -7,10 +7,10 @@
     "color_grading": {
       "midtones": {
         "contrast": [1.14, 1.14, 1.14],
-        "gain": [1.08, 1.08, 1.08],
+        "gain": [1.02, 1.02, 1.02],
         "gamma": [2.2, 2.2, 2.2],
         "offset": [0.0, 0.0, 0.0],
-        "saturation": [1.16, 1.16, 1.16]
+        "saturation": [1.2, 1.2, 1.2]
       },
       "shadows": {
         "enabled": true,

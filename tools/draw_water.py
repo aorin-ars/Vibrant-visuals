@@ -10,7 +10,8 @@ noise - the "vanilla" look, and the reason reflections of the sky and
 shore do not read.
 
 These replace it with:
-  - a flat grey colour (the biome's water colour tints it, as vanilla's does)
+  - a flat grey colour (the biome's water colour tints it, as vanilla's does),
+    more transparent than vanilla's
   - smooth metalness/emissive/roughness/subsurface, slightly glossier than
     vanilla so reflections stay clean
   - no normal map, so the surface shape comes only from the wave simulation
@@ -33,10 +34,12 @@ from PIL import Image
 OUT = Path(__file__).resolve().parent.parent / "bedrock/textures/blocks"
 
 # name -> (width, height, alpha). Vanilla: still water 16x512 (32 frames) at
-# alpha 240, flowing water 32x1024 at alpha 255.
+# alpha 240, flowing water 32x1024 at alpha 255. Lower here, so the surface
+# layer lets more of the water below show through: clear water where the
+# bottom and plants stay visible, as in Complementary.
 WATER = {
-    "water_still_grey": (16, 512, 240),
-    "water_flow_grey": (32, 1024, 255),
+    "water_still_grey": (16, 512, 170),
+    "water_flow_grey": (32, 1024, 190),
 }
 GREY = 176                  # vanilla's pattern averages ~165; flat and a touch lighter
 MERS = (18, 0, 12, 0)       # vanilla: metalness 18, roughness ~15-22; a little smoother

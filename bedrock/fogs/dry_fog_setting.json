@@ -51,14 +51,14 @@
     "volumetric": {
       "density": {
         "air": {
-          "max_density": 0.06,
+          "max_density": 0.04,
           "max_density_height": 62.0,
           "zero_density_height": 150.0
         }
       },
       "media_coefficients": {
         "air": {
-          "scattering": [0.05, 0.045, 0.036],
+          "scattering": [0.046, 0.046, 0.044],
           "absorption": [0.0, 0.0, 0.0]
         }
       },
