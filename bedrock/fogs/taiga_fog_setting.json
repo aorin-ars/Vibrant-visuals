@@ -27,7 +27,7 @@
     "volumetric": {
       "density": {
         "air": {
-          "max_density": 0.05,
+          "max_density": 0.06,
           "max_density_height": 62.0,
           "zero_density_height": 180.0
         }
@@ -40,7 +40,7 @@
       },
       "henyey_greenstein_g": {
         "air": {
-          "henyey_greenstein_g": 0.5
+          "henyey_greenstein_g": 0.32
         }
       }
     }

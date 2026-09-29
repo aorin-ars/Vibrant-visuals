@@ -707,9 +707,9 @@ def haze(density, scattering, g, *, absorption=0.0, floor=62.0, ceiling=170.0):
     haze and light shafts fall into valleys and caves.
 
     How thick it looks goes roughly with density x (scattering + absorption)
-    per block: 0.045 x 0.049 is about 0.0022, a haze that takes a quarter of
-    the colour out of terrain 130 blocks away at sea level - the clear but
-    deep air of Complementary's landscapes. Vanilla has 0.05 x 0.06 in a few
+    per block: 0.055 x 0.049 is about 0.0027, a haze that takes a quarter of
+    the colour out of terrain about 100 blocks away at sea level - the clear
+    but deep air of Complementary's landscapes. Vanilla has 0.05 x 0.06 in a few
     biomes, evenly at every height, and none elsewhere.
 
     Vibrant Visuals uses only the brightness of an absorption colour, so it
@@ -727,24 +727,32 @@ def haze(density, scattering, g, *, absorption=0.0, floor=62.0, ceiling=170.0):
 # Complementary's air: a haze that softens distance to a clear blue, glows
 # gold toward a low sun and faint blue under the moon, fills valleys and
 # caves, and turns into light shafts where the light falls through leaves or
-# cave openings. g about 0.5 lights it all around the sky, not only toward
-# the sun (vanilla's 0.75 left it invisible looking away). Blue scatters
-# about twice as much as red, as in real air, so distance turns blue rather
-# than milky white - at twice this density the first in-game test washed
-# nearby hills out to white. Humid forests and swamps are mistier, deserts
-# clearer.
+# cave openings. Blue scatters about twice as much as red, as in real air, so
+# distance turns blue rather than milky white. Humid forests and swamps are
+# mistier, deserts clearer.
+#
+# g (the last number) decides from where the shafts can be seen. Light
+# shafts are sunlit air next to air in shadow; how bright the sunlit part
+# looks depends on the angle to the sun. At g 0.5 air seen at right angles
+# to the sun is a tenth as bright as air toward it, so shafts through leaves
+# vanished as soon as the sun was out of view. At 0.3 it is a third - the
+# shafts stay visible whenever the light's direction lets them form, not
+# only when looking into the sun - while the white glare toward the sun
+# halves. The densities are a little higher than before to keep the shafts
+# strong; the first in-game test, at 0.09 and g 0.5, washed nearby hills
+# out to white looking toward the sun.
 HAZE = {
-    "clear": haze(0.045, (0.032, 0.046, 0.068), 0.50),
-    "humid": haze(0.08, (0.042, 0.052, 0.062), 0.45, ceiling=190.0),
-    "swamp": haze(0.10, (0.046, 0.054, 0.044), 0.40, absorption=0.06, ceiling=150.0),
-    "temperate": haze(0.05, (0.032, 0.046, 0.066), 0.50, ceiling=180.0),
-    "roofed": haze(0.09, (0.040, 0.050, 0.052), 0.55),
-    "cold": haze(0.045, (0.034, 0.047, 0.070), 0.50),
-    "ice_spikes": haze(0.07, (0.038, 0.050, 0.070), 0.40),
-    "dry": haze(0.04, (0.046, 0.046, 0.044), 0.45, ceiling=150.0),
+    "clear": haze(0.055, (0.032, 0.046, 0.068), 0.30),
+    "humid": haze(0.09, (0.042, 0.052, 0.062), 0.30, ceiling=190.0),
+    "swamp": haze(0.10, (0.046, 0.054, 0.044), 0.30, absorption=0.06, ceiling=150.0),
+    "temperate": haze(0.06, (0.032, 0.046, 0.066), 0.32, ceiling=180.0),
+    "roofed": haze(0.11, (0.040, 0.050, 0.052), 0.35),
+    "cold": haze(0.05, (0.034, 0.047, 0.070), 0.30),
+    "ice_spikes": haze(0.07, (0.038, 0.050, 0.070), 0.30),
+    "dry": haze(0.045, (0.046, 0.046, 0.044), 0.30, ceiling=150.0),
     # Complementary's savanna: a warmer, brighter haze over the distance.
-    "savanna": haze(0.07, (0.048, 0.048, 0.046), 0.45),
-    "mushroom": haze(0.06, (0.050, 0.036, 0.052), 0.40, absorption=0.02, ceiling=160.0),
+    "savanna": haze(0.07, (0.048, 0.048, 0.046), 0.30),
+    "mushroom": haze(0.06, (0.050, 0.036, 0.052), 0.30, absorption=0.02, ceiling=160.0),
     # The End is fogged at every height, as in vanilla, but violet.
     "end": haze(0.25, (0.026, 0.016, 0.034), 0.80, floor=320.0, ceiling=320.0),
     # No air fog at all, which is what vanilla's Nether has.

@@ -597,6 +597,33 @@ class Checker:
                     self.fail(f"{rel}: height map must be single-channel, {image.name} is {mode}")
         return count
 
+    PARTICLE_MATERIALS = {"particles_alpha", "particles_blend", "particles_add", "particles_opaque"}
+    FACING_MODES = {"rotate_xyz", "rotate_y", "lookat_xyz", "lookat_y", "lookat_direction",
+                    "direction_x", "direction_y", "direction_z", "emitter_transform_xy",
+                    "emitter_transform_xz", "emitter_transform_yz"}
+
+    def particles(self) -> None:
+        """A particle whose texture is missing renders as the purple and
+        black checkerboard; an unknown material or facing mode is dropped."""
+        for path in sorted((self.pack / "particles").glob("*.json")):
+            rel = path.relative_to(self.pack).as_posix()
+            effect = json.loads(path.read_text()).get("particle_effect", {})
+            desc = effect.get("description", {})
+            if ":" not in str(desc.get("identifier", "")):
+                self.fail(f"{rel}: description.identifier needs a namespace")
+            render = desc.get("basic_render_parameters", {})
+            if render.get("material") not in self.PARTICLE_MATERIALS:
+                self.fail(f"{rel}: material {render.get('material')!r} is not one of "
+                          f"{sorted(self.PARTICLE_MATERIALS)}")
+            texture = render.get("texture", "")
+            if texture.startswith("textures/") and not texture.startswith("textures/particle/particles") \
+                    and not any((self.pack / (texture + ext)).is_file() for ext in (".png", ".tga")):
+                self.fail(f"{rel}: texture {texture} is not in this pack")
+            billboard = effect.get("components", {}).get("minecraft:particle_appearance_billboard")
+            if billboard and billboard.get("facing_camera_mode") not in self.FACING_MODES:
+                self.fail(f"{rel}: facing_camera_mode {billboard.get('facing_camera_mode')!r} is not "
+                          f"a known mode")
+
     def environment(self) -> None:
         for rel, (mode, aspect) in ENVIRONMENT_TEXTURES.items():
             path = self.resolve(rel)
@@ -674,6 +701,7 @@ def main() -> int:
     c.manifest()
     identifiers = c.settings()
     texture_sets = c.texture_sets()
+    c.particles()
     c.environment()
     c.misc()
     if args.vanilla:
