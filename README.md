@@ -31,9 +31,18 @@ Vibrant Visuals で再現するリソースパックです。
 2. **設定 → ビデオ → Vibrant Visuals** を **オン**にする
 3. ワールドの **設定 → リソースパック** でこのパックを有効にする
 
-**追加パック（任意）**: `VibrantUnbound-Relief-*.mcpack` を一緒に有効にすると、
-石・木材・鉱石などのブロックに凹凸が付きます（Complementary の「Generated Normals」相当）。
-バニラのテクスチャから作るため、リポジトリには入っていません（[作り方](#開発)）。
+**PBR 追加パック（任意）**: `VibrantUnbound-PBR-*.mcpack` を Vibrant Unbound の**上**に置いて
+一緒に有効にすると、ブロックの質感が変わります。
+
+| | 中身 |
+|---|---|
+| 凹凸 | 不透明なブロック 677 種に凹凸（ハイトマップ）。丸石・鉱石・レンガは強く、木材は中くらい、羊毛やコンクリートはほぼ平ら（Complementary の「Generated Normals」相当）。すき間は少しざらつかせ、出っ張りとの質感の差を付ける |
+| 発光 | グロウストーン・シーランタン・フロッグライト・シュルームライト・マグマなど 40 種を、光源らしく強く光らせる（バニラは例えばグロウストーンで 255 中 41 と弱い）。**鉱石の鉱物部分がほんのり光る**（ダイヤ・エメラルド・ラピス・レッドストーン・金・鉄・銅・ネザー金・クォーツ。石炭は光らない）＝ Complementary の「Glowing Ores」 |
+| つや | 氷・金属ブロック・宝石ブロック・黒曜石・彩釉テラコッタ・磨かれた石を滑らかにして、映り込みが出るように。宝石の鉱石は鉱物部分だけつやつや |
+
+Vibrant Visuals では、ブロックの質感（テクスチャセット）が参照する画像は**同じパックの中に**
+なければならないため、この追加パックにはバニラのブロックの画像が入ります。そのため
+リポジトリには入れず、手元のバニラのファイルから作っています（[作り方](#開発)）。
 **個人利用のみ**で、再配布はしないでください。
 
 手動で入れる場合は、zip を展開して `com.mojang/resource_packs/` に置いてください。
@@ -254,7 +263,7 @@ python3 tools/generate_bedrock.py --vanilla $V   # 設定ファイルを生成�
 python3 tools/draw_sky.py                        # 丸い太陽と月、雲のスカイボックスを描く（数分かかる）
 python3 tools/draw_water.py                      # 模様のない水のテクスチャ
 python3 tools/check_bedrock.py --vanilla $V      # 統合版パックの検証（キー名・値の範囲・全バイオーム網羅）
-tools/package.sh --vanilla $V                    # 配布ファイルを生成（凹凸追加パックを含む）
+tools/package.sh --vanilla $V                    # 配布ファイルを生成（PBR 追加パックを含む）
 
 python3 tools/validate_shaders.py     # Java版 GLSL を全52ステージ×4構成でコンパイル
 python3 tools/check_options.py        # Java版の設定項目の整合性
@@ -266,5 +275,5 @@ python3 tools/check_options.py        # Java版の設定項目の整合性
 ## ライセンス
 
 MIT License — [LICENSE](LICENSE) を参照してください。
-凹凸追加パック（`tools/build_pbr.py` の出力）は Mojang のテクスチャを含むため、
+PBR 追加パック（`tools/build_pbr.py` の出力）は Mojang のテクスチャを含むため、
 このライセンスの対象外で、個人利用に限ります。

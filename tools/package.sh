@@ -5,10 +5,11 @@
 #
 #   build/VibrantUnbound-<ver>.mcpack         Bedrock  -> open it, or drop in
 #                                             com.mojang/resource_packs/
-#   build/VibrantUnbound-Relief-<ver>.mcpack  Bedrock  -> optional block relief
-#                                             add-on; only with --vanilla, since
-#                                             it is made from the vanilla
-#                                             textures (personal use only)
+#   build/VibrantUnbound-PBR-<ver>.mcpack     Bedrock  -> optional PBR add-on:
+#                                             block relief, glow, shine; only
+#                                             with --vanilla, since it is made
+#                                             from the vanilla textures
+#                                             (personal use only)
 #   build/VibrantVisuals-Check-<ver>.mcpack   Bedrock  -> diagnostic; turns the
 #                                             world magenta iff deferred
 #                                             rendering is actually running
@@ -56,12 +57,12 @@ rm -rf build/stage
 echo "$bedrock"
 
 if [[ -n "$vanilla" ]]; then
-  python3 tools/build_pbr.py --vanilla "$vanilla" --out build/pbr >/dev/null
+  python3 tools/build_pbr.py --vanilla "$vanilla" --out build/pbr --patch "$patch" >/dev/null
   python3 tools/check_bedrock.py build/pbr
-  relief="build/VibrantUnbound-Relief-${version}.mcpack"
-  rm -f "$relief"
-  (cd build/pbr && zip -r -q "../../$relief" . -x '.*')
-  echo "$relief"
+  pbr="build/VibrantUnbound-PBR-${version}.mcpack"
+  rm -f "$pbr"
+  (cd build/pbr && zip -r -q "../../$pbr" . -x '.*')
+  echo "$pbr"
 fi
 
 # Diagnostic: answers "is deferred rendering even running?" - see diagnostic/README.md

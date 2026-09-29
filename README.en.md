@@ -30,11 +30,20 @@ with Bedrock's Vibrant Visuals renderer.
 2. **Settings → Video → Vibrant Visuals**: on
 3. In the world's **Settings → Resource Packs**, activate the pack
 
-**Optional add-on**: activate `VibrantUnbound-Relief-*.mcpack` alongside it to
-give stone, wood, ores and other opaque blocks surface relief (the equivalent of
-Complementary's generated normals). It is built from the vanilla textures, so
-it is not in the repository ([how to build it](#development)). **Personal use
-only** — do not redistribute it.
+**Optional PBR add-on**: put `VibrantUnbound-PBR-*.mcpack` **above** Vibrant
+Unbound and activate both, for material detail:
+
+| | What it does |
+|---|---|
+| Relief | Height maps for 677 opaque blocks: strong on cobblestone, ores and bricks, medium on wood, nearly flat on wool and concrete (Complementary's generated normals). Crevices are a little rougher than the raised parts |
+| Glow | 40 light blocks — glowstone, sea lanterns, froglights, shroomlights, magma and more — glow like light sources (vanilla keeps glowstone at 41 of 255). **Ore minerals glow faintly** (diamond, emerald, lapis, redstone, gold, iron, copper, nether gold, quartz; not coal), like Complementary's glowing ores |
+| Shine | Ice, metal and gem blocks, obsidian, glazed terracotta and polished stone are smoother, so they catch reflections; gem ores are glossy in their minerals |
+
+A block's texture set may only use images in its own pack, so this add-on
+has to contain the vanilla block textures. It is therefore built from your
+copy of the vanilla files instead of living in the repository
+([how to build it](#development)). **Personal use only** — do not
+redistribute it.
 
 To install by hand, unzip into `com.mojang/resource_packs/`.
 
@@ -263,7 +272,7 @@ python3 tools/generate_bedrock.py --vanilla $V   # settings files (bedrock/ and 
 python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes)
 python3 tools/draw_water.py                      # plain water textures
 python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
-tools/package.sh --vanilla $V                    # distributables, including the relief add-on
+tools/package.sh --vanilla $V                    # distributables, including the PBR add-on
 
 python3 tools/validate_shaders.py     # Java GLSL, 52 stages x 4 macro variants
 python3 tools/check_options.py        # Java options consistency
@@ -274,6 +283,6 @@ Pass `--glslang <path>` if `glslangValidator` is not on `PATH`
 
 ## License
 
-MIT — see [LICENSE](LICENSE). The relief add-on (output of
+MIT — see [LICENSE](LICENSE). The PBR add-on (output of
 `tools/build_pbr.py`) contains Mojang's textures, is not covered by this
 license, and is for personal use only.
