@@ -30,9 +30,9 @@
         }
       },
       "weather": {
-        "fog_start": 0.23,
-        "fog_end": 0.7,
-        "fog_color": "#666666",
+        "fog_start": 0.06,
+        "fog_end": 0.62,
+        "fog_color": "#8C939C",
         "render_distance_type": "render"
       },
       "lava": {
@@ -56,9 +56,9 @@
           "zero_density_height": 170.0
         },
         "weather": {
-          "max_density": 0.22,
+          "max_density": 0.3,
           "max_density_height": 64.0,
-          "zero_density_height": 280.0
+          "zero_density_height": 300.0
         }
       },
       "media_coefficients": {

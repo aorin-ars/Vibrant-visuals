@@ -811,9 +811,25 @@ def volumetric(style: dict, *, with_defaults: bool) -> dict:
         # everywhere. Underwater is deliberately left to the game: a
         # volumetric water medium made the player's own shadow show up as a
         # dark shape in front of the camera when swimming.
-        vol["density"]["weather"] = {"max_density": 0.22, "max_density_height": 64.0,
-                                     "zero_density_height": 280.0}
+        vol["density"]["weather"] = dict(RAIN_HAZE)
     return vol
+
+
+# The rainy day of a well-known Java shader showcase (the one reproduced on
+# request): an even, light blue-grey mist that softens things a few dozen
+# blocks away and swallows the far distance, so trees stand as grey
+# silhouettes against a grey sky. Two parts, both only active while it
+# rains:
+#  - the volumetric haze thickens and reaches higher, so hills are in it too;
+#  - the distance fog for weather closes in, pale blue-grey rather than
+#    vanilla's dark #666666, so the far distance fades into mist rather than
+#    into gloom. As a share of the render distance: begins at 6 %, complete
+#    at 62 % - at 12 chunks, about 12 and 120 blocks.
+# The overcast sky and soft, shadowless light of rain are the game's own; a
+# pack has no per-weather lighting.
+RAIN_HAZE = {"max_density": 0.30, "max_density_height": 64.0, "zero_density_height": 300.0}
+RAIN_DISTANCE_FOG = {"fog_start": 0.06, "fog_end": 0.62, "fog_color": "#8C939C",
+                     "render_distance_type": "render"}
 
 
 def build_fogs(vanilla: Path) -> dict[str, dict]:
@@ -842,11 +858,16 @@ def build_fogs(vanilla: Path) -> dict[str, dict]:
         else:
             continue
 
+        distance = dict(settings["distance"])
+        # Overworld fogs only: the Nether's and the End's weather fog stays.
+        if (ident == "fog_default" or "weather" in distance) and style is not HAZE["none"] \
+                and style is not HAZE["end"]:
+            distance["weather"] = dict(RAIN_DISTANCE_FOG)
         out[path.name] = {
             "format_version": FOG_FORMAT,
             "minecraft:fog_settings": {
                 "description": settings["description"],
-                "distance": settings["distance"],
+                "distance": distance,
                 "volumetric": volumetric(style, with_defaults=defaults),
             },
         }

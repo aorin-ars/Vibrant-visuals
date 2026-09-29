@@ -49,7 +49,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | Shadows | Grey (full sky light) | Sky light cut to 60 %, for a clear step between sun and shade; shade stays blue-grey, never black. Short shadows (noon sun 78° up). More sky light at sunset, so the coloured sky fills the shade |
 | Night | Moonlight 0.4 | **Moonlight 1.0**, blue: moonlit faces stand out and the valley haze glows blue |
 | Air | Uniform fog in some biomes | **Clear air with depth**: distant terrain fades to blue rather than milky white, haze gathers in valleys and caves (densest low, gone around y=170), glows gold toward a low sun and blue under the moon. **Light shafts** through leaves and cave openings **show without looking into the sun** — with the sun off screen or behind a tree, wherever the light makes them. Mistier in humid forests, swamps and savannas, clearer in deserts; none in the Nether |
-| Rain | Small splashes | **Glossy ripples** spread where raindrops land, on the ground and on water, catching the sky and light like a film of water; the haze thickens |
+| Rain | Dark grey fog | **A soft, misty rain**: a pale blue-grey mist softens things a few dozen blocks away and swallows the distance, trees turning to grey silhouettes (it starts at 6 % of the render distance and is complete at 62 %); the haze thickens and reaches over the hills. Raindrops splash as the game's own small blue droplets |
 | Water | No waves, the old water pattern | **Clear water**: nothing in it but water (no plankton, no silt) and a more transparent surface than vanilla's, so the bottom and water plants show through; vanilla's water pattern (white streaks) and its normal map are replaced, leaving only gentle ripples, so the sky and shore reflect cleanly; a hint of the biome's water colour |
 | Underwater | — | The game's own (an earlier underwater fog made the player's shadow show up as a dark shape, so it was removed) |
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
@@ -129,7 +129,8 @@ numbers and textures. These Complementary features cannot be reproduced:
 
 - Grass and leaves waving in the wind
 - **Moving** volumetric clouds, auroras, nebulae (static clouds painted into the sky are possible — see above)
-- The ground itself turning wet and reflective in rain (a block's gloss comes from its texture and cannot follow the weather; the raindrop ripples are glossy instead)
+- The ground itself turning wet and reflective in rain (a block's gloss comes from its texture and cannot follow the weather)
+- A darker, overcast sky or softer light only while it rains (lighting and sky settings cannot follow the weather; the overcast look of rain is the game's own)
 - Depth of field, motion blur, lens flare
 
 Fog density cannot follow the time of day either (fog settings do not support
@@ -260,7 +261,7 @@ V=bedrock-samples/resource_pack
 
 python3 tools/generate_bedrock.py --vanilla $V   # settings files (bedrock/ and diagnostic/)
 python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes)
-python3 tools/draw_water.py                      # plain water textures, rain ripples
+python3 tools/draw_water.py                      # plain water textures
 python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
 tools/package.sh --vanilla $V                    # distributables, including the relief add-on
 

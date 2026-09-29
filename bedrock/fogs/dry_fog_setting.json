@@ -30,9 +30,9 @@
         }
       },
       "weather": {
-        "fog_start": 0.23,
-        "fog_end": 0.7,
-        "fog_color": "#666666",
+        "fog_start": 0.06,
+        "fog_end": 0.62,
+        "fog_color": "#8C939C",
         "render_distance_type": "render"
       },
       "lava": {
