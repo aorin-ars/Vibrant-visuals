@@ -35,9 +35,9 @@ Unbound and activate both, for material detail:
 
 | | What it does |
 |---|---|
-| Relief | Height maps for 677 opaque blocks: strong on cobblestone, ores and bricks, medium on wood, nearly flat on wool and concrete (Complementary's generated normals). Crevices are a little rougher than the raised parts |
+| Relief | **Nearly every block**: height maps for 1,257 block textures (leaves, flowers, crops, glass, doors, rails and animated blocks included) and normal maps for the 79 textures of chests, beds, shulker boxes, bells, mob heads, signs and the enchanting table's book (Complementary's generated normals). Strong on cobblestone, ores and bricks, medium on wood, nearly flat on wool and concrete, gentler on foliage, faint on glass; crevices a little rougher than the raised parts. Only water, lava (vanilla's own relief kept), fire, portals and bubble columns stay as they are |
 | Glow | 40 light blocks — glowstone, sea lanterns, froglights, shroomlights, magma and more — glow like light sources (vanilla keeps glowstone at 41 of 255). **Ore minerals glow faintly** (diamond, emerald, lapis, redstone, gold, iron, copper, nether gold, quartz; not coal), like Complementary's glowing ores |
-| Shine | Ice, metal and gem blocks, obsidian, glazed terracotta and polished stone are smoother, so they catch reflections; gem ores are glossy in their minerals |
+| Shine | Ice, metal and gem blocks, obsidian, glazed terracotta, polished stone, bells and copper chests are smoother, so they catch reflections; gem ores are glossy in their minerals |
 
 A block's texture set may only use images in its own pack, so this add-on
 has to contain the vanilla block textures. It is therefore built from your
