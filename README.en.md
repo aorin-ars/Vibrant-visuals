@@ -53,7 +53,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | | Vanilla Vibrant Visuals | VYSE-Vibrant Visuals |
 |---|---|---|
 | Picture | "generic" tone mapping | **ACES (filmic) tone mapping**: firm shade, rich midtones, bright skies and sunsets rolling smoothly into white. A different look from stock Vibrant Visuals at the root |
-| Sunlight | Whitish, fades early in the afternoon | **Strong, clear white** at noon, 125 (vanilla 100); gold as the sun gets low, orange to red on the horizon |
+| Sunlight | Whitish, fades early in the afternoon | **Clear white** at noon, at vanilla's 100 (125 blew out bright walls and the sky); the contrast with the shade comes from less sky light. Gold as the sun gets low, orange to red on the horizon |
 | Sky through the day | Muted | A low sun lights the land gold to orange instead of turning red and dim. Early morning (magenta turning orange-gold) → morning (warm cream horizon in a blue sky) → noon (blue sky paling to an almost white horizon) → late afternoon (gold to peach horizon) → sunset (lavender above a coral-pink horizon — the whole sky goes pastel, like Complementary's sunsets) → night (navy) → late night (deep navy). Never black |
 | Sky | Nearly one even blue (Rayleigh 10) | Rayleigh down to 1.3, so the sky is a real gradient from the blue zenith to a pale horizon; a **small halo gathered around the sun** instead of vanilla's milky haze over half the sky; a faint halo around the moon at night |
 | Shadows | Grey (full sky light) | Sky light cut to 60 %, for a clear step between sun and shade; shade stays blue-grey, never black. Short shadows (noon sun 78° up). More sky light at sunset, so the coloured sky fills the shade |
@@ -65,7 +65,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
 | Sun and moon | Squares | **Small round sun** (1/6 the width of vanilla's square; its halo comes from the sky's scattering), **small round moon** with craters and all 8 phases |
 | Clouds | Flat blocky slabs | **Soft fair-weather clouds painted across the whole sky** (a skybox): white patches with blue gaps between them and ragged, wispy margins, smaller and denser toward the horizon; tinted by the sun at sunset. [See below](#sky-clouds-skybox) |
-| Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.10 / saturation 1.10 / gain 1.02, and a slightly cool white balance (6100 K) — the clean, faintly blue cast of Complementary's daytime (leaves blue-green rather than lime); shadows lean slightly cool, highlights slightly warm |
+| Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.10 / saturation 1.10, no extra gain (it helped blow out daylight), and a slightly cool white balance (6100 K) — the clean, faintly blue cast of Complementary's daytime (leaves blue-green rather than lime); shadows lean slightly cool, highlights slightly warm (tinted, not brightened) |
 
 ### Why every biome is covered
 

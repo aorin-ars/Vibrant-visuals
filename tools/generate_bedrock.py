@@ -138,18 +138,19 @@ def lerp_rgb(a, b, t):
 #
 # Vanilla's own curve agrees: its sun fades to nothing between 0.282 and 0.292.
 
-# Strong, clear sun: 125 at noon (vanilla 100), for the bright sunlit faces
-# and deep shade of the reference. The fall-off follows the air the light
-# crosses, not sin(elevation) - the engine already shades surfaces by angle -
-# so low sun stays strong and warm.
+# Clear sun at vanilla strength, 100 at noon. 125 blew out sunlit walls and
+# the sky in game once the ACES curve and the grade's gain were on top; the
+# contrast with the shade comes from the reduced sky light below instead.
+# The fall-off follows the air the light crosses, not sin(elevation) - the
+# engine already shades surfaces by angle - so low sun stays strong and warm.
 SUN_ILLUMINANCE = mirror({
-    0.000: 125.0,
-    0.080: 124.0,
-    0.150: 116.0,
-    0.200: 100.0,
-    0.230: 80.0,
-    0.250: 57.0,
-    0.265: 36.0,
+    0.000: 100.0,
+    0.080: 99.0,
+    0.150: 94.0,
+    0.200: 84.0,
+    0.230: 70.0,
+    0.250: 53.0,
+    0.265: 35.0,
     0.275: 20.0,
     0.282: 5.5,
     0.2915: 0.01,
@@ -551,11 +552,12 @@ ATMOSPHERICS = {
 # ACES curve (TONE_MAP) already deepens contrast and enriches midtone colour,
 # so the grade on top of it is milder than a "generic" one would need: a
 # touch more contrast and saturation - less than it first had: next to
-# Complementary's screenshots, 1.20 turned leaves lime. Almost no extra gain:
-# at 1.08 sunlit grass rolled off into pastel in the first in-game test. Standard gamma: a lifted gamma washed the
-# picture out in game. Shadows lean cool, highlights a touch warm, as in the
-# sunlit reference.
-BASE_GRADE = {"contrast": 1.10, "saturation": 1.10, "gain": (1.02, 1.02, 1.02)}
+# Complementary's screenshots, 1.20 turned leaves lime. No extra gain: at
+# 1.08 sunlit grass rolled off into pastel in the first in-game test, and
+# even 1.02 helped blow out bright daytime surfaces. Standard gamma: a lifted
+# gamma washed the picture out in game. Shadows lean cool, highlights a touch
+# warm, as in the sunlit reference.
+BASE_GRADE = {"contrast": 1.10, "saturation": 1.10, "gain": (1.0, 1.0, 1.0)}
 GAMMA = 2.2
 # A little cooler than neutral daylight (6500 K), for the clean, slightly
 # blue cast of Complementary's daytime: greens lean toward blue-green instead
@@ -593,7 +595,9 @@ def grading(identifier, *, temperature=BASE_TEMPERATURE, contrast=None, saturati
                     "enabled": True,
                     "highlightsMin": 1.8,
                     "contrast": [1.0, 1.0, 1.0],
-                    "gain": [1.03, 1.01, 0.97],
+                    # Warm, but no brighter: a gain above 1 here pushed
+                    # sunlit faces and the sky into white.
+                    "gain": [1.0, 0.98, 0.94],
                     "gamma": [GAMMA, GAMMA, GAMMA],
                     "offset": [0.0, 0.0, 0.0],
                     "saturation": [1.0, 1.0, 1.0],
@@ -1029,17 +1033,19 @@ PBR = {
 #    only overhead. Distance haze is drawn into the images instead.
 #  - ambient: a small floor. In game this scale is strong - 0.7 made clouds
 #    glow white at midnight - so night sits near zero and moonlight does the
-#    rest; low at dawn, when clouds are dark silhouettes (早朝). Keyframes
-#    sit at real sun elevations, as in the lighting tables.
+#    rest; low at dawn, when clouds are dark silhouettes (早朝). By day
+#    1.5, not 1.8, so cloud cores stay below white and keep their soft
+#    grey shading. Keyframes sit at real sun elevations, as in the
+#    lighting tables.
 CLOUD_CUBEMAP = {
     "format_version": CUBEMAP_FORMAT,
     "minecraft:cubemap_settings": {
         "description": {"identifier": "minecraft:default_cubemap"},
         "lighting": {
             "ambient_light_illuminance": keyframes({
-                0.000: 1.8, 0.250: 1.6, 0.283: 1.1, 0.300: 0.5, 0.330: 0.12,
+                0.000: 1.5, 0.250: 1.45, 0.283: 1.1, 0.300: 0.5, 0.330: 0.12,
                 0.400: 0.04, 0.600: 0.04, 0.670: 0.12, 0.700: 0.3, 0.717: 0.6,
-                0.750: 1.4, 1.000: 1.8,
+                0.750: 1.3, 1.000: 1.5,
             }),
             "sky_light_contribution": 1.0,
             "directional_light_contribution": 0.22,
