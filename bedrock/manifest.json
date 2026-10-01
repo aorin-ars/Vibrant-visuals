@@ -18,17 +18,17 @@
   "subpacks": [
     {
       "folder_name": "no_clouds",
-      "name": "空: 雲なし / Sky: no clouds",
+      "name": "Sky: no clouds",
       "memory_tier": 0
     },
     {
       "folder_name": "high_clouds",
-      "name": "空: 高い雲だけ / Sky: high clouds only",
+      "name": "Sky: cirrus + the game's clouds",
       "memory_tier": 0
     },
     {
       "folder_name": "unbound_clouds",
-      "name": "空: Unbound の雲 / Sky: Unbound clouds",
+      "name": "Sky: feathery cirrus",
       "memory_tier": 0
     }
   ],

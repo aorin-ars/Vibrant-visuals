@@ -423,19 +423,15 @@ def main() -> int:
         "capabilities": ["pbr"],
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    shutil.copy2(ROOT / "bedrock/pack_icon.png", out / "pack_icon.png")
+    shutil.copy2(ROOT / "branding/pbr_pack_icon.png", out / "pack_icon.png")
     texts = out / "texts"
     texts.mkdir()
-    (texts / "en_US.lang").write_text(
-        "pack.name=Vibrant Unbound - PBR\n"
-        "pack.description=Optional add-on: block relief, glowing light blocks and ores, "
-        "glossy ice and metal. Built from the vanilla textures; use together with Vibrant "
-        "Unbound. Personal use only.\n")
-    (texts / "ja_JP.lang").write_text(
-        "pack.name=Vibrant Unbound - PBR\n"
-        "pack.description=追加パック：ブロックの凹凸、光るブロックと鉱石の発光、氷や金属のつや。"
-        "バニラのテクスチャから作ります。Vibrant Unbound と一緒に使ってください。個人利用のみ。\n",
-        encoding="utf-8")
+    lang = ("pack.name=VYSE-Vibrant Visuals PBR\n"
+            "pack.description=Add-on for VYSE-Vibrant Visuals: relief on nearly every block, "
+            "glowing light blocks and ores, glossy ice, metal and polished stone. Built from the "
+            "vanilla textures - for personal use only.\n")
+    for name in ("en_US.lang", "ja_JP.lang"):
+        (texts / name).write_text(lang, encoding="utf-8")
 
     print(f"{out}: {counts['relief']} block textures with relief, {counts['entity relief']} "
           f"chest/bed/sign/... textures with relief, {counts['glow']} brighter light blocks, "

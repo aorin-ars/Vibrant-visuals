@@ -6,7 +6,7 @@ Shader-mod looks for Minecraft, for **both editions**.
 
 | | Contents | Goes to |
 |---|---|---|
-| [`bedrock/`](bedrock/) | **Vibrant Unbound** — a Complementary Unbound style resource pack for Vibrant Visuals | open the `.mcpack` |
+| [`bedrock/`](bedrock/) | **VYSE-Vibrant Visuals** — a Complementary Unbound style resource pack for Vibrant Visuals | open the `.mcpack` |
 | [`java/`](java/) | Shader pack for Iris / OptiFine | `.minecraft/shaderpacks/` |
 
 > **The two editions use completely different formats.** A Java shader pack
@@ -14,7 +14,7 @@ Shader-mod looks for Minecraft, for **both editions**.
 
 ---
 
-# Bedrock Edition: Vibrant Unbound
+# Bedrock Edition: VYSE-Vibrant Visuals
 
 Recreates the look of the Java shader **Complementary Shaders (Unbound style)**
 with Bedrock's Vibrant Visuals renderer.
@@ -26,12 +26,13 @@ with Bedrock's Vibrant Visuals renderer.
 
 ## Installing
 
-1. Open `VibrantUnbound-*.mcpack` — it imports itself
+1. Open `VYSE-Vibrant-Visuals-*.mcpack` — it imports itself
 2. **Settings → Video → Vibrant Visuals**: on
 3. In the world's **Settings → Resource Packs**, activate the pack
 
-**Optional PBR add-on**: put `VibrantUnbound-PBR-*.mcpack` **above** Vibrant
-Unbound and activate both, for material detail:
+**Optional PBR add-on**: put **VYSE-Vibrant Visuals PBR**
+(`VYSE-Vibrant-Visuals-PBR-*.mcpack`) **above** VYSE-Vibrant Visuals and
+activate both, for material detail:
 
 | | What it does |
 |---|---|
@@ -49,7 +50,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 
 ## What changes
 
-| | Vanilla Vibrant Visuals | Vibrant Unbound |
+| | Vanilla Vibrant Visuals | VYSE-Vibrant Visuals |
 |---|---|---|
 | Picture | "generic" tone mapping | **ACES (filmic) tone mapping**: firm shade, rich midtones, bright skies and sunsets rolling smoothly into white. A different look from stock Vibrant Visuals at the root |
 | Sunlight | Whitish, fades early in the afternoon | **Strong, clear white** at noon, 125 (vanilla 100); gold as the sun gets low, orange to red on the horizon |
@@ -63,7 +64,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | Underwater | — | The game's own (an earlier underwater fog made the player's shadow show up as a dark shape, so it was removed) |
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
 | Sun and moon | Squares | **Small round sun** (its halo comes from the sky's scattering), **round moon** with craters and all 8 phases |
-| Clouds | Flat blocky slabs | **Cotton-wool cumulus painted into the sky** (a skybox): bright white tops, blue-grey shaded undersides, with thin cirrus above; tinted by the sun at sunset. [See below](#sky-clouds-skybox) |
+| Clouds | Flat blocky slabs | **Feathery cirrus painted into the sky** (a skybox): fine fibres bundled into wind-blown streaks that fan out toward the horizon, white at their dense heads, letting the blue through where thin; tinted by the sun at sunset. [See below](#sky-clouds-skybox) |
 | Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.10 / saturation 1.10 / gain 1.02, and a slightly cool white balance (6100 K) — the clean, faintly blue cast of Complementary's daytime (leaves blue-green rather than lime); shadows lean slightly cool, highlights slightly warm |
 
 ### Why every biome is covered
@@ -92,18 +93,18 @@ colours, sunsets and nights still follow the time of day, and only the clouds
 take on the light — white at noon, gold to pink at sunset.
 
 **Choose the clouds in the pack's settings**: world Settings → Resource Packs →
-tap the active Vibrant Unbound → the gear (⚙).
+tap the active VYSE-Vibrant Visuals → the gear (⚙).
 
 | Option | What it is | The game's own clouds |
 |---|---|---|
-| **Sky: Unbound clouds** (default) | Cotton-wool cumulus with thin high cirrus above | **Hidden automatically** (no flat blocky clouds) |
-| Sky: high clouds only | Just the thin cirrus | Keep them on — for pairing with the shadow-casting vanilla clouds |
+| **Sky: feathery cirrus** (default) | Feathery cirrus | **Hidden automatically** (no flat blocky clouds) |
+| Sky: cirrus + the game's clouds | The same cirrus | Keep them on — for pairing with the shadow-casting vanilla clouds |
 | Sky: no clouds | Nothing painted | Up to you |
 
 Worth knowing:
 
 - Painted clouds **do not move**; they are fixed to the sky
-- Distant clouds fade to pale blue inside the images (the game's haze erased the low clouds entirely)
+- Distant streaks fade to pale blue inside the images (the game's haze erased low clouds entirely)
 - Only the Overworld has them; the Nether and the End are unchanged
 
 The face order (0–3 the sides from left to right, 4 the top, 5 the bottom) was
@@ -125,11 +126,14 @@ so they keep their proper size and spacing in game (`EYE_BELOW_CENTRE` in
 at the centre, the clouds stopped in a square overhead; painted for a flat
 box, they came out stretched tall, with a mirrored copy below the horizon.
 
-The clouds themselves are fair-weather cumulus heaps — flat bases, rounded,
-billowing tops — ray-marched pixel by pixel: the lower a point sits in its
-heap, the more cloud above shades it, so tops are bright white and undersides
-blue-grey, like cotton wool. No sun direction is baked in (the real one
-moves); the game adds the sun's colour.
+The clouds themselves are cirrus — "mare's tails" — on a high layer that
+curves with the planet: noise stretched far along the wind and ridged into
+thin fibres, bundled into streaks of varying strength, with dense heads that
+trail short feathery barbs set at an angle. Every face samples the same
+continuous layer, so there are no seams, and from the ground the parallel
+streaks fan out toward the horizon. No photos are used; it is all computed.
+No sun direction is baked in (the real one moves); the game adds the sun's
+colour.
 
 ## What a resource pack cannot do
 
@@ -227,7 +231,7 @@ JSON directly works too, but regenerating overwrites it).
 | More biome colour in water | `biome_water_color_contribution` in `WATER` (0–1) |
 | Block light colours | `LIGHT_COLORS` |
 | Cloud brightness and sunset tint | `ambient_light_illuminance` (brightness) and `directional_light_contribution` (how much the sun colours them) in `CLOUD_CUBEMAP` |
-| Amount of cloud | `coverage` (share of the sky) in `CLOUD_VARIANTS`, in `tools/draw_sky.py` |
+| Amount of cloud | the `cover` line of `cirrus_density` in `tools/draw_sky.py` (raise the `+ 0.15` to spread cloud over more of the sky) |
 | How the game places the sky images (if clouds sit wrong) | `EYE_BELOW_CENTRE` (how far below the cube's centre the eye is), in `tools/draw_sky.py` |
 | Tilt of the sun's path | `ORBITAL_OFFSET` (degrees) |
 
@@ -269,7 +273,7 @@ pip install pillow numpy
 V=bedrock-samples/resource_pack
 
 python3 tools/generate_bedrock.py --vanilla $V   # settings files (bedrock/ and diagnostic/)
-python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes)
+python3 tools/draw_sky.py                        # round sun and moon, cirrus skyboxes (takes minutes)
 python3 tools/draw_water.py                      # plain water textures
 python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
 tools/package.sh --vanilla $V                    # distributables, including the PBR add-on

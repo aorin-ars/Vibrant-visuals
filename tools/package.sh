@@ -3,9 +3,9 @@
 #
 #   tools/package.sh [--vanilla <bedrock-samples>/resource_pack]
 #
-#   build/VibrantUnbound-<ver>.mcpack         Bedrock  -> open it, or drop in
+#   build/VYSE-Vibrant-Visuals-<ver>.mcpack   Bedrock  -> open it, or drop in
 #                                             com.mojang/resource_packs/
-#   build/VibrantUnbound-PBR-<ver>.mcpack     Bedrock  -> optional PBR add-on:
+#   build/VYSE-Vibrant-Visuals-PBR-<ver>.mcpack Bedrock  -> optional PBR add-on:
 #                                             block relief, glow, shine; only
 #                                             with --vanilla, since it is made
 #                                             from the vanilla textures
@@ -50,7 +50,7 @@ print("pack version", ".".join(map(str, manifest["header"]["version"])))
 EOF
 
 # Bedrock: manifest.json has to sit at the archive root, so zip from inside.
-bedrock="build/VibrantUnbound-${version}.mcpack"
+bedrock="build/VYSE-Vibrant-Visuals-${version}.mcpack"
 rm -f "$bedrock"
 (cd "$stage" && zip -r -q "../../../$bedrock" . -x '.*')
 rm -rf build/stage
@@ -59,7 +59,7 @@ echo "$bedrock"
 if [[ -n "$vanilla" ]]; then
   python3 tools/build_pbr.py --vanilla "$vanilla" --out build/pbr --patch "$patch" >/dev/null
   python3 tools/check_bedrock.py build/pbr
-  pbr="build/VibrantUnbound-PBR-${version}.mcpack"
+  pbr="build/VYSE-Vibrant-Visuals-PBR-${version}.mcpack"
   rm -f "$pbr"
   (cd build/pbr && zip -r -q "../../$pbr" . -x '.*')
   echo "$pbr"
