@@ -60,6 +60,10 @@ ROOT = Path(__file__).resolve().parent.parent
 HEADER_UUID = "5a1f3c2e-8d47-4b6a-9e21-7c0b4d9f6a13"
 MODULE_UUID = "b2e87d45-1c9a-4f36-8a5d-3e6f0c7b9d28"
 VERSION = [2, 0]
+NAME = "VYSE-Vibrant Visuals PBR"
+DESCRIPTION = ("Add-on for VYSE-Vibrant Visuals: relief on nearly every block, glowing light "
+               "blocks and ores, glossy ice, metal and polished stone. Built from the vanilla "
+               "textures - for personal use only.")
 
 IMAGE_EXTS = (".tga", ".png", ".jpg", ".jpeg")   # the engine's own priority order
 
@@ -412,26 +416,18 @@ def main() -> int:
     manifest = {
         "format_version": 2,
         "header": {
-            "name": "pack.name",
-            "description": "pack.description",
+            "name": NAME,
+            "description": DESCRIPTION,
             "uuid": HEADER_UUID,
             "version": version,
             "min_engine_version": [1, 21, 120],
         },
-        "modules": [{"type": "resources", "description": "pack.description",
+        "modules": [{"type": "resources", "description": DESCRIPTION,
                      "uuid": MODULE_UUID, "version": version}],
         "capabilities": ["pbr"],
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     shutil.copy2(ROOT / "branding/pbr_pack_icon.png", out / "pack_icon.png")
-    texts = out / "texts"
-    texts.mkdir()
-    lang = ("pack.name=VYSE-Vibrant Visuals PBR\n"
-            "pack.description=Add-on for VYSE-Vibrant Visuals: relief on nearly every block, "
-            "glowing light blocks and ores, glossy ice, metal and polished stone. Built from the "
-            "vanilla textures - for personal use only.\n")
-    for name in ("en_US.lang", "ja_JP.lang"):
-        (texts / name).write_text(lang, encoding="utf-8")
 
     print(f"{out}: {counts['relief']} block textures with relief, {counts['entity relief']} "
           f"chest/bed/sign/... textures with relief, {counts['glow']} brighter light blocks, "

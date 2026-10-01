@@ -290,13 +290,13 @@ class Checker:
             self.fail('manifest has no "capabilities": ["pbr"], so every Vibrant Visuals '
                       'file in the pack will be ignored')
 
+        # A localisation key ("pack.name" with texts/*.lang) is not looked up
+        # everywhere: the world's resource pack list shows the key itself.
         for field in ("name", "description"):
-            key = header.get(field)
-            if isinstance(key, str) and key.startswith("pack."):
-                for lang in sorted((self.pack / "texts").glob("*.lang")):
-                    if not any(line.startswith(key + "=")
-                               for line in lang.read_text(encoding="utf-8").splitlines()):
-                        self.fail(f"{lang.name} has no entry for {key}")
+            value = header.get(field)
+            if isinstance(value, str) and value.startswith("pack."):
+                self.fail(f'manifest header {field} is the key "{value}"; the world settings '
+                          f'pack list shows it as is, so write the text itself')
 
         # Subpacks: every listed folder has to exist (the game cannot apply a
         # missing one), and a folder nobody lists is dead weight in the pack.

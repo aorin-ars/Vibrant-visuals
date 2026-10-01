@@ -1,8 +1,8 @@
 {
   "format_version": 2,
   "header": {
-    "name": "pack.name",
-    "description": "pack.description",
+    "name": "[TEST] Vibrant Visuals check",
+    "description": "Turns dirt and stone lime green on any renderer, and the whole world magenta only under deferred rendering. Which of the two you see says where the problem is. Remove once you have your answer.",
     "uuid": "7b1d0f42-5c8e-4a13-9f26-3e0a8d5c17b4",
     "version": [
       1,
@@ -18,7 +18,7 @@
   "modules": [
     {
       "type": "resources",
-      "description": "pack.description",
+      "description": "Turns dirt and stone lime green on any renderer, and the whole world magenta only under deferred rendering. Which of the two you see says where the problem is. Remove once you have your answer.",
       "uuid": "c3f9a6d1-84b2-4e07-a5d8-91c6b027fe35",
       "version": [
         1,
