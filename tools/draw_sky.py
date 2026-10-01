@@ -7,17 +7,18 @@ Everything here is drawn procedurally; no vanilla or third-party art is used.
 
 Sun and moon (bedrock/textures/environment/)
 --------------------------------------------
-Vanilla's sun and moon are 8x8 pixel squares. Complementary draws a round sun
-with a soft corona and a round, cratered moon; these are drawn at 4x the
-vanilla resolution, keeping vanilla's layout so the disc lands where the game
-expects it:
+Vanilla's sun and moon are 8x8 pixel squares. Complementary draws a small
+round sun with a thin corona and a round, cratered moon. The game stretches
+each image over the same quad whatever its resolution, so these are drawn at
+16x the vanilla resolution with the disc centred, and the discs are a quarter
+the width of vanilla's squares - small, as in the sky of a shader pack, and
+still round when magnified:
 
-  sun_vv.png       128x128 RGBA  the sun Vibrant Visuals draws; transparent
-                                 background, disc centred, same size as
-                                 vanilla's 8/32 square
-  sun.png          128x128 RGBA  the sun the classic renderer draws; black
+  sun_vv.png       512x512 RGBA  the sun Vibrant Visuals draws; transparent
+                                 background
+  sun.png          512x512 RGBA  the sun the classic renderer draws; black
                                  background, since it is blended additively
-  moon_phases.png  512x256 RGB   4x2 grid of 128px cells, black background,
+  moon_phases.png  2048x1024 RGB 4x2 grid of 512px cells, black background,
                                  phase order as vanilla: 0 full, 1-3 waning
                                  (lit from the left), 4 new, 5-7 waxing
 
@@ -39,11 +40,13 @@ The game places the cube with the eye below its centre, so eye level falls
 EYE_BELOW_CENTRE). Every pixel is painted for the direction it is actually
 seen in.
 
-The clouds are feathery cirrus - "mare's tails" - on a high layer that
-curves with the planet: long fibrous strands bent along the wind, bundled
-into streaks of varying strength, with denser hooked heads. Seen from the
-ground the parallel streaks fan out toward the horizon. There are no seams
-between faces because they all sample one continuous field.
+The clouds are a soft fair-weather field on a layer that curves with the
+planet: loose patches of white cloud with ragged, wispy margins and blue
+gaps, lined up a little along the wind, smaller and denser toward the
+horizon. No single feature is so regular that it reads as a pattern from
+any direction - the earlier cirrus fibres, all converging on one point of
+the horizon, looked like a swirl. There are no seams between faces because
+they all sample one continuous field.
 """
 
 from __future__ import annotations
@@ -57,10 +60,10 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "bedrock/textures/environment"
 
-CELL = 128                 # 4x vanilla's 32px cell
-RADIUS = 18.0              # the moon: a circle with the area of vanilla's 8/32 square, at 4x
-SUN_RADIUS = 10.0          # the sun: about 60 % of vanilla's width. Bloom and the
-                           # atmosphere's own halo already make it read larger in game
+CELL = 512                 # 16x vanilla's 32px cell
+RADIUS = 18.0              # the moon: 7 % of the cell across (vanilla's square: 25 %)
+SUN_RADIUS = 10.0          # the sun: 4 % across. Bloom and the atmosphere's own halo
+                           # make it read larger in game; at 15 % it looked far too big
 
 
 def grid(size: int):
@@ -175,7 +178,7 @@ def draw_moon_phases() -> Image.Image:
 # --------------------------------------------------------------------------
 
 FACE_SIZE = 1024
-SUPERSAMPLE = 2          # 2x2 per pixel, so the fine strands near the horizon don't shimmer
+SUPERSAMPLE = 2          # 2x2 per pixel, so the fine margins near the horizon do not shimmer
 
 _F = np.array([0.0, 0.0, 1.0])
 _R = np.array([1.0, 0.0, 0.0])
@@ -206,7 +209,7 @@ HORIZON_HAZE = np.array([0.80, 0.87, 0.97])   # what distant clouds fade toward
 # Subpacks whose painted clouds replace the game's own: they also get a fully
 # transparent clouds.png, which removes the flat block clouds without the
 # player having to find the video setting. The other keeps the game's 3D
-# clouds (which cast shadows in Vibrant Visuals) under the cirrus.
+# clouds (which cast shadows in Vibrant Visuals) with the painted ones.
 REPLACES_VANILLA_CLOUDS = {"unbound_clouds"}
 
 
@@ -289,8 +292,8 @@ def cellular(x, y, seed, octaves=3):
 # huge clouds overhead or noise at the horizon; on a curved layer the
 # horizon is a finite distance away.
 EARTH_RADIUS = 20.0
-CIRRUS_ALTITUDE = 3.0     # the high layer; its streaks reach the horizon ~11 units away
-WIND = 0.6                # direction the strands stream along (radians)
+CLOUD_ALTITUDE = 3.0      # the layer; it reaches the horizon ~11 units away
+WIND = 0.6                # direction the patches line up along (radians)
 
 
 def shell_distance(up, altitude):
@@ -300,48 +303,41 @@ def shell_distance(up, altitude):
     return -b + np.sqrt(b * b + 2.0 * EARTH_RADIUS * altitude + altitude * altitude)
 
 
-def cirrus_density(x, z, seed: int = SEED):
-    """0..1 cirrus at layer position x, z."""
-    u = x * np.cos(WIND) + z * np.sin(WIND)          # along the wind
-    v = -x * np.sin(WIND) + z * np.cos(WIND)         # across it
-    # Strands bend: their position across the wind drifts slowly along them.
-    vw = v + 1.5 * fbm(u * 0.18, v * 0.18, 3, seed + 3)
-    uw = u + 0.6 * fbm(u * 0.18 + 5.1, v * 0.18 + 3.3, 2, seed + 9)
-    # Fibres: noise stretched far along the wind and ridged into thin lines,
-    # each wrapped in a softer glow.
-    f = fbm(uw * 0.35, vw * 7.0, 4, seed + 11)
-    fibres = (0.65 * np.clip(1.0 - np.abs(f) * 3.0, 0.0, 1.0) ** 1.5
-              + 0.35 * np.clip(1.0 - np.abs(f) * 2.2, 0.0, 1.0))
-    # Bundles of strands - the visible streaks - some bright, many faint,
-    # tapering at their ends; and the large patches of sky they fill.
-    bundle = smoothstep(-0.08, 0.32, fbm(uw * 0.16, vw * 1.4, 3, seed + 21))
-    bundle *= 0.5 + 0.5 * smoothstep(-0.3, 0.4, fbm(uw * 0.09 + 7.7, vw * 0.5 - 2.2, 2, seed + 71))
-    cover = smoothstep(-0.15, 0.2, fbm(x * 0.07, z * 0.07, 3, seed + 31) + 0.15)
-    # Tufts: the dense heads strands trail from, with short feathery barbs
-    # set at an angle to the wind.
-    tufts = smoothstep(0.62, 0.88, cellular(uw * 0.45, vw * 2.0, seed + 41, octaves=1))
-    ub = uw * np.cos(1.0) + vw * np.sin(1.0)
-    vb = -uw * np.sin(1.0) + vw * np.cos(1.0)
-    barbs = np.clip(1.0 - np.abs(fbm(ub * 0.8, vb * 9.0, 3, seed + 61)) * 2.6, 0.0, 1.0)
-    veil = 0.07 * smoothstep(-0.2, 0.4, fbm(u * 0.25, v * 1.2, 3, seed + 51))
-    d = cover * (bundle * (0.9 * fibres + 0.8 * tufts * (0.5 + 0.5 * barbs)) + veil)
-    return np.clip(d * 1.35, 0.0, 1.0)
+def cloud_density(x, z, seed: int = SEED):
+    """0..1 cloud at layer position x, z, and the mid-scale noise (for shading)."""
+    # Patches are stretched a little along the wind and their outlines
+    # warped, so they line up in loose rows without forming stripes.
+    u = (x * np.cos(WIND) + z * np.sin(WIND)) / 1.35
+    v = -x * np.sin(WIND) + z * np.cos(WIND)
+    wu = u + 0.6 * fbm(u * 0.35 + 3.7, v * 0.35 - 1.3, 3, seed + 3)
+    wv = v + 0.6 * fbm(u * 0.35 - 6.1, v * 0.35 + 2.9, 3, seed + 5)
+    big = fbm(wu * 0.55, wv * 0.55, 4, seed + 11)       # patches and clear gaps
+    mid = fbm(wu * 1.5, wv * 1.5, 4, seed + 15)         # clumps within a patch
+    fine = fbm(x * 4.5, z * 4.5, 4, seed + 31)          # ragged, wispy margins
+    puffs = cellular(x * 3.5, z * 3.5, seed + 21, octaves=2)
+    n = 0.60 * big + 0.32 * mid + 0.16 * fine + 0.10 * (puffs - 0.5)
+    # Thickness rises quickly past the edge and saturates in the cores, so
+    # margins stay thin and translucent while the middles are solid white.
+    d = 1.0 - np.exp(-9.0 * np.clip(n + 0.03, 0.0, None))
+    return d, mid
 
 
-def cirrus(d: np.ndarray):
-    """Straight-alpha colour and opacity of the cirrus for view directions d."""
+def clouds(d: np.ndarray):
+    """Straight-alpha colour and opacity of the clouds for view directions d."""
     up = np.clip(d[:, 1], 0.0, 1.0)
-    t = shell_distance(up, CIRRUS_ALTITUDE)
-    dens = cirrus_density(d[:, 0] * t, d[:, 2] * t)
-    # Thin veils let the blue through; dense heads are white.
-    thin = np.array([0.84, 0.89, 0.97])
-    rgb = thin + (1.0 - thin) * np.clip(dens * 1.3, 0.0, 1.0)[:, None]
+    t = shell_distance(up, CLOUD_ALTITUDE)
+    dens, mid = cloud_density(d[:, 0] * t, d[:, 2] * t)
+    # Thin margins are faintly blue; cores are white, with some lumps a
+    # touch grey-blue, which gives the patches volume.
+    edge = np.array([0.90, 0.94, 1.0])
+    rgb = edge + (1.0 - edge) * smoothstep(0.1, 0.6, dens)[:, None]
+    rgb *= (1.0 - 0.10 * smoothstep(0.55, 1.0, dens) * smoothstep(0.0, 0.3, -mid))[:, None]
     # The game's haze is off for the sky, so distance is painted in: far
-    # streaks pale toward the horizon's blue and thin out.
+    # clouds pale toward the horizon's blue and thin out.
     haze = (1.0 - np.exp(-t / 9.0))[:, None] * 0.5
     rgb = rgb * (1.0 - haze) + HORIZON_HAZE * haze
-    alpha = (np.clip(dens * 0.95, 0.0, 0.92) * smoothstep(0.0, 0.06, up)
-             * (0.55 + 0.45 * np.exp(-t / 8.0)))
+    alpha = (np.clip(dens * 1.15, 0.0, 1.0) * smoothstep(0.0, 0.08, up)
+             * (0.5 + 0.5 * np.exp(-t / 7.0)))
     return rgb, alpha * (d[:, 1] > 0.0)
 
 
@@ -356,7 +352,7 @@ def draw_cloud_face(face: int) -> Image.Image:
     for r in range(0, last, 128):
         rows = slice(r, min(r + 128, last))
         dirs = face_dirs(face, n, rows)
-        rgb, alpha = cirrus(dirs.reshape(-1, 3))
+        rgb, alpha = clouds(dirs.reshape(-1, 3))
         pre[rows] = np.dstack([(rgb * alpha[:, None]).reshape(dirs.shape),
                                alpha.reshape(dirs.shape[:-1])])
     # Downsample in premultiplied space, then store straight alpha. The colour
