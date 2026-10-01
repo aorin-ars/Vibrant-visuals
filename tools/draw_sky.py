@@ -39,10 +39,11 @@ The game places the cube with the eye below its centre, so eye level falls
 EYE_BELOW_CENTRE). Every pixel is painted for the direction it is actually
 seen in.
 
-The clouds are fair-weather cumulus heaps on a layer that curves with the
-planet, ray-marched along each pixel's view direction: large overhead,
-crowding together toward the horizon, with flat grey bases, bright billowing
-tops, and no seams between faces because they all sample one field.
+The clouds are feathery cirrus - "mare's tails" - on a high layer that
+curves with the planet: long fibrous strands bent along the wind, bundled
+into streaks of varying strength, with denser hooked heads. Seen from the
+ground the parallel streaks fan out toward the horizon. There are no seams
+between faces because they all sample one continuous field.
 """
 
 from __future__ import annotations
@@ -174,7 +175,7 @@ def draw_moon_phases() -> Image.Image:
 # --------------------------------------------------------------------------
 
 FACE_SIZE = 1024
-SUPERSAMPLE = 2          # 2x2 per pixel, so the crowded clouds at the horizon don't shimmer
+SUPERSAMPLE = 2          # 2x2 per pixel, so the fine strands near the horizon don't shimmer
 
 _F = np.array([0.0, 0.0, 1.0])
 _R = np.array([1.0, 0.0, 0.0])
@@ -196,23 +197,16 @@ FACES = [(_F, _R, -_U), (_R, -_F, -_U), (-_F, -_R, -_U), (-_R, _F, -_U),
 # a square overhead; painted for a flat box, they came out stretched tall.
 EYE_BELOW_CENTRE = 0.40
 
-# Each variant becomes a subpack the player picks in the pack's settings.
-# coverage: share of the sky above ~10 degrees covered by cumulus.
-# cirrus:   peak opacity of the high, streaky cloud layer.
-CLOUD_VARIANTS = {
-    # Complementary Unbound's fair-weather sky: puffy cumulus with a few
-    # high streaks above them. Meant to replace the game's own clouds.
-    "unbound_clouds": {"coverage": 0.38, "cirrus": 0.35},
-    # Only the high streaks, for keeping the game's 3D clouds (which cast
-    # shadows in Vibrant Visuals) and still getting a fuller sky above them.
-    "high_clouds": {"coverage": 0.0, "cirrus": 0.85},
-}
+# Subpacks that get the painted clouds; they are the same images. The folders
+# and their order live in bedrock/manifest.json.
+CLOUD_SUBPACKS = ["unbound_clouds", "high_clouds"]
 SEED = 7
 HORIZON_HAZE = np.array([0.80, 0.87, 0.97])   # what distant clouds fade toward
 
 # Subpacks whose painted clouds replace the game's own: they also get a fully
 # transparent clouds.png, which removes the flat block clouds without the
-# player having to find the video setting.
+# player having to find the video setting. The other keeps the game's 3D
+# clouds (which cast shadows in Vibrant Visuals) under the cirrus.
 REPLACES_VANILLA_CLOUDS = {"unbound_clouds"}
 
 
@@ -290,16 +284,13 @@ def cellular(x, y, seed, octaves=3):
     return total / norm
 
 
-# Clouds sit in a shell around a planet whose radius is this many cloud-base
-# altitudes. A flat layer would stretch without limit toward the horizon,
-# forcing either huge clouds overhead or noise at the horizon; on a curved
-# layer the horizon is a finite distance away.
+# Clouds sit in a shell around a planet whose radius is this many units. A
+# flat layer would stretch without limit toward the horizon, forcing either
+# huge clouds overhead or noise at the horizon; on a curved layer the
+# horizon is a finite distance away.
 EARTH_RADIUS = 20.0
-CLOUD_BASE = 1.0          # the unit of length
-CLOUD_DEPTH = 0.42        # the tallest heap, base to top: fair-weather cumulus
-FIELD_EXTENT = 9.4        # the field covers +-this; the layer's top meets the horizon at ~8.9
-FIELD_SIZE = 4096
-MARCH_STEPS = 40
+CIRRUS_ALTITUDE = 3.0     # the high layer; its streaks reach the horizon ~11 units away
+WIND = 0.6                # direction the strands stream along (radians)
 
 
 def shell_distance(up, altitude):
@@ -309,183 +300,87 @@ def shell_distance(up, altitude):
     return -b + np.sqrt(b * b + 2.0 * EARTH_RADIUS * altitude + altitude * altitude)
 
 
-def layer_hit(d: np.ndarray, altitude: float):
-    """Horizontal position at which view directions d meet a cloud layer
-    `altitude` above the viewer."""
-    dist = shell_distance(np.clip(d[..., 1], 0.0, 1.0), altitude)
-    return d[..., 0] * dist, d[..., 2] * dist
+def cirrus_density(x, z, seed: int = SEED):
+    """0..1 cirrus at layer position x, z."""
+    u = x * np.cos(WIND) + z * np.sin(WIND)          # along the wind
+    v = -x * np.sin(WIND) + z * np.cos(WIND)         # across it
+    # Strands bend: their position across the wind drifts slowly along them.
+    vw = v + 1.5 * fbm(u * 0.18, v * 0.18, 3, seed + 3)
+    uw = u + 0.6 * fbm(u * 0.18 + 5.1, v * 0.18 + 3.3, 2, seed + 9)
+    # Fibres: noise stretched far along the wind and ridged into thin lines,
+    # each wrapped in a softer glow.
+    f = fbm(uw * 0.35, vw * 7.0, 4, seed + 11)
+    fibres = (0.65 * np.clip(1.0 - np.abs(f) * 3.0, 0.0, 1.0) ** 1.5
+              + 0.35 * np.clip(1.0 - np.abs(f) * 2.2, 0.0, 1.0))
+    # Bundles of strands - the visible streaks - some bright, many faint,
+    # tapering at their ends; and the large patches of sky they fill.
+    bundle = smoothstep(-0.08, 0.32, fbm(uw * 0.16, vw * 1.4, 3, seed + 21))
+    bundle *= 0.5 + 0.5 * smoothstep(-0.3, 0.4, fbm(uw * 0.09 + 7.7, vw * 0.5 - 2.2, 2, seed + 71))
+    cover = smoothstep(-0.15, 0.2, fbm(x * 0.07, z * 0.07, 3, seed + 31) + 0.15)
+    # Tufts: the dense heads strands trail from, with short feathery barbs
+    # set at an angle to the wind.
+    tufts = smoothstep(0.62, 0.88, cellular(uw * 0.45, vw * 2.0, seed + 41, octaves=1))
+    ub = uw * np.cos(1.0) + vw * np.sin(1.0)
+    vb = -uw * np.sin(1.0) + vw * np.cos(1.0)
+    barbs = np.clip(1.0 - np.abs(fbm(ub * 0.8, vb * 9.0, 3, seed + 61)) * 2.6, 0.0, 1.0)
+    veil = 0.07 * smoothstep(-0.2, 0.4, fbm(u * 0.25, v * 1.2, 3, seed + 51))
+    d = cover * (bundle * (0.9 * fibres + 0.8 * tufts * (0.5 + 0.5 * barbs)) + veil)
+    return np.clip(d * 1.35, 0.0, 1.0)
 
 
-def lookup(grid, x, z):
-    """Bilinear sample of a field grid at layer positions x, z."""
-    n = grid.shape[0]
-    gx = (x + FIELD_EXTENT) / (2 * FIELD_EXTENT) * n - 0.5
-    gz = (z + FIELD_EXTENT) / (2 * FIELD_EXTENT) * n - 0.5
-    x0 = np.clip(np.floor(gx).astype(np.int32), 0, n - 2)
-    z0 = np.clip(np.floor(gz).astype(np.int32), 0, n - 2)
-    fx = np.clip(gx - x0, 0.0, 1.0)
-    fz = np.clip(gz - z0, 0.0, 1.0)
-    near = grid[z0, x0] + (grid[z0, x0 + 1] - grid[z0, x0]) * fx
-    far = grid[z0 + 1, x0] + (grid[z0 + 1, x0 + 1] - grid[z0 + 1, x0]) * fx
-    return near + (far - near) * fz
+def cirrus(d: np.ndarray):
+    """Straight-alpha colour and opacity of the cirrus for view directions d."""
+    up = np.clip(d[:, 1], 0.0, 1.0)
+    t = shell_distance(up, CIRRUS_ALTITUDE)
+    dens = cirrus_density(d[:, 0] * t, d[:, 2] * t)
+    # Thin veils let the blue through; dense heads are white.
+    thin = np.array([0.84, 0.89, 0.97])
+    rgb = thin + (1.0 - thin) * np.clip(dens * 1.3, 0.0, 1.0)[:, None]
+    # The game's haze is off for the sky, so distance is painted in: far
+    # streaks pale toward the horizon's blue and thin out.
+    haze = (1.0 - np.exp(-t / 9.0))[:, None] * 0.5
+    rgb = rgb * (1.0 - haze) + HORIZON_HAZE * haze
+    alpha = (np.clip(dens * 0.95, 0.0, 0.92) * smoothstep(0.0, 0.06, up)
+             * (0.55 + 0.45 * np.exp(-t / 8.0)))
+    return rgb, alpha * (d[:, 1] > 0.0)
 
 
-class Cumulus:
-    """Fair-weather cumulus as heaps on a flat base: the height of the cloud
-    above every point of the layer, precomputed, then ray-marched per pixel.
-
-    Seen from below, a heap shows its grey, flat base overhead and its
-    bright, billowing top toward the horizon; the parts low in a heap are
-    shaded by the heap above them. There is no fixed sun direction in the
-    shading - the real sun moves - and the game adds the sun's colour.
-    """
-
-    def __init__(self, coverage: float, seed: int = SEED):
-        n = FIELD_SIZE
-        xs = ((np.arange(n) + 0.5) / n * 2 - 1) * FIELD_EXTENT
-        shape = np.empty((n, n), np.float32)
-        billow = np.empty((n, n), np.float32)
-        regional = np.empty((n, n), np.float32)
-        self.wisp = np.empty((n, n), np.float32)
-        for r in range(0, n, 256):
-            z, x = np.meshgrid(xs[r:r + 256], xs, indexing="ij")
-            # Domain warp breaks up the grid-aligned look of plain noise.
-            qx = x + 0.22 * fbm(x * 1.6 + 5.2, z * 1.6 + 1.3, 3, seed + 11)
-            qz = z + 0.22 * fbm(x * 1.6 + 1.7, z * 1.6 + 9.2, 3, seed + 23)
-            # One round cell per cloud, roughened by fbm so no two match,
-            # and a finer cellular layer carving the outline into lobes.
-            shape[r:r + 256] = (0.60 * cellular(qx * 1.05, qz * 1.05, seed + 51, octaves=1)
-                                + 0.40 * (0.5 + fbm(qx * 1.4, qz * 1.4, 5, seed))
-                                + 0.22 * (cellular(qx * 3.2, qz * 3.2, seed + 77) - 0.57))
-            billow[r:r + 256] = 0.5 + fbm(qx * 4.5, qz * 4.5, 4, seed + 131)
-            # Some heaps tall, some flat and thin, as in a real fair-weather sky.
-            regional[r:r + 256] = 0.5 + fbm(qx * 0.45 + 2.1, qz * 0.45 - 4.4, 2, seed + 211)
-            # Fine and medium noise fray the surface into wisps and thin
-            # patches instead of a cut-out edge.
-            self.wisp[r:r + 256] = (0.6 * (0.5 + fbm(qx * 16.0, qz * 16.0, 3, seed + 171))
-                                    + 0.4 * (0.5 + fbm(qx * 6.0, qz * 6.0, 3, seed + 191)))
-
-        # Where clouds start, so that `coverage` of the sky above about 10
-        # degrees is cloud, and the density of the thickest cores.
-        rng = np.random.default_rng(seed + 999)
-        v = rng.normal(size=(200000, 3))
-        v /= np.linalg.norm(v, axis=1, keepdims=True)
-        v = v[v[:, 1] > 0.17]
-        x, z = layer_hit(v, CLOUD_BASE)
-        sampled = lookup(shape, x, z)
-        lo, hi = np.quantile(sampled, 1.0 - coverage), np.quantile(sampled, 0.995)
-
-        depth = np.clip((shape - lo) / (hi - lo), 0.0, 1.0)
-        dome = 1.0 - (1.0 - depth) ** 2          # steep sides, a broad rounded top
-        thickness = np.clip(0.45 + 1.0 * regional, 0.35, 1.0)
-        self.height = (CLOUD_DEPTH * dome * thickness * (0.7 + 0.6 * billow)).astype(np.float32)
-        self.height[depth <= 0] = -0.02
-
-    def render(self, d: np.ndarray, rng: np.random.Generator):
-        """Straight-alpha colour and opacity for view directions d (N x 3)."""
-        up = np.clip(d[:, 1], 0.0, 1.0)
-        above = d[:, 1] > 0.0
-        t0 = shell_distance(up, CLOUD_BASE)
-        dt = (shell_distance(up, CLOUD_BASE + CLOUD_DEPTH) - t0) / MARCH_STEPS
-        jitter = rng.random(len(d))
-        shade = np.array([0.50, 0.56, 0.68])     # the underside, lit by the blue sky
-        lit = np.array([1.0, 0.995, 0.985])
-        colour = np.zeros((len(d), 3))
-        seen = np.ones(len(d))                    # transmittance so far
-        weighted_distance = np.zeros(len(d))
-        for i in range(MARCH_STEPS):
-            t = t0 + (i + jitter) * dt
-            px, py, pz = d[:, 0] * t, d[:, 1] * t, d[:, 2] * t
-            h = np.sqrt(px * px + (py + EARTH_RADIUS) ** 2 + pz * pz) - EARTH_RADIUS - CLOUD_BASE
-            # Fine noise sheared with height roughens the surface into
-            # wisps instead of a smooth shell.
-            inside = (lookup(self.height, px, pz) - h
-                      - 0.09 * (lookup(self.wisp, px + 0.6 * h, pz - 0.4 * h) - 0.5))
-            # A soft surface: density builds up over the outer 0.1, so edges
-            # are translucent, as in Complementary's clouds.
-            density = np.clip(inside / 0.10, 0.0, 1.0) * np.clip(h / 0.04 + 0.25, 0.0, 1.0)
-            a = (1.0 - np.exp(-24.0 * density * dt)) * above
-            if not a.any():
-                continue
-            # Light from above, dimmed by the cloud over the point, and
-            # darker the lower the point sits in its heap.
-            below_top = np.maximum(inside, 0.0)
-            sun = 0.7 * np.exp(-7.0 * below_top) + 0.3 * np.exp(-2.0 * below_top)
-            height = np.clip(h / (0.9 * CLOUD_DEPTH), 0.0, 1.0)
-            k = np.clip((0.35 + 0.65 * sun) * (0.40 + 0.60 * height ** 0.55) + 0.1, 0.0, 1.0)
-            w = seen * a
-            colour += w[:, None] * (shade + (lit - shade) * k[:, None])
-            weighted_distance += w * t
-            seen *= 1.0 - a
-        alpha = 1.0 - seen
-        rgb = colour / np.maximum(alpha, 1e-6)[:, None]
-        # The game's haze is off for the sky (it erased the low clouds), so
-        # distance is painted in: far clouds pale toward the horizon's blue
-        # and thin out a little.
-        distance = weighted_distance / np.maximum(alpha, 1e-6)
-        haze = (1.0 - np.exp(-distance / 5.0))[:, None] * 0.55
-        rgb = rgb * (1.0 - haze) + HORIZON_HAZE * haze
-        alpha *= (0.6 + 0.4 * np.exp(-distance / 6.0)) * smoothstep(0.0, 0.03, up)
-        return rgb, alpha
-
-
-def cirrus(d: np.ndarray, strength: float, seed: int = SEED):
-    """A higher layer, stretched along one wind direction into streaks."""
-    cx, cz = layer_hit(d, 3.0)
-    sx = cx * np.cos(0.6) - cz * np.sin(0.6)
-    sz = cx * np.sin(0.6) + cz * np.cos(0.6)
-    streaks = fbm(sx * 0.12, sz * 0.9, 5, seed + 301) + 0.35 * fbm(sx * 0.05 + 3.3, sz * 0.05 - 1.1, 2, seed + 401)
-    alpha = smoothstep(0.08, 0.45, streaks) * strength * smoothstep(0.03, 0.25, d[:, 1])
-    return np.broadcast_to(np.array([0.97, 0.98, 1.0]), d.shape), alpha
-
-
-def render_face_rows(face: int, rows: slice, n: int, cumulus: Cumulus | None,
-                     cirrus_strength: float, rng: np.random.Generator):
-    dirs = face_dirs(face, n, rows)
-    flat = dirs.reshape(-1, 3)
-    rgb_ci, a_ci = cirrus(flat, cirrus_strength)
-    if cumulus is not None:
-        rgb_cu, a_cu = cumulus.render(flat, rng)
-    else:
-        rgb_cu, a_cu = rgb_ci, np.zeros(len(flat))
-    # Cumulus in front of cirrus.
-    alpha = a_cu + a_ci * (1.0 - a_cu)
-    pre = rgb_cu * a_cu[:, None] + rgb_ci * (a_ci * (1.0 - a_cu))[:, None]
-    return np.dstack([pre.reshape(dirs.shape), alpha.reshape(dirs.shape[:-1])])
-
-
-def draw_cloud_face(face: int, cumulus: Cumulus | None, cirrus_strength: float) -> Image.Image:
+def draw_cloud_face(face: int) -> Image.Image:
     if face == 5:                                   # below the horizon: nothing to draw
         return Image.new("RGBA", (FACE_SIZE, FACE_SIZE), (230, 230, 230, 0))
     n = FACE_SIZE * SUPERSAMPLE
-    rng = np.random.default_rng(SEED * 100 + face)
     # A side image below eye level stays empty: the ground covers it, and
     # from a height any clouds there would hang below the horizon.
     last = n if face == 4 else -(-eye_level_row(n) // SUPERSAMPLE) * SUPERSAMPLE
     pre = np.zeros((n, n, 4))
     for r in range(0, last, 128):
         rows = slice(r, min(r + 128, last))
-        pre[rows] = render_face_rows(face, rows, n, cumulus, cirrus_strength, rng)
+        dirs = face_dirs(face, n, rows)
+        rgb, alpha = cirrus(dirs.reshape(-1, 3))
+        pre[rows] = np.dstack([(rgb * alpha[:, None]).reshape(dirs.shape),
+                               alpha.reshape(dirs.shape[:-1])])
     # Downsample in premultiplied space, then store straight alpha. The colour
     # under transparent pixels stays cloud-coloured, so texture filtering
     # never pulls a dark fringe into the cloud edges.
     pre = pre.reshape(FACE_SIZE, SUPERSAMPLE, FACE_SIZE, SUPERSAMPLE, 4).mean(axis=(1, 3))
     a = pre[..., 3]
-    straight = np.where(a[..., None] > 1e-4, pre[..., :3] / np.maximum(a, 1e-6)[..., None], 0.9)
+    straight = np.where(a[..., None] > 1e-4, pre[..., :3] / np.maximum(a, 1e-6)[..., None], 0.95)
     return Image.fromarray(np.dstack([to_u8(np.clip(straight, 0, 1)), to_u8(a)]), "RGBA")
 
 
 def draw_skyboxes() -> None:
-    for name, params in CLOUD_VARIANTS.items():
+    faces = [draw_cloud_face(face) for face in range(6)]
+    for name in CLOUD_SUBPACKS:
         out = ROOT / "bedrock/subpacks" / name / "textures/environment/overworld_cubemap"
         out.mkdir(parents=True, exist_ok=True)
-        cumulus = Cumulus(params["coverage"]) if params["coverage"] > 0 else None
-        for face in range(6):
-            draw_cloud_face(face, cumulus, params["cirrus"]).save(out / f"cubemap_{face}.png",
-                                                                  optimize=True)
+        for face, image in enumerate(faces):
+            image.save(out / f"cubemap_{face}.png", optimize=True)
+        clouds = out.parent / "clouds.png"
         if name in REPLACES_VANILLA_CLOUDS:
             # Same size as vanilla's cloud map (256x256), nothing in it.
-            Image.new("RGBA", (256, 256), (255, 255, 255, 0)).save(out.parent / "clouds.png")
+            Image.new("RGBA", (256, 256), (255, 255, 255, 0)).save(clouds)
+        elif clouds.exists():
+            clouds.unlink()
         size = sum((out / f"cubemap_{f}.png").stat().st_size for f in range(6))
         print(f"{out}: 6 faces {FACE_SIZE}x{FACE_SIZE} RGBA, {size / 1e6:.1f} MB")
 
