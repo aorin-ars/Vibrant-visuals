@@ -63,8 +63,8 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | Water | No waves, the old water pattern | **Clear water**: nothing in it but water (no plankton, no silt) and a more transparent surface than vanilla's, so the bottom and water plants show through; vanilla's water pattern (white streaks) and its normal map are replaced, leaving only gentle ripples, so the sky and shore reflect cleanly; a hint of the biome's water colour |
 | Underwater | — | The game's own (an earlier underwater fog made the player's shadow show up as a dark shape, so it was removed) |
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
-| Sun and moon | Squares | **Small round sun** (its halo comes from the sky's scattering), **round moon** with craters and all 8 phases |
-| Clouds | Flat blocky slabs | **Feathery cirrus painted into the sky** (a skybox): fine fibres bundled into wind-blown streaks that fan out toward the horizon, white at their dense heads, letting the blue through where thin; tinted by the sun at sunset. [See below](#sky-clouds-skybox) |
+| Sun and moon | Squares | **Small round sun** (1/6 the width of vanilla's square; its halo comes from the sky's scattering), **small round moon** with craters and all 8 phases |
+| Clouds | Flat blocky slabs | **Soft fair-weather clouds painted across the whole sky** (a skybox): white patches with blue gaps between them and ragged, wispy margins, smaller and denser toward the horizon; tinted by the sun at sunset. [See below](#sky-clouds-skybox) |
 | Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.10 / saturation 1.10 / gain 1.02, and a slightly cool white balance (6100 K) — the clean, faintly blue cast of Complementary's daytime (leaves blue-green rather than lime); shadows lean slightly cool, highlights slightly warm |
 
 ### Why every biome is covered
@@ -97,14 +97,14 @@ tap the active VYSE-Vibrant Visuals → the gear (⚙).
 
 | Option | What it is | The game's own clouds |
 |---|---|---|
-| **Sky: feathery cirrus** (default) | Feathery cirrus | **Hidden automatically** (no flat blocky clouds) |
-| Sky: cirrus + the game's clouds | The same cirrus | Keep them on — for pairing with the shadow-casting vanilla clouds |
+| **Sky: soft clouds** (default) | Soft fair-weather clouds | **Hidden automatically** (no flat blocky clouds) |
+| Sky: soft clouds + the game's clouds | The same clouds | Keep them on — for pairing with the shadow-casting vanilla clouds |
 | Sky: no clouds | Nothing painted | Up to you |
 
 Worth knowing:
 
 - Painted clouds **do not move**; they are fixed to the sky
-- Distant streaks fade to pale blue inside the images (the game's haze erased low clouds entirely)
+- Distant clouds fade to pale blue inside the images (the game's haze erased low clouds entirely)
 - Only the Overworld has them; the Nether and the End are unchanged
 
 The face order (0–3 the sides from left to right, 4 the top, 5 the bottom) was
@@ -126,14 +126,15 @@ so they keep their proper size and spacing in game (`EYE_BELOW_CENTRE` in
 at the centre, the clouds stopped in a square overhead; painted for a flat
 box, they came out stretched tall, with a mirrored copy below the horizon.
 
-The clouds themselves are cirrus — "mare's tails" — on a high layer that
-curves with the planet: noise stretched far along the wind and ridged into
-thin fibres, bundled into streaks of varying strength, with dense heads that
-trail short feathery barbs set at an angle. Every face samples the same
-continuous layer, so there are no seams, and from the ground the parallel
-streaks fan out toward the horizon. No photos are used; it is all computed.
-No sun direction is baked in (the real one moves); the game adds the sun's
-colour.
+The clouds themselves are a fair-weather field on a layer that curves with
+the planet: noise at three scales — patches and clear gaps, clumps within a
+patch, ragged margins — with thin, translucent edges and solid white cores.
+The patches line up a little along the wind, but nothing forms stripes or
+swirls, so the sky looks natural whichever way you look (the previous
+cirrus, its strands all converging on one point of the horizon, read as a
+swirl). Every face samples the same continuous layer, so there are no seams.
+No photos are used; it is all computed. No sun direction is baked in (the
+real one moves); the game adds the sun's colour.
 
 ## What a resource pack cannot do
 
@@ -231,7 +232,7 @@ JSON directly works too, but regenerating overwrites it).
 | More biome colour in water | `biome_water_color_contribution` in `WATER` (0–1) |
 | Block light colours | `LIGHT_COLORS` |
 | Cloud brightness and sunset tint | `ambient_light_illuminance` (brightness) and `directional_light_contribution` (how much the sun colours them) in `CLOUD_CUBEMAP` |
-| Amount of cloud | the `cover` line of `cirrus_density` in `tools/draw_sky.py` (raise the `+ 0.15` to spread cloud over more of the sky) |
+| Amount of cloud | `n + 0.03` in `cloud_density`, in `tools/draw_sky.py` (raise the `0.03` for more cloud) |
 | How the game places the sky images (if clouds sit wrong) | `EYE_BELOW_CENTRE` (how far below the cube's centre the eye is), in `tools/draw_sky.py` |
 | Tilt of the sun's path | `ORBITAL_OFFSET` (degrees) |
 
@@ -273,7 +274,7 @@ pip install pillow numpy
 V=bedrock-samples/resource_pack
 
 python3 tools/generate_bedrock.py --vanilla $V   # settings files (bedrock/ and diagnostic/)
-python3 tools/draw_sky.py                        # round sun and moon, cirrus skyboxes (takes minutes)
+python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes)
 python3 tools/draw_water.py                      # plain water textures
 python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
 tools/package.sh --vanilla $V                    # distributables, including the PBR add-on
