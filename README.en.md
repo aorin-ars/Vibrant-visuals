@@ -90,7 +90,8 @@ Vibrant Visuals lights those images with the sun and sky
 This pack uses that to paint **clouds on a transparent background** into the
 sky. Everywhere else the normal Vibrant Visuals sky shows through, so its
 colours, sunsets and nights still follow the time of day, and only the clouds
-take on the light — white at noon, gold to pink at sunset.
+take on the light — white at noon, gold to pink at sunset, dim grey-blue
+shapes at night.
 
 **Choose the clouds in the pack's settings**: world Settings → Resource Packs →
 tap the active VYSE-Vibrant Visuals → the gear (⚙).
