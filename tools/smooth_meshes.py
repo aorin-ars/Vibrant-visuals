@@ -6,11 +6,13 @@
 
 Bedrock models are boxes ("cubes") and, in some add-ons, free-form meshes
 ("poly_mesh" in a bone): a list of positions shared between polygons, and
-a normal for every polygon corner. The game shades with exactly those
-normals - it never computes its own - and most exporters write each
-polygon's own flat normal, so a rounded mesh renders with a crease along
+a normal for every polygon corner. The classic renderer shades with
+exactly those normals, and most exporters write each polygon's own flat
+normal, so a rounded mesh renders with a crease along
 every edge even though its polygons share their vertices. Resource packs
-cannot change the shaders, so the only fix is in the model file.
+cannot change the shaders, so the only fix is in the model file. (Models
+whose normals are already smooth but which show creases only in Vibrant
+Visuals are a different problem, in the renderer; this does not fix them.)
 
 This tool rewrites the normals of every poly_mesh: each corner gets the
 average of the normals of the polygons that share its vertex (weighted by

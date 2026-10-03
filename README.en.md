@@ -248,10 +248,13 @@ materials (red = glow, green = gloss, blue = metal).
 ## Smoothing mesh parts (`tools/smooth_meshes.py`)
 
 Bedrock models are boxes ("cubes"), and some add-ons add free-form meshes
-(`poly_mesh`). A mesh's polygons share vertices, but **the game shades with
-exactly the normals written in the model file and never computes its own**;
-most exporters write each polygon's flat normal, so even a rounded part shows
-a crease along every edge. Resource packs cannot change the Vibrant Visuals
+(`poly_mesh`). A mesh's polygons share vertices, but **the classic renderer
+shades with exactly the normals written in the model file**; most exporters
+write each polygon's flat normal, so even a rounded part shows a crease along
+every edge. This tool is for that case. Some models already have smooth
+normals and show creases only in Vibrant Visuals; that comes from how Vibrant
+Visuals draws them, not from the model, and this tool cannot fix it (the
+cause is being narrowed down). Resource packs cannot change the Vibrant Visuals
 shaders, so the only fix is in the model file (vanilla models are all boxes,
 with no meshes).
 
