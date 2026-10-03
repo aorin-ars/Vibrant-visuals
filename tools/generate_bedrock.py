@@ -967,6 +967,10 @@ LIGHT_COLORS = {
     "colored_torch_blue": "#5C7CFF",
     "colored_torch_purple": "#C05CFF",
 }
+# Invisible light blocks are how builders light interiors - train cars,
+# stations, offices - from ceiling fixtures. Cool white, like fluorescent
+# tubes and LED panels, instead of the engine's default warm light.
+LIGHT_COLORS.update({f"light_block_{level}": "#EEF4FF" for level in range(16)})
 LIGHT_COLORS.update({f"{c}candle": FIRE for c in CANDLE_COLORS})
 LIGHT_COLORS.update({f"{c}candle_cake": FIRE for c in CANDLE_COLORS})
 LIGHT_COLORS.update({b: COPPER for b in POINT_LIGHT_BLOCKS if b.endswith("copper_lantern")})
@@ -1003,10 +1007,17 @@ PBR = {
     "minecraft:pbr_fallback_settings": {
         # [metalness, emissive, roughness, subsurface] for anything without a
         # texture set. Vanilla blocks all have texture sets; this mostly
-        # decides how add-on blocks and mobs look. Mobs and add-on vehicles
-        # get a faint sheen.
+        # decides how add-on blocks and entities look.
+        # Entities: a clean satin finish, as in RTX renders of add-on trains
+        # and vehicles - soft diffuse shading with a broad, subtle highlight
+        # and a faint sheen at grazing angles, no mirror reflections.
+        # Roughness 150 (0.59) sits at the smooth end of Mojang's own mob
+        # materials (Steve's smoothest parts are 154), so the many vanilla
+        # mobs without a texture set, which also use this, stay natural
+        # rather than plastic. Not metallic: painted panels, plastics and
+        # fabrics are all dielectric. 215 left vehicles chalky and flat.
         "blocks": {"global_metalness_emissive_roughness_subsurface": [0, 0, 255, 0]},
-        "actors": {"global_metalness_emissive_roughness_subsurface": [0, 0, 215, 0]},
+        "actors": {"global_metalness_emissive_roughness_subsurface": [0, 0, 150, 0]},
         "items": {"global_metalness_emissive_roughness_subsurface": [0, 0, 255, 0]},
         "particles": {"global_metalness_emissive_roughness_subsurface": [0, 0, 255, 0]},
     },

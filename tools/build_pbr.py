@@ -103,10 +103,13 @@ TRANSLUCENT_RELIEF = 0.3
 # Blocks drawn as entities: chests, beds, shulker boxes, bells, mob heads,
 # signs, the enchanting table's book. Their textures are unwrapped models,
 # which cannot take height maps, so they get normal maps instead. Patterns
-# are paths under textures/entity; the value is the relief strength.
+# are paths under textures/entity; the value is the relief strength. Half
+# of what the blocks get: these are smooth, made objects - planed wood,
+# lacquered shells, cast metal - and read best as clean hard surfaces with
+# a hint of their grain, not bumpy ones.
 ENTITY_BLOCKS = [
-    ("chest/*", 1.0), ("bed/*", 0.7), ("shulker/*", 0.8), ("bell/*", 0.7),
-    ("skulls/*", 0.8), ("sign*", 1.0), ("*_sign", 1.0), ("enchanting_table_book", 0.6),
+    ("chest/*", 0.5), ("bed/*", 0.35), ("shulker/*", 0.4), ("bell/*", 0.35),
+    ("skulls/*", 0.4), ("sign*", 0.5), ("*_sign", 0.5), ("enchanting_table_book", 0.3),
 ]
 # Slope of the normal per unit of luminance difference between neighbouring
 # pixels: 0.1 of luminance across a pixel tilts the surface ~17 degrees.

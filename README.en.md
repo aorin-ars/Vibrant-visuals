@@ -36,7 +36,7 @@ activate both, for material detail:
 
 | | What it does |
 |---|---|
-| Relief | **Nearly every block**: height maps for 1,257 block textures (leaves, flowers, crops, glass, doors, rails and animated blocks included) and normal maps for the 79 textures of chests, beds, shulker boxes, bells, mob heads, signs and the enchanting table's book (Complementary's generated normals). Strong on cobblestone, ores and bricks, medium on wood, nearly flat on wool and concrete, gentler on foliage, faint on glass; crevices a little rougher than the raised parts. Only water, lava (vanilla's own relief kept), fire, portals and bubble columns stay as they are |
+| Relief | **Nearly every block**: height maps for 1,257 block textures (leaves, flowers, crops, glass, doors, rails and animated blocks included) and normal maps for the 79 textures of chests, beds, shulker boxes, bells, mob heads, signs and the enchanting table's book (Complementary's generated normals; at half the blocks' strength, so these made objects read as clean, smooth surfaces with a hint of grain). Strong on cobblestone, ores and bricks, medium on wood, nearly flat on wool and concrete, gentler on foliage, faint on glass; crevices a little rougher than the raised parts. Only water, lava (vanilla's own relief kept), fire, portals and bubble columns stay as they are |
 | Glow | 40 light blocks — glowstone, sea lanterns, froglights, shroomlights, magma and more — glow like light sources (vanilla keeps glowstone at 41 of 255). **Ore minerals glow faintly** (diamond, emerald, lapis, redstone, gold, iron, copper, nether gold, quartz; not coal), like Complementary's glowing ores |
 | Shine | Ice, metal and gem blocks, obsidian, glazed terracotta, polished stone, bells and copper chests are smoother, so they catch reflections; gem ores are glossy in their minerals |
 
@@ -62,7 +62,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | Rain | Dark grey fog | **A soft, misty rain**: a pale blue-grey mist softens things a few dozen blocks away and swallows the distance, trees turning to grey silhouettes (it starts at 6 % of the render distance and is complete at 62 %); the haze thickens and reaches over the hills. Raindrops splash as the game's own small blue droplets |
 | Water | No waves, the old water pattern | **Clear water**: nothing in it but water (no plankton, no silt) and a more transparent surface than vanilla's, so the bottom and water plants show through; vanilla's water pattern (white streaks) and its normal map are replaced, leaving only gentle ripples, so the sky and shore reflect cleanly; a hint of the biome's water colour |
 | Underwater | — | The game's own (an earlier underwater fog made the player's shadow show up as a dark shape, so it was removed) |
-| Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white — 106 blocks |
+| Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white, invisible light blocks the cool white of fluorescent tubes (#EEF4FF) for lighting train cars and stations — 122 blocks |
 | Sun and moon | Squares | **Small round sun** (1/6 the width of vanilla's square; its halo comes from the sky's scattering), **small round moon** with craters and all 8 phases |
 | Clouds | Flat blocky slabs | **Soft fair-weather clouds painted across the whole sky** (a skybox): white patches with blue gaps between them and ragged, wispy margins, smaller and denser toward the horizon; tinted by the sun at sunset. [See below](#sky-clouds-skybox) |
 | Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.10 / saturation 1.10, no extra gain (it helped blow out daylight), and a slightly cool white balance (6100 K) — the clean, faintly blue cast of Complementary's daytime (leaves blue-green rather than lime); shadows lean slightly cool, highlights slightly warm (tinted, not brightened) |
@@ -183,7 +183,11 @@ break. `tools/check_bedrock.py` catches it.
 
 Vibrant Visuals supports PBR. The quickest lever is the pack-wide default for
 entities (`actors` in `pbr/global.json`, `[metalness, emission, roughness,
-subsurface]`; lower roughness is glossier — this pack uses 215, vanilla 255).
+subsurface]`; lower roughness is glossier — this pack uses 150, vanilla 255).
+That is the clean satin of painted panels in an RTX render — a broad, subtle
+highlight, no mirror reflections — and since vanilla mobs without a texture
+set use it too, it sits at the smooth end of Mojang's own mob materials
+(Steve's smoothest parts are 154).
 
 For a specific texture, `textures/entity/my_train.png`, add
 `my_train.texture_set.json` next to it:

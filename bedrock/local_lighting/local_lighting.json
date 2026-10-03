@@ -185,6 +185,70 @@
       "light_color": "#FF6A1F",
       "light_type": "static_light"
     },
+    "minecraft:light_block_0": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_1": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_10": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_11": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_12": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_13": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_14": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_15": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_2": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_3": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_4": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_5": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_6": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_7": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_8": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
+    "minecraft:light_block_9": {
+      "light_color": "#EEF4FF",
+      "light_type": "static_light"
+    },
     "minecraft:light_blue_candle": {
       "light_color": "#FFA24D",
       "light_type": "point_light"
