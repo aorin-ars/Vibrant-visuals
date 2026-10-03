@@ -32,10 +32,12 @@ subtle sheen, glossy glass and screens, lit displays and light fittings,
 no exaggerated reflections and no bump mapping (models are hard surfaces).
 
 The result is a separate resource pack to place ABOVE the add-on; the add-on
-itself is not modified. It carries an unchanged copy of each colour texture,
-since a texture set must sit in the same pack as its images - so it is for
-personal use, like the add-on it is made from. Textures that already have a
-texture set in the add-on are left alone.
+itself is not modified. It carries a copy of each colour texture, since a
+texture set must sit in the same pack as its images - so it is for personal
+use, like the add-on it is made from. The copy has the same colours; only
+the add-on's alpha-coded self-lighting of the interior is taken out, since
+it washes the cabin flat white in Vibrant Visuals (--keep-glow keeps it).
+Textures that already have a texture set in the add-on are left alone.
 """
 
 from __future__ import annotations
@@ -109,33 +111,55 @@ PRIORITY = [BODY, "equipment", "interior", "door", "front", "skirt", "window_fra
 # Materials: (metalness, emissive, roughness) in 0..1
 # --------------------------------------------------------------------------
 
-STAINLESS = (1.0, 0.0, 0.34)        # brushed stainless body and doors
-POLISHED = (1.0, 0.0, 0.20)         # grab poles, rack bars
-SATIN_METAL = (1.0, 0.0, 0.36)      # aluminium window frames, rack mesh, pantograph
-FILM = (0.0, 0.0, 0.32)             # livery stripes: printed film on the body
-GASKET = (0.0, 0.0, 0.62)           # black rubber
-GLOSS_BLACK = (0.0, 0.0, 0.10)      # front window glass and black front mask
-PAINT = (0.0, 0.0, 0.42)            # painted FRP, painted panels
-DARK_PAINT = (0.0, 0.0, 0.62)       # underfloor boxes, bogie frames
-LAMINATE = (0.0, 0.0, 0.42)         # interior walls: melamine laminate
-CEILING = (0.0, 0.0, 0.55)
-FLOOR = (0.0, 0.0, 0.70)            # rubber / vinyl flooring
-ROOF = (0.0, 0.0, 0.78)             # roof coating
+# Kept soft. Fully metallic stainless (first version) has no diffuse light
+# at all, so by day the body only mirrored the ground and sky and turned
+# grey, and polished seat-end partitions glittered. Train bodies, fittings
+# and frames are mostly diffuse here with a metallic sheen on top, and
+# nothing is smoother than about 0.4 except glass and screens.
+STAINLESS = (0.12, 0.0, 0.48)       # brushed stainless body and doors
+POLISHED = (0.15, 0.0, 0.42)        # poles, racks, partitions (they share one swatch)
+SATIN_METAL = (0.30, 0.0, 0.50)     # aluminium window frames, rack mesh, pantograph
+FILM = (0.0, 0.0, 0.45)             # livery stripes: printed film on the body
+GASKET = (0.0, 0.0, 0.65)           # black rubber
+GLOSS_BLACK = (0.0, 0.0, 0.18)      # front window glass and black front mask
+PAINT = (0.0, 0.0, 0.50)            # painted FRP, painted panels
+DARK_PAINT = (0.0, 0.0, 0.65)       # underfloor boxes, bogie frames
+LAMINATE = (0.0, 0.0, 0.50)         # interior walls: melamine laminate
+CEILING = (0.0, 0.0, 0.60)
+FLOOR = (0.0, 0.0, 0.75)            # rubber / vinyl flooring
+ROOF = (0.0, 0.0, 0.80)             # roof coating
 MOQUETTE = (0.0, 0.0, 0.92)         # seat fabric
-PLASTIC = (0.0, 0.0, 0.34)          # straps
-CONSOLE = (0.0, 0.0, 0.55)          # cab desk, switches
-STICKER = (0.0, 0.0, 0.38)
+PLASTIC = (0.0, 0.0, 0.40)          # straps
+CONSOLE = (0.0, 0.0, 0.60)          # cab desk, switches
+STICKER = (0.0, 0.0, 0.45)
+SCREEN = 0.15                       # roughness of LCDs, signs, lamp lenses
 
-# Self-light. Inside the car the add-on half self-lights every surface (its
-# material reads alpha 127 as glow); in Vibrant Visuals that turns the cabin
-# flat. Surfaces get only a faint fill instead, which still reads as a lit
-# car at night but leaves the shading to the light, and the light fittings
-# themselves glow - like real fluorescent tubes.
-FILL = 0.05
+# Self-light. The add-on half self-lights every surface inside the car (its
+# material reads alpha 127 as glow), which in Vibrant Visuals washes the
+# cabin flat white. The copy of the texture in this pack is made opaque
+# there (see opaque_copy()), so only the map below glows: a faint fill,
+# which still reads as a lit car at night but leaves the shading to the
+# light, and the light fittings themselves - like real fluorescent tubes.
+FILL = 0.07
+FLOOR_FILL = 0.05
 LIGHT_GLOW = 0.90
 SCREEN_GLOW = 0.62
 SIGN_GLOW = 0.70
 LAMP_GLOW = 0.85
+
+
+def opaque_copy(data: bytes, fmt: str) -> bytes:
+    """The colour texture with MTC's glow code taken out of its alpha:
+    alpha 30-254 (interior 127, light fittings 83, glowing signs) becomes
+    255. Alpha 0 - window cut-outs - and the faint 1-29 halo pixels are
+    kept. Colours are untouched."""
+    img = Image.open(io.BytesIO(data))
+    rgba = np.array(img.convert("RGBA"))
+    a = rgba[..., 3]
+    a[(a >= 30) & (a < 255)] = 255
+    out = io.BytesIO()
+    Image.fromarray(rgba, "RGBA").save(out, format=fmt)
+    return out.getvalue()
 
 
 def classify(name_path: tuple[str, ...]) -> str:
@@ -359,7 +383,7 @@ def material(labels: np.ndarray, rgba: np.ndarray) -> np.ndarray:
     for name, glow in (("screen", SCREEN_GLOW), ("sign", SIGN_GLOW), ("needle", 0.35),
                        ("lamp", LAMP_GLOW), ("headlight", LAMP_GLOW)):
         mask = is_(name)
-        put(mask, (0.0, glow, 0.08))
+        put(mask, (0.0, glow, SCREEN))
     # Cab instruments: lamps and lit markings glow, the desk does not.
     panel = is_("cab_panel")
     lit = panel & (((sat > 0.35) & (lum > 0.25)) | (lum > 0.70))
@@ -368,8 +392,9 @@ def material(labels: np.ndarray, rgba: np.ndarray) -> np.ndarray:
     # Fill light inside the car, and the light fittings.
     surfaces = inside & (m[..., 1] == 0)
     m[surfaces, 1] = FILL
+    m[surfaces & (up | is_("seat")), 1] = FLOOR_FILL
     m[fitting & (m[..., 1] < LIGHT_GLOW) & (labels >= 0), 1] = LIGHT_GLOW
-    m[fitting & (labels >= 0), 2] = 0.12
+    m[fitting & (labels >= 0), 2] = SCREEN
 
     out = np.zeros(labels.shape + (4,), np.uint8)
     out[..., :3] = np.uint8(np.round(np.clip(m, 0, 1) * 255))
@@ -447,6 +472,9 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=ROOT / "build/train_pbr")
     parser.add_argument("--preview", type=Path, help="also write material previews here")
     parser.add_argument("--patch", type=int, default=0, help="patch number of the pack version")
+    parser.add_argument("--keep-glow", action="store_true",
+                        help="copy the colour textures unchanged, keeping the add-on's own "
+                             "alpha-coded self-lighting of the interior")
     args = parser.parse_args()
 
     src = Source(args.addon)
@@ -482,7 +510,10 @@ def main() -> int:
             dest = args.out / Path(tex).parent
             dest.mkdir(parents=True, exist_ok=True)
             stem = Path(tex).name
-            (dest / Path(image_name).name).write_bytes(src.files[image_name])
+            colour = src.files[image_name]
+            if not args.keep_glow:
+                colour = opaque_copy(colour, "TGA" if image_name.endswith(".tga") else "PNG")
+            (dest / Path(image_name).name).write_bytes(colour)
             Image.fromarray(mers, "RGBA").save(dest / f"{stem}_vu_mers.png", optimize=True)
             (dest / f"{stem}.texture_set.json").write_text(json.dumps({
                 "format_version": "1.21.30",

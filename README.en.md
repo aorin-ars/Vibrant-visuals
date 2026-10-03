@@ -228,17 +228,21 @@ MTC / TBTK template's romanised Japanese: `tsurikawa` strap rails, `turikawa`
 straps, `nidana` luggage racks, `sodesikiri` seat-end partitions, `yukasita`
 underfloor, `maku` destination signs, `lcd`, `mascon`, `panta`...), from MTC's
 alpha code (255 outside, 127 inside, lower for light fittings, 0 for window
-cut-outs) and from colour. Stainless is metal, stripes are glossy film, the
+cut-outs) and from colour. Stainless is satin silver, stripes are glossy film, the
 black front is glass-glossy, walls are laminate, floors rubber, seats
 moquette; signs, LCDs, cab lamps, headlights and ceiling lights glow; no bump
-maps (clean RTX-style surfaces). The add-on half self-lights the whole
+maps (clean RTX-style surfaces). Bodies and fittings stay mostly diffuse with a
+thin metallic sheen: fully metallic, they mirrored their surroundings and
+turned grey by day, and glittered. The add-on half self-lights the whole
 interior; in Vibrant Visuals that flattens the shading, so surfaces only get
 a faint glow and the light fittings do the glowing.
 
 The output is **a separate resource pack to put above the add-on**; the add-on
 is not modified. Since a texture set needs its images in the same pack, it
-contains the add-on's colour textures unchanged — **personal use only**, like
-the add-on. `--preview` also writes images of the part guesses and of the
+contains copies of the add-on's colour textures — **personal use only**, like
+the add-on. The colours are unchanged; only the alpha code that half
+self-lights the interior is taken out, since it washes the cabin flat white
+in Vibrant Visuals (`--keep-glow` keeps it). `--preview` also writes images of the part guesses and of the
 materials (red = glow, green = gloss, blue = metal).
 
 ## Tuning
