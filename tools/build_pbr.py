@@ -10,15 +10,17 @@ glow faintly (glowstone at 41 of 255), and nearly everything is equally
 rough, ice and polished metal included. This builds Complementary-style
 texture sets on top of them:
 
-  relief   a height map for every block texture, derived from its own
+  relief   a normal map for every block texture, derived from its own
            colour - brighter reads as raised - scaled by material: strong for
            cobblestone, ores and bricks, medium for wood, almost flat for
            wool and concrete, gentler for foliage and glass
            (RELIEF_BY_MATERIAL); cut-outs are measured on their visible
-           pixels only, animated textures frame by frame. Blocks drawn as
-           entities - chests, beds, shulker boxes, bells, mob heads, signs -
-           get normal maps instead, since models cannot take height maps
-           (ENTITY_BLOCKS)
+           pixels only, animated textures frame by frame, and the slopes
+           wrap round the texture so block edges meet cleanly (height maps,
+           used at first, drew a seam line along every block edge; nearly
+           flat textures such as concrete get no relief map at all). Blocks
+           drawn as entities - chests, beds, shulker boxes, bells, mob
+           heads, signs - get normal maps too (ENTITY_BLOCKS)
   glow     light blocks glow like light blocks (EMISSION_TARGET), and ores
            glow faintly in their minerals, like Complementary's "glowing
            ores" (GLOWING_ORES)
@@ -274,6 +276,36 @@ def normal_map(color: Image.Image, strength: float) -> np.ndarray:
     return np.uint8(np.round((n * 0.5 + 0.5) * 255))
 
 
+# Block relief is shipped as normal maps computed here, not as height maps.
+# Vibrant Visuals compares a height map's border pixels with what lies beyond
+# the texture, so every block with one got a thin seam line along its edges -
+# plainest on smooth blocks like concrete. Here the slopes wrap around the
+# texture (block textures tile), so the edges match their neighbours.
+BLOCK_NORMAL_SLOPE = 2.0   # surface tilt per unit of height step between pixels
+FLAT_LIMIT = 0.03          # below this steepest tilt (~2 degrees) a texture gets no relief map
+
+
+def block_normal_map(height: np.ndarray, opaque: np.ndarray) -> np.ndarray | None:
+    """RGB normal map (vanilla's DirectX convention) from a 0..1 height
+    field, slopes wrapping within each animation frame; None if flat."""
+    gx = np.zeros_like(height)
+    gy = np.zeros_like(height)
+    for rows in frames(height.shape):
+        h, seen = height[rows], opaque[rows]
+        dx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) / 2
+        dy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) / 2
+        # A difference across a transparent gap is not a slope.
+        both_x = seen & np.roll(seen, 1, 1) & np.roll(seen, -1, 1)
+        both_y = seen & np.roll(seen, 1, 0) & np.roll(seen, -1, 0)
+        gx[rows] = np.where(both_x, dx, 0.0) * BLOCK_NORMAL_SLOPE
+        gy[rows] = np.where(both_y, dy, 0.0) * BLOCK_NORMAL_SLOPE
+    if max(np.abs(gx).max(), np.abs(gy).max()) < FLAT_LIMIT:
+        return None
+    n = np.dstack([-gx, -gy, np.ones_like(height)])
+    n /= np.linalg.norm(n, axis=-1, keepdims=True)
+    return np.uint8(np.round((n * 0.5 + 0.5) * 255))
+
+
 def relief_strength(key: str, color: Image.Image) -> float:
     strength = match(key, RELIEF_BY_MATERIAL)
     if strength is not None:
@@ -357,7 +389,7 @@ def main() -> int:
         same_size = mers is not None and mers.shape[:2] == (color.size[1], color.size[0])
 
         # Relief
-        height = normal = None
+        height = normal = block_normal = None
         has_bump = "normal" in texture_set or "heightmap" in texture_set
         ore = GLOWING_ORES.get(key) if kind == "block" else None
         minerals = None
@@ -371,6 +403,9 @@ def main() -> int:
             strength = relief_strength(key, color)
             if strength > 0:
                 height = height_map(color, strength, name in INVERTED, minerals)
+                block_normal = block_normal_map(height, smoothed_luminance(color)[1])
+                if block_normal is None:
+                    skip("no relief: flat texture (concrete, plain wool...)")
                 if same_size:
                     # Crevices hold dust and shade: a little rougher than the tops.
                     mers[..., 2] += CREVICE_ROUGHNESS * np.clip(0.5 - height, 0.0, 0.4) / 0.4
@@ -404,7 +439,7 @@ def main() -> int:
 
         changed_mers = mers is not None and not np.array_equal(
             np.round(np.clip(mers, 0, 255)), mers_orig)
-        if height is None and normal is None and not changed_mers:
+        if block_normal is None and normal is None and not changed_mers:
             continue
 
         dest = out / folder.relative_to(vanilla)
@@ -426,9 +461,9 @@ def main() -> int:
             if normal_path:
                 shutil.copy2(normal_path, dest / normal_path.name)
                 new_set["normal"] = texture_set["normal"]
-        if height is not None:
-            new_set["heightmap"] = f"{name}_height"
-            Image.fromarray(np.uint8(np.round(height * 255)), "L").save(dest / f"{name}_height.png")
+        if block_normal is not None:
+            new_set["normal"] = f"{name}_vu_normal"
+            Image.fromarray(block_normal, "RGB").save(dest / f"{name}_vu_normal.png")
             counts["relief"] += 1
         if normal is not None:
             new_set["normal"] = f"{name}_vu_normal"
