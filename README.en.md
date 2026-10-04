@@ -183,11 +183,12 @@ break. `tools/check_bedrock.py` catches it.
 
 Vibrant Visuals supports PBR. The quickest lever is the pack-wide default for
 entities (`actors` in `pbr/global.json`, `[metalness, emission, roughness,
-subsurface]`; lower roughness is glossier — this pack uses 150, vanilla 255).
-That is the clean satin of painted panels in an RTX render — a broad, subtle
-highlight, no mirror reflections — and since vanilla mobs without a texture
-set use it too, it sits at the smooth end of Mojang's own mob materials
-(Steve's smoothest parts are 154).
+subsurface]`; lower roughness is glossier — this pack uses 190, vanilla 255).
+That is a soft satin: a broad, faint highlight, no mirror reflections. It is
+not smoother because Vibrant Visuals does not block the sky inside an entity:
+every surface inside a train car is lit by, and reflects, the open sky, and at
+150 interiors washed out pale blue. Vanilla mobs without a texture set use it
+too; it sits mid-range in Mojang's own mob materials (Steve: 154-255).
 
 For a specific texture, `textures/entity/my_train.png`, add
 `my_train.texture_set.json` next to it:

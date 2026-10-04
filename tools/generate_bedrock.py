@@ -1008,16 +1008,17 @@ PBR = {
         # [metalness, emissive, roughness, subsurface] for anything without a
         # texture set. Vanilla blocks all have texture sets; this mostly
         # decides how add-on blocks and entities look.
-        # Entities: a clean satin finish, as in RTX renders of add-on trains
-        # and vehicles - soft diffuse shading with a broad, subtle highlight
-        # and a faint sheen at grazing angles, no mirror reflections.
-        # Roughness 150 (0.59) sits at the smooth end of Mojang's own mob
-        # materials (Steve's smoothest parts are 154), so the many vanilla
-        # mobs without a texture set, which also use this, stay natural
-        # rather than plastic. Not metallic: painted panels, plastics and
-        # fabrics are all dielectric. 215 left vehicles chalky and flat.
+        # Entities: a soft satin finish - diffuse shading with a broad, faint
+        # highlight, no mirror reflections. Not smoother: Vibrant Visuals
+        # does not block the sky inside an entity, so the inside of a train
+        # car is lit by, and reflects, the open sky on every surface. At
+        # roughness 150 that reflection washed car interiors out pale blue;
+        # 190 (0.75) keeps it to a faint sheen. That is also the middle of
+        # Mojang's own mob materials (Steve 154-255), so the vanilla mobs
+        # without a texture set, which use this too, look natural. Not
+        # metallic: painted panels, plastics and fabrics are all dielectric.
         "blocks": {"global_metalness_emissive_roughness_subsurface": [0, 0, 255, 0]},
-        "actors": {"global_metalness_emissive_roughness_subsurface": [0, 0, 150, 0]},
+        "actors": {"global_metalness_emissive_roughness_subsurface": [0, 0, 190, 0]},
         "items": {"global_metalness_emissive_roughness_subsurface": [0, 0, 255, 0]},
         "particles": {"global_metalness_emissive_roughness_subsurface": [0, 0, 255, 0]},
     },
