@@ -22,6 +22,8 @@ texture sets on top of them:
   glow     light blocks glow like light blocks (EMISSION_TARGET), and ores
            glow faintly in their minerals, like Complementary's "glowing
            ores" (GLOWING_ORES)
+  wet      mobs, boats, minecarts... turn darker and glossy while rain falls
+           on them or they are in water (tools/wet_entities.py)
   shine    ice, metal blocks, gems, obsidian, glazed terracotta and polished
            stone are smoother, so they catch reflections (SMOOTHER); in every
            block with relief the crevices are a little rougher than the tops
@@ -52,6 +54,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageFilter
 
+import wet_entities
+
 ROOT = Path(__file__).resolve().parent.parent
 
 # Fixed so that re-importing a rebuilt pack upgrades it in place (it replaces
@@ -62,8 +66,8 @@ MODULE_UUID = "b2e87d45-1c9a-4f36-8a5d-3e6f0c7b9d28"
 VERSION = [2, 0]
 NAME = "VYSE-Vibrant Visuals PBR"
 DESCRIPTION = ("Add-on for VYSE-Vibrant Visuals: relief on nearly every block, glowing light "
-               "blocks and ores, glossy ice, metal and polished stone. Built from the vanilla "
-               "textures - for personal use only.")
+               "blocks and ores, glossy ice, metal and polished stone, mobs wet and glossy in "
+               "rain. Built from the vanilla textures - for personal use only.")
 
 IMAGE_EXTS = (".tga", ".png", ".jpg", ".jpeg")   # the engine's own priority order
 
@@ -415,6 +419,15 @@ def main() -> int:
         (dest / ts_path.name).write_text(json.dumps({
             "format_version": "1.21.30", "minecraft:texture_set": new_set}, indent=2) + "\n")
 
+    # Wet entities: glossy in rain (see tools/wet_entities.py).
+    wet = None
+    if (vanilla / "entity").is_dir() and (vanilla / "render_controllers").is_dir():
+        wet = wet_entities.build(vanilla, out)
+    else:
+        print("no vanilla entity/ or render_controllers/ - wet entities skipped. With a sparse "
+              "clone, run:\n  git sparse-checkout add /resource_pack/entity/ "
+              "/resource_pack/render_controllers/")
+
     version = VERSION + [args.patch]
     manifest = {
         "format_version": 2,
@@ -435,6 +448,9 @@ def main() -> int:
     print(f"{out}: {counts['relief']} block textures with relief, {counts['entity relief']} "
           f"chest/bed/sign/... textures with relief, {counts['glow']} brighter light blocks, "
           f"{counts['glowing ores']} glowing ores, {counts['shine']} smoother surfaces")
+    if wet:
+        print(f"  wet in rain: {wet['entities']} entities, {wet['textures']} wet textures, "
+              f"{wet['controllers']} render controllers")
     for reason, count in sorted(skipped.items(), key=lambda kv: -kv[1]):
         print(f"  {count:4d}  {reason}")
     return 0

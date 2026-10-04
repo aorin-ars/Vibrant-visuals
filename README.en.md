@@ -39,6 +39,7 @@ activate both, for material detail:
 | Relief | **Nearly every block**: height maps for 1,257 block textures (leaves, flowers, crops, glass, doors, rails and animated blocks included) and normal maps for the 79 textures of chests, beds, shulker boxes, bells, mob heads, signs and the enchanting table's book (Complementary's generated normals; at half the blocks' strength, so these made objects read as clean, smooth surfaces with a hint of grain). Strong on cobblestone, ores and bricks, medium on wood, nearly flat on wool and concrete, gentler on foliage, faint on glass; crevices a little rougher than the raised parts. Only water, lava (vanilla's own relief kept), fire, portals and bubble columns stay as they are |
 | Glow | 40 light blocks — glowstone, sea lanterns, froglights, shroomlights, magma and more — glow like light sources (vanilla keeps glowstone at 41 of 255). **Ore minerals glow faintly** (diamond, emerald, lapis, redstone, gold, iron, copper, nether gold, quartz; not coal), like Complementary's glowing ores |
 | Shine | Ice, metal and gem blocks, obsidian, glazed terracotta, polished stone, bells and copper chests are smoother, so they catch reflections; gem ores are glossy in their minerals |
+| Wet in rain | **Mobs, boats, minecarts, armor stands and other entities turn slightly darker and glossy while rain falls on them or they are in water** (roughness about halved, so reflections and highlights show), and dry as soon as they are under cover or out of the water. Covers 172 vanilla entities (not the player, whose texture is the skin); add-on entities such as trains are not affected |
 
 A block's texture set may only use images in its own pack, so this add-on
 has to contain the vanilla block textures. It is therefore built from your
@@ -144,7 +145,7 @@ numbers and textures. These Complementary features cannot be reproduced:
 
 - Grass and leaves waving in the wind
 - **Moving** volumetric clouds, auroras, nebulae (static clouds painted into the sky are possible — see above)
-- The ground itself turning wet and reflective in rain (a block's gloss comes from its texture and cannot follow the weather)
+- The ground itself turning wet and reflective in rain (a block's gloss comes from its texture and cannot follow the weather; entities can switch textures when wet, which the PBR add-on does)
 - A darker, overcast sky or softer light only while it rains (lighting and sky settings cannot follow the weather; the overcast look of rain is the game's own)
 - Depth of field, motion blur, lens flare
 
