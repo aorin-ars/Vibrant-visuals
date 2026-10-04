@@ -10,6 +10,9 @@
 #                                             with --vanilla, since it is made
 #                                             from the vanilla textures
 #                                             (personal use only)
+#   build/VYSE-Weather-Sync-<ver>.mcpack      Bedrock  -> optional behavior pack:
+#                                             restores the rainy sky after
+#                                             rejoining a world while it rains
 #   build/VibrantVisuals-Check-<ver>.mcpack   Bedrock  -> diagnostic; turns the
 #                                             world magenta iff deferred
 #                                             rendering is actually running
@@ -64,6 +67,24 @@ if [[ -n "$vanilla" ]]; then
   (cd build/pbr && zip -r -q "../../$pbr" . -x '.*')
   echo "$pbr"
 fi
+
+# Behavior pack: resends rain after rejoining a rainy world (the game shows
+# a clear sky until the weather changes). Same patch stamping as above.
+sync_stage="build/stage/weather_sync"
+rm -rf "$sync_stage" && mkdir -p build/stage && cp -r weather_sync "$sync_stage"
+python3 - "$sync_stage/manifest.json" "$patch" <<'PYEOF'
+import json, sys
+path, patch = sys.argv[1], int(sys.argv[2])
+manifest = json.load(open(path, encoding="utf-8"))
+for entry in [manifest["header"]] + manifest["modules"]:
+    entry["version"] = entry["version"][:2] + [patch]
+open(path, "w", encoding="utf-8").write(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+PYEOF
+sync="build/VYSE-Weather-Sync-${version}.mcpack"
+rm -f "$sync"
+(cd "$sync_stage" && zip -r -q "../../../$sync" . -x '.*')
+rm -rf build/stage
+echo "$sync"
 
 # Diagnostic: answers "is deferred rendering even running?" - see diagnostic/README.md
 check="build/VibrantVisuals-Check-${version}.mcpack"

@@ -1,0 +1,32 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "VYSE Weather Sync",
+    "description": "Behavior pack for VYSE-Vibrant Visuals: after reopening a world while it rains, the game shows a clear sky with rain falling. This restarts the rain once when you join, so the sky turns rainy again.",
+    "uuid": "08038915-9a45-4b5c-851e-296675ca4ac5",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 21, 50]
+  },
+  "modules": [
+    {
+      "type": "data",
+      "uuid": "99b92d47-06dc-4bf6-9b4f-e9e3cb0ad46c",
+      "version": [1, 0, 0]
+    },
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "9d37ffd0-1758-41ee-a4e8-b777ee92f332",
+      "version": [1, 0, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    { "module_name": "@minecraft/server", "version": "1.16.0" }
+  ],
+  "metadata": {
+    "authors": ["aorin-ars"],
+    "license": "MIT",
+    "url": "https://github.com/aorin-ars/Vibrant-visuals"
+  }
+}
