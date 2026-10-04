@@ -24,6 +24,8 @@ texture sets on top of them:
            ores" (GLOWING_ORES)
   wet      mobs, boats, minecarts... turn darker and glossy while rain falls
            on them or they are in water (tools/wet_entities.py)
+  through  stained glass lets light through and glows in its own colour when
+           the sun is behind it (LIT_THROUGH)
   shine    ice, metal blocks, gems, obsidian, glazed terracotta and polished
            stone are smoother, so they catch reflections (SMOOTHER); in every
            block with relief the crevices are a little rougher than the tops
@@ -172,6 +174,17 @@ SMOOTHER = {
 }
 CREVICE_ROUGHNESS = 50    # extra roughness (0-255) at the lowest point of the relief
 
+# Light through: stained glass passes light (subsurface), so a pane glows in
+# its own colour when the sun shines through it from behind - stained glass
+# in a sunlit window or roof. Vanilla gives glass no transmission at all.
+# Vibrant Visuals cannot tint the sunlight that reaches the floor behind the
+# glass (its shadows have no colour), so this is as close as it gets. Clear
+# and black glass are left as they are.
+LIT_THROUGH = [
+    ("glass_black", 0), ("glass_pane_top_black", 0), ("glass_pane_top", 0),
+    ("glass_*", 0.75),
+]
+
 
 def match(name: str, table):
     """First value whose pattern matches the texture name (dict or pair list)."""
@@ -303,7 +316,8 @@ def main() -> int:
     out: Path = args.out
     if out.exists():
         shutil.rmtree(out)
-    counts = {"relief": 0, "entity relief": 0, "glow": 0, "glowing ores": 0, "shine": 0}
+    counts = {"relief": 0, "entity relief": 0, "glow": 0, "glowing ores": 0, "shine": 0,
+              "light through": 0}
     skipped: dict[str, int] = {}
 
     def skip(reason):
@@ -383,6 +397,10 @@ def main() -> int:
             if factor:
                 mers[..., 2] *= factor
                 counts["shine"] += 1
+            through = match(key, LIT_THROUGH)
+            if through:
+                mers[..., 3] = np.maximum(mers[..., 3], 255 * through)
+                counts["light through"] += 1
 
         changed_mers = mers is not None and not np.array_equal(
             np.round(np.clip(mers, 0, 255)), mers_orig)
@@ -447,7 +465,8 @@ def main() -> int:
 
     print(f"{out}: {counts['relief']} block textures with relief, {counts['entity relief']} "
           f"chest/bed/sign/... textures with relief, {counts['glow']} brighter light blocks, "
-          f"{counts['glowing ores']} glowing ores, {counts['shine']} smoother surfaces")
+          f"{counts['glowing ores']} glowing ores, {counts['shine']} smoother surfaces, "
+          f"{counts['light through']} stained glass textures that let light through")
     if wet:
         print(f"  wet in rain: {wet['entities']} entities, {wet['textures']} wet textures, "
               f"{wet['controllers']} render controllers")
