@@ -1037,20 +1037,23 @@ PBR = {
 # The skyboxes are clouds on a transparent background, so these values only
 # decide how the clouds are lit; the sky behind them is the atmosphere.
 #  - sky light: clouds take on the colour of the sky around them
-#  - directional light: they turn gold and pink at sunset with the sun.
-#    This share is one constant for the sun and the moon, and the game
-#    exposes nights about as much brighter as the moon is weaker, so
-#    whatever it is, moonlit clouds look as bright against the night as
-#    sunlit ones do against the day. At 0.22 they stood out crisp white
-#    at night; 0.10 leaves a faint silver.
-#  - ambient: the only light here that follows the clock, so it carries
-#    the daytime brightness the lower directional share gave up, fades
-#    through sunset - still under the sun's share, so clouds keep its
-#    gold - and is zero at night, when clouds should be dim grey-blue
-#    shapes against the sky. In game this scale is strong (0.7 made
-#    clouds glow white at midnight); low at dawn, when clouds are dark
-#    silhouettes (早朝). Keyframes sit at real sun elevations, as in the
-#    lighting tables.
+#  - directional light: they turn gold and pink at sunset with the sun,
+#    and - the main reason it carries most of their light - it dims in
+#    rain, when the game turns the sun down and the sky grey: clouds lit
+#    mostly by it grey over with the sky, which then reads as one
+#    overcast deck instead of white puffs on a dark sky. The share is one
+#    constant for the sun and the moon, and the game exposes nights about
+#    as much brighter as the moon is weaker, so moonlit clouds look about
+#    as bright against the night as sunlit ones against the day: at 0.22
+#    they stood out crisp white at night, 0.12 leaves a faint silver.
+#  - ambient: the only light here that follows the clock, but not the
+#    weather, so it is kept small - at 8 by day it held the clouds white
+#    through rain. It fills in by day, fades through sunset under the
+#    sun's share, so clouds keep its gold, and is zero at night, when
+#    clouds should be dim grey-blue shapes against the sky. In game this
+#    scale is strong (0.7 made clouds glow white at midnight); low at
+#    dawn, when clouds are dark silhouettes (早朝). Keyframes sit at real
+#    sun elevations, as in the lighting tables.
 #  - no atmospheric or volumetric scattering: with it on, the game haze
 #    erased every cloud below about 20 degrees, so the sky looked painted
 #    only overhead. Distance haze is drawn into the images instead.
@@ -1060,13 +1063,13 @@ CLOUD_CUBEMAP = {
         "description": {"identifier": "minecraft:default_cubemap"},
         "lighting": {
             "ambient_light_illuminance": keyframes({
-                0.000: 8.0, 0.150: 7.5, 0.200: 6.0, 0.250: 4.0, 0.265: 2.2,
-                0.283: 1.1, 0.300: 0.5, 0.330: 0.06, 0.400: 0.0, 0.600: 0.0,
-                0.670: 0.06, 0.700: 0.3, 0.717: 0.6, 0.735: 2.2, 0.750: 4.0,
-                0.800: 6.0, 0.850: 7.5, 1.000: 8.0,
+                0.000: 2.5, 0.150: 2.4, 0.200: 2.0, 0.250: 1.5, 0.265: 1.0,
+                0.283: 0.6, 0.300: 0.3, 0.330: 0.04, 0.400: 0.0, 0.600: 0.0,
+                0.670: 0.04, 0.700: 0.2, 0.717: 0.4, 0.735: 1.0, 0.750: 1.5,
+                0.800: 2.0, 0.850: 2.4, 1.000: 2.5,
             }),
             "sky_light_contribution": 1.0,
-            "directional_light_contribution": 0.10,
+            "directional_light_contribution": 0.12,
             "affected_by_atmospheric_scattering": False,
             "affected_by_volumetric_scattering": False,
         },
