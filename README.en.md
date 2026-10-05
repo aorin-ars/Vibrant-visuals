@@ -59,7 +59,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | Sky through the day | Muted | A low sun lights the land gold to orange instead of turning red and dim. Early morning (magenta turning orange-gold) → morning (warm cream horizon in a blue sky) → noon (blue sky paling to an almost white horizon) → late afternoon (gold to peach horizon) → sunset (lavender above a coral-pink horizon — the whole sky goes pastel, like Complementary's sunsets) → night (navy) → late night (deep navy). Never black |
 | Sky | Nearly one even blue (Rayleigh 10) | Rayleigh down to 1.3, so the sky is a real gradient from the blue zenith to a pale horizon; a **small halo gathered around the sun** instead of vanilla's milky haze over half the sky; a faint halo around the moon at night |
 | Shadows | Grey (full sky light) | Sky light cut to 60 %, for a clear step between sun and shade; shade stays blue-grey, never black. Short shadows (noon sun 78° up). More sky light at sunset, so the coloured sky fills the shade |
-| Night | Moonlight 0.4 | **Moonlight 1.0**, blue: moonlit faces stand out and the valley haze glows blue |
+| Night | Moonlight 0.4 | Early in the night **moonlight 0.6**, blue: moonlit faces stand out and the valley haze glows blue. **The deep night is dark like a real one**: moonlight 0.2 (half of vanilla), less sky light, a nearly black-blue sky; shapes show faint blue-grey and shade is close to black. Torches and other block light are not dimmed, so they stand out in the dark |
 | Air | Uniform fog in some biomes | **Clear air with depth**: distant terrain fades to blue rather than milky white, haze gathers in valleys and caves (densest low, gone around y=170), glows gold toward a low sun and blue under the moon. **Light shafts** through leaves and cave openings **show without looking into the sun** — with the sun off screen or behind a tree, wherever the light makes them. Mistier in humid forests, swamps and savannas, clearer in deserts; none in the Nether |
 | Rain | Dark grey fog | **A soft, misty rain**: a pale blue-grey mist softens things a few dozen blocks away and swallows the distance, trees turning to grey silhouettes (it starts at 6 % of the render distance and is complete at 62 %); the haze thickens and reaches over the hills. Raindrops splash as the game's own small blue droplets |
 | Water | No waves, the old water pattern | **Clear water**: nothing in it but water (no plankton, no silt) and a more transparent surface than vanilla's, so the bottom and water plants show through; vanilla's water pattern (white streaks) and its normal map are replaced, leaving only gentle ripples, so the sky and shore reflect cleanly; a hint of the biome's water colour |
@@ -301,7 +301,7 @@ JSON directly works too, but regenerating overwrites it).
 | Halo around the sun | `SUN_MIE` (brightness) and `SUN_GLARE` (higher keeps it closer to the sun) |
 | Darker / lighter shadows | `SKY_INTENSITY` (sky light, 0.1–1.0; lower is darker shade) |
 | Darker / lighter caves | `AMBIENT_ILLUMINANCE` |
-| Brighter nights | `MOON_ILLUMINANCE` |
+| Night brightness | `MOON_ILLUMINANCE` (the deep night is its 0.400–0.600 entries), the night entries of `SKY_INTENSITY`, `DEEP_NIGHT_ZENITH` (midnight sky colour) |
 | Less / more haze | first number of each `HAZE` entry (density) |
 | How light shafts show | third number of each `HAZE` entry (forward scattering: closer to 1 shows them only looking into the sun, lower shows them from the side too) |
 | Overall character | `TONE_MAP` (`aces`, `generic`, `hable`, ...) |

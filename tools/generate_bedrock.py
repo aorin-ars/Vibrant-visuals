@@ -189,12 +189,17 @@ SUN_COLOR = {
     1.000: [255, 248, 236],
 }
 
-# Strong blue moonlight - vanilla's is 0.4. With the reduced sky fill below
-# it is what nights are seen by: moonlit faces stand out blue against dark
-# shade, and the valley haze glows a faint blue, as in Complementary's nights.
+# Blue moonlight that fades into a real, dark night. Early in the night it
+# is 0.6 (vanilla 0.4 all night): moonlit faces stand out blue against dark
+# shade and the valley haze glows a faint blue, as in Complementary's
+# evenings. Toward midnight (深夜) it sinks to 0.2, half of vanilla's, so the
+# deep night is dark the way a real one is - shapes in faint blue-grey,
+# shade close to black - while torches and other block light, which this
+# does not touch, stand out in it. At 1.0 all night, midnight looked like
+# dusk.
 MOON_ILLUMINANCE = {
-    0.000: 0.0, 0.200: 0.0, 0.225: 0.6, 0.300: 1.0,
-    0.700: 1.0, 0.735: 0.6, 0.750: 0.0, 1.000: 0.0,
+    0.000: 0.0, 0.200: 0.0, 0.225: 0.4, 0.300: 0.6, 0.360: 0.32, 0.400: 0.2,
+    0.600: 0.2, 0.640: 0.32, 0.700: 0.6, 0.735: 0.4, 0.750: 0.0, 1.000: 0.0,
 }
 MOON_COLOR = [124, 160, 255]
 
@@ -206,7 +211,7 @@ MOON_COLOR = [124, 160, 255]
 # when the moon should do the lighting.
 SKY_INTENSITY = mirror({
     0.000: 0.60, 0.200: 0.62, 0.250: 0.68, 0.283: 0.75, 0.300: 0.72,
-    0.330: 0.58, 0.400: 0.50, 0.500: 0.50,
+    0.330: 0.58, 0.360: 0.45, 0.400: 0.30, 0.500: 0.30,
 })
 
 # Fallback light for caves and for surfaces with nothing to reflect. Kept at
@@ -223,8 +228,8 @@ AMBIENT_COLOR = {
     1.000: [210, 224, 255],
 }
 AMBIENT_ILLUMINANCE = {
-    0.000: 0.022, 0.283: 0.020, 0.340: 0.017,
-    0.660: 0.017, 0.717: 0.020, 1.000: 0.022,
+    0.000: 0.022, 0.283: 0.020, 0.340: 0.017, 0.400: 0.013,
+    0.600: 0.013, 0.660: 0.017, 0.717: 0.020, 1.000: 0.022,
 }
 
 
@@ -361,13 +366,14 @@ BLEND_START = mirror({0.0: 0.70, 0.25: 0.50, 0.301: 0.25, 0.5: 0.25})
 BLEND_MIE_START = {0.0: 0.5, 0.1: 0.5, 0.2: 1.0, 0.8: 1.0, 0.9: 0.5, 1.0: 0.5}
 BLEND_MAX = {0.0: 0.25, 1.0: 0.25}
 
-# Night is navy, not black: a lighter band at the horizon early in the night
-# (夜), deepening toward midnight (深夜). A little brighter than the colours
-# would need at vanilla's night Rayleigh (5), since this pack's is 1.6.
+# Early night (夜) is navy with a lighter band at the horizon; toward
+# midnight (深夜) the sky goes nearly black-blue, as a real night sky does
+# away from city lights. A little brighter than the colours would need at
+# vanilla's night Rayleigh (5), since this pack's is 1.6.
 NIGHT_ZENITH = [20, 36, 92]
 NIGHT_HORIZON = [46, 64, 118]
-DEEP_NIGHT_ZENITH = [10, 18, 50]
-DEEP_NIGHT_HORIZON = [24, 36, 70]
+DEEP_NIGHT_ZENITH = [5, 9, 27]
+DEEP_NIGHT_HORIZON = [12, 18, 38]
 
 # Complementary's sunset: the whole sky turns pastel - lavender overhead,
 # peach to coral-pink at the horizon, rose and violet after the sun is gone.
