@@ -29,6 +29,7 @@ No vanilla file is copied into the pack.
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import sys
 from pathlib import Path
@@ -160,9 +161,10 @@ SUN_ILLUMINANCE = mirror({
 
 # Neutral white from late morning to mid-afternoon - no yellow cast at noon.
 # Warmth only arrives with low sun: gold below ~20 degrees, orange below
-# ~10, and in the last few degrees a red sun, as a real one is when its
-# light crosses the most air - at sunset (日没) and at sunrise (早朝) alike,
-# so the land glows red-orange for those minutes. Below the horizon the
+# ~10, and in the last few degrees a deep red-orange sun, as a real one is
+# when its light crosses the most air - at sunset (日没) and at sunrise (早朝)
+# alike, so the land glows orange for those minutes. Kept orange rather than
+# pink-red (no blue in it): photos of real sunsets read orange. Below the horizon the
 # colour only feeds sky scattering, which paints the rose and violet of
 # twilight.
 SUN_COLOR = {
@@ -170,19 +172,19 @@ SUN_COLOR = {
     0.150: [255, 246, 232],
     0.200: [255, 240, 220],
     0.230: [255, 222, 180],
-    0.250: [255, 188, 122],
-    0.265: [255, 142, 82],
-    0.275: [255, 102, 54],
-    0.283: [255, 72, 40],
+    0.250: [255, 178, 88],
+    0.265: [255, 146, 54],
+    0.275: [255, 118, 34],
+    0.283: [255, 96, 22],
     0.300: [255, 110, 120],
     0.330: [255, 140, 150],
     0.500: [255, 110, 60],
     0.670: [255, 140, 150],
     0.700: [255, 120, 130],
-    0.717: [255, 72, 40],
-    0.725: [255, 104, 56],
-    0.735: [255, 146, 86],
-    0.750: [255, 192, 128],
+    0.717: [255, 96, 22],
+    0.725: [255, 118, 34],
+    0.735: [255, 146, 54],
+    0.750: [255, 182, 96],
     0.770: [255, 228, 190],
     0.800: [255, 242, 222],
     0.845: [255, 246, 232],
@@ -353,10 +355,10 @@ RAYLEIGH = mirror({0.0: 1.30, 0.15: 1.30, 0.20: 1.20, 0.25: 1.15, 0.283: 1.15,
 # in-game test showed a large white blotch round the sun), spreading into a
 # big warm glow as the sun sets. The same lobe shapes the moon's glow at
 # night.
-SUN_MIE = mirror({0.0: 0.22, 0.15: 0.26, 0.20: 0.40, 0.25: 0.90, 0.283: 1.50,
-                  0.30: 0.80, 0.34: 0.0, 0.5: 0.0})
-SUN_GLARE = mirror({0.0: 12.0, 0.15: 10.0, 0.20: 7.0, 0.25: 4.5, 0.283: 3.2,
-                    0.30: 3.5, 0.34: 5.0, 0.5: 5.0})
+SUN_MIE = mirror({0.0: 0.22, 0.15: 0.26, 0.20: 0.45, 0.25: 1.20, 0.283: 2.20,
+                  0.30: 1.10, 0.34: 0.0, 0.5: 0.0})
+SUN_GLARE = mirror({0.0: 12.0, 0.15: 10.0, 0.20: 6.5, 0.25: 4.0, 0.283: 2.6,
+                    0.30: 3.0, 0.34: 5.0, 0.5: 5.0})
 MOON_MIE = {0.0: 0.0, 0.27: 0.0, 0.33: 0.40, 0.67: 0.40, 0.73: 0.0, 1.0: 0.0}
 
 # Horizon blend: vanilla's shape, with the zenith taking over a little lower at
@@ -375,10 +377,12 @@ NIGHT_HORIZON = [46, 64, 118]
 DEEP_NIGHT_ZENITH = [5, 9, 27]
 DEEP_NIGHT_HORIZON = [12, 18, 38]
 
-# Complementary's sunset: the whole sky turns pastel - lavender overhead,
-# peach to coral-pink at the horizon, rose and violet after the sun is gone.
-DUSK_ZENITH = (126, 110, 184)
-DAWN_ZENITH = (104, 116, 192)
+# Sunsets and sunrises like photos of real ones: at sunset the sky warms to
+# amber overhead over a deep red-orange horizon; at sunrise a red-orange
+# band lies along the horizon under an indigo sky. (The pastel lavender and
+# coral-pink of earlier versions read too soft.)
+DUSK_ZENITH = (176, 112, 92)
+DAWN_ZENITH = (72, 76, 154)
 
 
 def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
@@ -386,28 +390,29 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
     """Zenith and horizon colour keyframes around one day palette.
 
     Stops sit at real sun elevations (see the table above SUN_ILLUMINANCE):
-    blue noon; a gold, then peach horizon under a softening blue as the sun
-    gets low (夕方); coral-pink horizon under a lavender sky with the sun on
-    the horizon (日没); rose and violet twilight; navy night. Dawn has its own
-    colours: magenta turning orange-gold under a blue-violet sky (早朝), then
-    a warm cream horizon in a blue morning sky (朝).
+    blue noon; a gold, then orange horizon under a warming sky as the sun
+    gets low (夕方); a deep red-orange horizon under an amber sky with the
+    sun on the horizon (日没), like a photo of a real sunset; a red afterglow
+    fading through maroon and dusky violet; navy night. Dawn has its own
+    colours: a red-orange band along the horizon under an indigo sky (早朝),
+    turning gold, then a warm horizon in a blue morning sky (朝).
     """
     t = twilight or {}
     day_zenith, day_horizon = list(day_zenith), list(day_horizon)
     dusk_zenith, dawn_zenith = list(dusk_zenith), list(dawn_zenith)
-    golden = t.get("golden", [255, 196, 128])
-    morning = t.get("morning", [255, 222, 186])
+    golden = t.get("golden", [255, 172, 80])
+    morning = t.get("morning", [255, 204, 150])
     zenith = {
         0.000: day_zenith,
         0.200: lerp_rgb(day_zenith, dusk_zenith, 0.1),
         0.250: lerp_rgb(day_zenith, dusk_zenith, 0.55),
         0.283: dusk_zenith,
-        0.300: t.get("zenith_dusk", [70, 62, 138]),
+        0.300: t.get("zenith_dusk", [74, 52, 108]),
         0.330: NIGHT_ZENITH,
         0.400: DEEP_NIGHT_ZENITH,
         0.600: DEEP_NIGHT_ZENITH,
         0.670: NIGHT_ZENITH,
-        0.700: t.get("zenith_dawn", [48, 60, 132]),
+        0.700: t.get("zenith_dawn", [38, 42, 108]),
         0.717: dawn_zenith,
         0.750: lerp_rgb(dawn_zenith, day_zenith, 0.6),
         0.800: lerp_rgb(day_zenith, dawn_zenith, 0.1),
@@ -419,20 +424,20 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
         0.210: lerp_rgb(day_horizon, golden, 0.35),
         0.235: lerp_rgb(day_horizon, golden, 0.7),
         0.250: golden,
-        0.265: t.get("sunset", [255, 166, 112]),
-        0.278: t.get("sunset_deep", [255, 136, 100]),
-        0.290: t.get("afterglow", [246, 116, 120]),
-        0.300: t.get("rose", [200, 104, 150]),
-        0.315: t.get("violet", [128, 92, 170]),
+        0.265: t.get("sunset", [255, 130, 42]),
+        0.278: t.get("sunset_deep", [255, 96, 24]),
+        0.290: t.get("afterglow", [232, 70, 32]),
+        0.300: t.get("rose", [164, 60, 72]),
+        0.315: t.get("violet", [90, 56, 118]),
         0.340: NIGHT_HORIZON,
         0.400: DEEP_NIGHT_HORIZON,
         0.600: DEEP_NIGHT_HORIZON,
         0.660: NIGHT_HORIZON,
-        0.685: t.get("violet_dawn", [100, 88, 160]),
-        0.700: t.get("magenta_dawn", [184, 108, 152]),
-        0.712: t.get("sunrise", [255, 146, 112]),
-        0.720: t.get("sunrise_gold", [255, 178, 116]),
-        0.735: lerp_rgb(t.get("sunrise_gold", [255, 178, 116]), morning, 0.5),
+        0.685: t.get("violet_dawn", [66, 60, 136]),
+        0.700: t.get("magenta_dawn", [196, 78, 56]),
+        0.712: t.get("sunrise", [255, 102, 28]),
+        0.720: t.get("sunrise_gold", [255, 136, 40]),
+        0.735: lerp_rgb(t.get("sunrise_gold", [255, 136, 40]), morning, 0.5),
         0.750: morning,
         0.770: lerp_rgb(morning, day_horizon, 0.6),
         0.800: lerp_rgb(morning, day_horizon, 0.9),
@@ -496,8 +501,8 @@ def flat_atmosphere(identifier, zenith, horizon, rayleigh, *, start=0.8, mie_sta
 DAY_ZENITH = [88, 146, 224]
 DAY_HORIZON = [184, 208, 236]
 
-DESERT_TWILIGHT = {"golden": [255, 204, 146], "sunset": [255, 176, 112],
-                   "sunset_deep": [255, 146, 96], "rose": [212, 112, 128]}
+DESERT_TWILIGHT = {"golden": [255, 180, 96], "sunset": [255, 140, 52],
+                   "sunset_deep": [255, 104, 30], "rose": [176, 70, 70]}
 
 ATMOSPHERICS = {
     "atmospherics.json": overworld_atmosphere(
@@ -701,6 +706,15 @@ WATER = {
         "biome_water_color_contribution": 0.12,
     },
 }
+
+# The lightweight subpack's water. The waves are summed octave by octave for
+# every water pixel, so fewer octaves is less work; each step is larger, so
+# the 10 octaves still run from the same broad swell (1.2) to the same fine
+# ripples (1.2 x 1.3^9, about 13, against 1.2 x 1.15^19 for the 20) at the
+# same speeds - the surface loses some in-between detail, not its ripples.
+LITE_WATER = copy.deepcopy(WATER)
+LITE_WATER["minecraft:water_settings"]["waves"].update(
+    {"octaves": 10, "frequency_scaling": 1.3, "speed_scaling": 1.085})
 
 
 # --------------------------------------------------------------------------
@@ -1105,8 +1119,12 @@ DEFAULT_CUBEMAP = {
 SKY_SUBPACKS = {
     "no_clouds": DEFAULT_CUBEMAP,
     "high_clouds": CLOUD_CUBEMAP,
+    "lite_clouds": CLOUD_CUBEMAP,
     "unbound_clouds": CLOUD_CUBEMAP,
 }
+# The lightweight subpack: the soft clouds at half resolution (draw_sky.py)
+# and cheaper water; everything else - light, sky, fog, PBR - is the same.
+LITE_SUBPACK = "lite_clouds"
 
 
 # --------------------------------------------------------------------------
@@ -1195,6 +1213,7 @@ def main() -> int:
     write(PACK / "pbr/global.json", PBR)
     for subpack, settings in SKY_SUBPACKS.items():
         write(PACK / "subpacks" / subpack / "cubemaps/default_cubemap.json", settings)
+    write(PACK / "subpacks" / LITE_SUBPACK / "water/water.json", LITE_WATER)
 
     for old in (DIAG / "lighting").glob("*.json"):
         old.unlink()

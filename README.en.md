@@ -55,8 +55,8 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | | Vanilla Vibrant Visuals | VYSE-Vibrant Visuals |
 |---|---|---|
 | Picture | "generic" tone mapping | **ACES (filmic) tone mapping**: firm shade, rich midtones, bright skies and sunsets rolling smoothly into white. A different look from stock Vibrant Visuals at the root |
-| Sunlight | Whitish, fades early in the afternoon | **Clear white** at noon, at vanilla's 100 (125 blew out bright walls and the sky); the contrast with the shade comes from less sky light. Gold as the sun gets low, then orange, and a **red sun** in its last few degrees at sunset and sunrise, the land glowing red-orange |
-| Sky through the day | Muted | A low sun lights the land gold to orange instead of turning red and dim. Early morning (magenta turning orange-gold) → morning (warm cream horizon in a blue sky) → noon (blue sky paling to an almost white horizon) → late afternoon (gold to peach horizon) → sunset (lavender above a coral-pink horizon — the whole sky goes pastel, like Complementary's sunsets) → night (navy) → late night (deep navy). Never black |
+| Sunlight | Whitish, fades early in the afternoon | **Clear white** at noon, at vanilla's 100 (125 blew out bright walls and the sky); the contrast with the shade comes from less sky light. Gold as the sun gets low, then deep orange, and a **red-orange sun** in its last few degrees at sunset and sunrise, the land glowing orange |
+| Sky through the day | Muted | **Strongly orange sunrises and sunsets**, like photographs. Sunrise (indigo overhead, a red-orange band along the horizon) → morning (warm cream horizon in a blue sky) → noon (blue sky paling to an almost white horizon) → late afternoon (gold to orange horizon) → sunset (amber high into the sky over a red-orange horizon, a wide glow around the sun) → afterglow (red fading to violet) → night (navy) → late night (deep navy). Never black |
 | Sky | Nearly one even blue (Rayleigh 10) | Rayleigh down to 1.3, so the sky is a real gradient from the blue zenith to a pale horizon; a **small halo gathered around the sun** instead of vanilla's milky haze over half the sky; a faint halo around the moon at night |
 | Shadows | Grey (full sky light) | Sky light cut to 60 %, for a clear step between sun and shade; shade stays blue-grey, never black. Short shadows (noon sun 78° up). More sky light at sunset, so the coloured sky fills the shade |
 | Night | Moonlight 0.4 | Early in the night **moonlight 0.6**, blue: moonlit faces stand out and the valley haze glows blue. **The deep night is dark like a real one**: moonlight 0.2 (half of vanilla), less sky light, a nearly black-blue sky; shapes show faint blue-grey and shade is close to black. Torches and other block light are not dimmed, so they stand out in the dark |
@@ -66,7 +66,7 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | Underwater | — | The game's own (an earlier underwater fog made the player's shadow show up as a dark shape, so it was removed) |
 | Block light | One colour | **Coloured**: torches and fire orange, soul fire cyan, redstone red, amethyst and ender blocks violet, sea lanterns cyan-white, end rods a cool bluish white, invisible light blocks the cool white of fluorescent tubes (#EEF4FF) for lighting train cars and stations — 122 blocks |
 | Sun and moon | Squares | **Small round sun** (1/6 the width of vanilla's square; its halo comes from the sky's scattering), **small round moon** with craters and all 8 phases |
-| Clouds | Flat blocky slabs | **Soft fair-weather clouds painted across the whole sky** (a skybox): white patches with blue gaps between them and ragged, wispy margins, smaller and denser toward the horizon; tinted by the sun at sunset. [See below](#sky-clouds-skybox) |
+| Clouds | Flat blocky slabs | **Soft fair-weather clouds painted across the whole sky** (a skybox): white patches with blue gaps between them and ragged, wispy margins, smaller and denser toward the horizon; tinted orange at sunset. [See below](#sky-clouds-skybox) |
 | Grading | Contrast 1.15 / saturation 1.05 | On top of ACES: contrast 1.10 / saturation 1.10, no extra gain (it helped blow out daylight), and a slightly cool white balance (6100 K) — the clean, faintly blue cast of Complementary's daytime (leaves blue-green rather than lime); shadows lean slightly cool, highlights slightly warm (tinted, not brightened) |
 
 ### Why every biome is covered
@@ -92,7 +92,7 @@ Vibrant Visuals lights those images with the sun and sky
 This pack uses that to paint **clouds on a transparent background** into the
 sky. Everywhere else the normal Vibrant Visuals sky shows through, so its
 colours, sunsets and nights still follow the time of day, and only the clouds
-take on the light — white at noon, gold to pink at sunset, dim grey-blue
+take on the light — white at noon, gold to orange at sunset, dim grey-blue
 shapes at night. In rain the game dims the sun and greys the sky, and the
 clouds grey over with it, so the whole sky reads as one overcast deck (the
 amount of cloud itself is an image and cannot follow the weather).
@@ -104,6 +104,7 @@ tap the active VYSE-Vibrant Visuals → the gear (⚙).
 |---|---|---|
 | **Sky: soft clouds** (default) | Soft fair-weather clouds | **Hidden automatically** (no flat blocky clouds) |
 | Sky: soft clouds + the game's clouds | The same clouds | Keep them on — for pairing with the shadow-casting vanilla clouds |
+| Lite: soft clouds, faster | The same clouds at half resolution, plus lighter water. [Lite mode](#lite-mode) | Hidden automatically |
 | Sky: no clouds | Nothing painted | Up to you |
 
 Worth knowing:
@@ -140,6 +141,33 @@ cirrus, its strands all converging on one point of the horizon, read as a
 swirl). Every face samples the same continuous layer, so there are no seams.
 No photos are used; it is all computed. No sun direction is baked in (the
 real one moves); the game adds the sun's colour.
+
+## Lite mode
+
+Pick **Lite: soft clouds, faster** in the pack's settings (the gear ⚙) for a
+lighter version that looks almost the same: only the costly parts change.
+
+| | Normal | Lite |
+|---|---|---|
+| Cloud images | 6 × 1024×1024 | **6 × 512×512** (a quarter of the GPU memory). They are magnified on screen anyway, so the edges only soften a little |
+| Water waves | 20 octaves | **10 octaves** (about half the work per water pixel). Each octave steps further, so the surface still runs from the same broad swell to the same fine ripples |
+| Light, sky, fog, PBR, shadows | | Unchanged (changing them changes the look) |
+
+To be honest, **a pack cannot make much lighter**. Most of Vibrant Visuals'
+cost is the rendering itself — shadows, volumetric fog, reflections — and
+only the video settings change its quality. For a smooth game, use lite mode
+together with these video settings (names vary by version; roughly the most
+gain for the least visible loss first):
+
+1. **Upscaling / resolution**: upscaling on, or a slightly lower render resolution. The biggest gain
+2. **Point light shadows**: off (shadows of torch light; hardly noticed by day or outdoors)
+3. **Volumetric fog quality**: low to medium (light shafts stay)
+4. **Reflection quality**: low (water reflections a little coarser)
+5. **Shadow quality**: medium (distant shadows a little coarser)
+6. **Render distance**: a little shorter (the distance haze hides it)
+
+The **PBR add-on** (block relief and gloss) adds textures and memory; on a
+weak device, leaving it off saves the most.
 
 ## What a resource pack cannot do
 
@@ -352,7 +380,7 @@ pip install pillow numpy
 V=bedrock-samples/resource_pack
 
 python3 tools/generate_bedrock.py --vanilla $V   # settings files (bedrock/ and diagnostic/)
-python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes)
+python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes; also the lite clouds)
 python3 tools/draw_water.py                      # plain water textures
 python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
 tools/package.sh --vanilla $V                    # distributables, including the PBR add-on

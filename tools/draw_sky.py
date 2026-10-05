@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draw the sun, the moon and the cloud skyboxes for bedrock/.
 
-    tools/draw_sky.py [--skip-clouds]       (needs Pillow and numpy)
+    tools/draw_sky.py [--skip-clouds | --lite-only]   (needs Pillow and numpy)
 
 Everything here is drawn procedurally; no vanilla or third-party art is used.
 
@@ -47,6 +47,9 @@ horizon. No single feature is so regular that it reads as a pattern from
 any direction - the earlier cirrus fibres, all converging on one point of
 the horizon, looked like a swirl. There are no seams between faces because
 they all sample one continuous field.
+
+The lightweight subpack (lite_clouds) gets the same faces at half the
+resolution; --lite-only remakes just those from the drawn ones.
 """
 
 from __future__ import annotations
@@ -210,7 +213,13 @@ HORIZON_HAZE = np.array([0.80, 0.87, 0.97])   # what distant clouds fade toward
 # transparent clouds.png, which removes the flat block clouds without the
 # player having to find the video setting. The other keeps the game's 3D
 # clouds (which cast shadows in Vibrant Visuals) with the painted ones.
-REPLACES_VANILLA_CLOUDS = {"unbound_clouds"}
+REPLACES_VANILLA_CLOUDS = {"unbound_clouds", "lite_clouds"}
+
+# The lightweight subpack: the same clouds at half the resolution (a quarter
+# of the GPU memory). They are already magnified on screen, so they only
+# soften a little.
+LITE_SUBPACK = "lite_clouds"
+LITE_FACE_SIZE = FACE_SIZE // 2
 
 
 def face_dirs(face: int, n: int, rows: slice = slice(None)) -> np.ndarray:
@@ -364,28 +373,57 @@ def draw_cloud_face(face: int) -> Image.Image:
     return Image.fromarray(np.dstack([to_u8(np.clip(straight, 0, 1)), to_u8(a)]), "RGBA")
 
 
+def half_size(image: Image.Image) -> Image.Image:
+    """Downsample in premultiplied space, like draw_cloud_face, so the
+    smaller faces keep clean cloud edges."""
+    a = np.asarray(image, dtype=np.float64) / 255.0
+    pre = np.dstack([a[..., :3] * a[..., 3:], a[..., 3:]])
+    n = LITE_FACE_SIZE
+    pre = pre.reshape(n, a.shape[0] // n, n, a.shape[1] // n, 4).mean(axis=(1, 3))
+    alpha = pre[..., 3]
+    straight = np.where(alpha[..., None] > 1e-4,
+                        pre[..., :3] / np.maximum(alpha, 1e-6)[..., None], 0.95)
+    return Image.fromarray(np.dstack([to_u8(np.clip(straight, 0, 1)), to_u8(alpha)]), "RGBA")
+
+
+def write_lite(faces: list[Image.Image]) -> None:
+    write_faces(LITE_SUBPACK, [half_size(f) for f in faces])
+
+
+def write_faces(name: str, faces: list[Image.Image]) -> None:
+    out = ROOT / "bedrock/subpacks" / name / "textures/environment/overworld_cubemap"
+    out.mkdir(parents=True, exist_ok=True)
+    for face, image in enumerate(faces):
+        image.save(out / f"cubemap_{face}.png", optimize=True)
+    clouds = out.parent / "clouds.png"
+    if name in REPLACES_VANILLA_CLOUDS:
+        # Same size as vanilla's cloud map (256x256), nothing in it.
+        Image.new("RGBA", (256, 256), (255, 255, 255, 0)).save(clouds)
+    elif clouds.exists():
+        clouds.unlink()
+    size = sum((out / f"cubemap_{f}.png").stat().st_size for f in range(6))
+    print(f"{out}: 6 faces {faces[0].size[0]}x{faces[0].size[1]} RGBA, {size / 1e6:.1f} MB")
+
+
 def draw_skyboxes() -> None:
     faces = [draw_cloud_face(face) for face in range(6)]
     for name in CLOUD_SUBPACKS:
-        out = ROOT / "bedrock/subpacks" / name / "textures/environment/overworld_cubemap"
-        out.mkdir(parents=True, exist_ok=True)
-        for face, image in enumerate(faces):
-            image.save(out / f"cubemap_{face}.png", optimize=True)
-        clouds = out.parent / "clouds.png"
-        if name in REPLACES_VANILLA_CLOUDS:
-            # Same size as vanilla's cloud map (256x256), nothing in it.
-            Image.new("RGBA", (256, 256), (255, 255, 255, 0)).save(clouds)
-        elif clouds.exists():
-            clouds.unlink()
-        size = sum((out / f"cubemap_{f}.png").stat().st_size for f in range(6))
-        print(f"{out}: 6 faces {FACE_SIZE}x{FACE_SIZE} RGBA, {size / 1e6:.1f} MB")
+        write_faces(name, faces)
+    write_lite(faces)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--skip-clouds", action="store_true",
                         help="only redraw the sun and moon (the skyboxes take a few minutes)")
+    parser.add_argument("--lite-only", action="store_true",
+                        help="only remake the lightweight skybox, from the drawn one")
     args = parser.parse_args()
+
+    if args.lite_only:
+        drawn = ROOT / "bedrock/subpacks" / CLOUD_SUBPACKS[0] / "textures/environment/overworld_cubemap"
+        write_lite([Image.open(drawn / f"cubemap_{face}.png").convert("RGBA") for face in range(6)])
+        return
 
     OUT.mkdir(parents=True, exist_ok=True)
     draw_sun_vv().save(OUT / "sun_vv.png", optimize=True)

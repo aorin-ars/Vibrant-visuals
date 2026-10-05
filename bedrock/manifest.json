@@ -27,6 +27,11 @@
       "memory_tier": 0
     },
     {
+      "folder_name": "lite_clouds",
+      "name": "Lite: soft clouds, faster",
+      "memory_tier": 0
+    },
+    {
       "folder_name": "unbound_clouds",
       "name": "Sky: soft clouds",
       "memory_tier": 0
