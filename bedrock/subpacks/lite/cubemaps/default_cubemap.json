@@ -1,0 +1,18 @@
+{
+  "format_version": "1.21.130",
+  "minecraft:cubemap_settings": {
+    "description": {
+      "identifier": "minecraft:default_cubemap"
+    },
+    "lighting": {
+      "ambient_light_illuminance": {
+        "0.000000": 5.625,
+        "1.000000": 5.625
+      },
+      "sky_light_contribution": 1.0,
+      "directional_light_contribution": 0.0,
+      "affected_by_atmospheric_scattering": false,
+      "affected_by_volumetric_scattering": true
+    }
+  }
+}

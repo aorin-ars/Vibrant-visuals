@@ -1097,9 +1097,9 @@ CLOUD_CUBEMAP = {
 }
 
 # The engine's own defaults (Mojang's cubemap documentation). The no-clouds
-# subpack carries these so it has a file at all - a subpack folder must
-# exist, and git does not keep empty ones - and so that choosing it restores
-# exactly the unmodified behaviour.
+# and lite subpacks carry these so they have a file at all - a subpack folder
+# must exist, and git does not keep empty ones - and so that choosing one
+# restores exactly the unmodified behaviour.
 DEFAULT_CUBEMAP = {
     "format_version": CUBEMAP_FORMAT,
     "minecraft:cubemap_settings": {
@@ -1119,12 +1119,12 @@ DEFAULT_CUBEMAP = {
 SKY_SUBPACKS = {
     "no_clouds": DEFAULT_CUBEMAP,
     "high_clouds": CLOUD_CUBEMAP,
-    "lite_clouds": CLOUD_CUBEMAP,
+    "lite": DEFAULT_CUBEMAP,
     "unbound_clouds": CLOUD_CUBEMAP,
 }
-# The lightweight subpack: the soft clouds at half resolution (draw_sky.py)
-# and cheaper water; everything else - light, sky, fog, PBR - is the same.
-LITE_SUBPACK = "lite_clouds"
+# The lightweight subpack: no sky images (the game's own clouds, like
+# no_clouds) and cheaper water; light, sky, fog and PBR are the same.
+LITE_SUBPACK = "lite"
 
 
 # --------------------------------------------------------------------------

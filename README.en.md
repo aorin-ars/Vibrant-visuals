@@ -104,8 +104,8 @@ tap the active VYSE-Vibrant Visuals → the gear (⚙).
 |---|---|---|
 | **Sky: soft clouds** (default) | Soft fair-weather clouds | **Hidden automatically** (no flat blocky clouds) |
 | Sky: soft clouds + the game's clouds | The same clouds | Keep them on — for pairing with the shadow-casting vanilla clouds |
-| Lite: soft clouds, faster | The same clouds at half resolution, plus lighter water. [Lite mode](#lite-mode) | Hidden automatically |
 | Sky: no clouds | Nothing painted | Up to you |
+| Lite: the game's clouds, faster | Nothing painted, plus lighter water. [Lite mode](#lite-mode) | Shown as usual (turn them off in Video Settings for even less work) |
 
 Worth knowing:
 
@@ -144,12 +144,13 @@ real one moves); the game adds the sun's colour.
 
 ## Lite mode
 
-Pick **Lite: soft clouds, faster** in the pack's settings (the gear ⚙) for a
-lighter version that looks almost the same: only the costly parts change.
+Pick **Lite: the game's clouds, faster** in the pack's settings (the gear ⚙)
+for a lighter version: light, sky and fog look the same; only the costly parts
+change.
 
 | | Normal | Lite |
 |---|---|---|
-| Cloud images | 6 × 1024×1024 | **6 × 512×512** (a quarter of the GPU memory). They are magnified on screen anyway, so the edges only soften a little |
+| Clouds | Painted cloud images (6 × 1024×1024) | **No images**: the game's usual clouds (which Video Settings can also turn off) |
 | Water waves | 20 octaves | **10 octaves** (about half the work per water pixel). Each octave steps further, so the surface still runs from the same broad swell to the same fine ripples |
 | Light, sky, fog, PBR, shadows | | Unchanged (changing them changes the look) |
 
@@ -165,6 +166,7 @@ gain for the least visible loss first):
 4. **Reflection quality**: low (water reflections a little coarser)
 5. **Shadow quality**: medium (distant shadows a little coarser)
 6. **Render distance**: a little shorter (the distance haze hides it)
+7. **Clouds**: off (in lite mode they are the game's clouds, so Video Settings can hide them)
 
 The **PBR add-on** (block relief and gloss) adds textures and memory; on a
 weak device, leaving it off saves the most.
