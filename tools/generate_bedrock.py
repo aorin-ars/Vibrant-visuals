@@ -940,7 +940,7 @@ LIGHT_COLORS = {
     "sea_lantern": "#B8F0FF",
     "beacon": "#C8F8FF",
     "conduit": "#9EEBFF",
-    "end_rod": "#F4E6FF",
+    "end_rod": "#D4E2FF",     # a cool, faintly blue white
     "end_portal": ENDER,
     "portal": ENDER,
     "crying_obsidian": ENDER,

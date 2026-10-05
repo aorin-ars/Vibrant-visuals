@@ -174,7 +174,11 @@ SMOOTHER = {
     "polished_*": 0.8, "*smooth*": 0.85, "quartz_block*": 0.8, "amethyst_block": 0.7,
     "bell/*": 0.5, "chest/copper_*": 0.8,
 }
-CREVICE_ROUGHNESS = 50    # extra roughness (0-255) at the lowest point of the relief
+CREVICE_ROUGHNESS = 70    # extra roughness (0-255) at the lowest point of the relief
+# Everything in RELIEF_BY_MATERIAL is scaled by this: 1.0 read as too subtle
+# in game, so the relief is a step deeper overall while the balance between
+# materials stays the same.
+RELIEF_GAIN = 1.4
 
 # Light through: stained glass passes light (subsurface), so a pane glows in
 # its own colour when the sun shines through it from behind - stained glass
@@ -294,7 +298,7 @@ def is_flat(height: np.ndarray, opaque: np.ndarray) -> bool:
         for axis in (0, 1):
             step = np.abs(np.diff(h, axis=axis))
             both = seen[1:, :] & seen[:-1, :] if axis == 0 else seen[:, 1:] & seen[:, :-1]
-            if (step * both).max() > FLAT_STEP:
+            if (step * both).max() > FLAT_STEP * RELIEF_GAIN:
                 return False
     return True
 
@@ -395,7 +399,7 @@ def main() -> int:
         elif not has_bump:
             strength = relief_strength(key, color)
             if strength > 0:
-                height = height_map(color, strength, name in INVERTED, minerals)
+                height = height_map(color, strength * RELIEF_GAIN, name in INVERTED, minerals)
                 if is_flat(height, smoothed_luminance(color)[1]):
                     height = None
                     skip("no relief: flat texture (concrete...) - avoids seam lines")
