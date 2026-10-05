@@ -159,10 +159,10 @@ SUN_ILLUMINANCE = mirror({
 })
 
 # Neutral white from late morning to mid-afternoon - no yellow cast at noon.
-# Warmth only arrives with low sun: gold below ~20 degrees, orange at a few
-# degrees, deep orange on the horizon - golden rather than red, as in
-# Complementary's sunsets, where the land glows warm instead of dimming.
-# Dawn is pinker and turns gold faster than dusk. Below the horizon the
+# Warmth only arrives with low sun: gold below ~20 degrees, orange below
+# ~10, and in the last few degrees a red sun, as a real one is when its
+# light crosses the most air - at sunset (日没) and at sunrise (早朝) alike,
+# so the land glows red-orange for those minutes. Below the horizon the
 # colour only feeds sky scattering, which paints the rose and violet of
 # twilight.
 SUN_COLOR = {
@@ -170,19 +170,19 @@ SUN_COLOR = {
     0.150: [255, 246, 232],
     0.200: [255, 240, 220],
     0.230: [255, 222, 180],
-    0.250: [255, 198, 135],
-    0.265: [255, 172, 104],
-    0.275: [255, 146, 84],
-    0.283: [255, 124, 70],
+    0.250: [255, 188, 122],
+    0.265: [255, 142, 82],
+    0.275: [255, 102, 54],
+    0.283: [255, 72, 40],
     0.300: [255, 110, 120],
     0.330: [255, 140, 150],
     0.500: [255, 110, 60],
     0.670: [255, 140, 150],
     0.700: [255, 120, 130],
-    0.717: [255, 128, 72],
-    0.725: [255, 150, 86],
-    0.735: [255, 180, 112],
-    0.750: [255, 205, 145],
+    0.717: [255, 72, 40],
+    0.725: [255, 104, 56],
+    0.735: [255, 146, 86],
+    0.750: [255, 192, 128],
     0.770: [255, 228, 190],
     0.800: [255, 242, 222],
     0.845: [255, 246, 232],
