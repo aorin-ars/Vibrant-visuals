@@ -144,8 +144,12 @@ def lerp_rgb(a, b, t):
 # contrast with the shade comes from the reduced sky light below instead.
 # The fall-off follows the air the light crosses, not sin(elevation) - the
 # engine already shades surfaces by angle - so low sun stays strong and warm,
-# and still lights the land orange with the sun on the horizon (at 5.5 there
-# the first in-game sunset showed the land lit only by the sky).
+# and still lights the land orange as it reaches the horizon (at 5.5 there
+# the first in-game sunset showed the land lit only by the sky). Once it is
+# under, it goes out within about a degree: the sun's disc is still drawn
+# below the horizon, and while it kept some light (16 at 0.282 fading to 0 at
+# 0.292, as vanilla's curve does from 1) the sunken sun showed through in
+# the sea's reflections. Sunrise mirrors it: no light until the disc is up.
 SUN_ILLUMINANCE = mirror({
     0.000: 100.0,
     0.080: 99.0,
@@ -155,9 +159,11 @@ SUN_ILLUMINANCE = mirror({
     0.250: 62.0,
     0.265: 48.0,
     0.275: 34.0,
-    0.282: 16.0,
-    0.2915: 0.01,
-    0.292: 0.0,
+    0.280: 22.0,
+    0.283: 9.0,
+    0.286: 1.0,
+    0.2875: 0.01,
+    0.288: 0.0,
     0.500: 0.0,
 })
 
