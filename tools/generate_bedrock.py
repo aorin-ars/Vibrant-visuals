@@ -150,9 +150,9 @@ SUN_ILLUMINANCE = mirror({
     0.150: 94.0,
     0.200: 84.0,
     0.230: 70.0,
-    0.250: 53.0,
-    0.265: 35.0,
-    0.275: 20.0,
+    0.250: 56.0,
+    0.265: 40.0,
+    0.275: 23.0,
     0.282: 5.5,
     0.2915: 0.01,
     0.292: 0.0,
@@ -160,22 +160,23 @@ SUN_ILLUMINANCE = mirror({
 })
 
 # Neutral white from late morning to mid-afternoon - no yellow cast at noon.
-# Warmth only arrives with low sun: gold below ~20 degrees, orange below
-# ~10, and in the last few degrees a deep red-orange sun, as a real one is
-# when its light crosses the most air - at sunset (日没) and at sunrise (早朝)
-# alike, so the land glows orange for those minutes. Kept orange rather than
-# pink-red (no blue in it): photos of real sunsets read orange. Below the horizon the
-# colour only feeds sky scattering, which paints the rose and violet of
-# twilight.
+# Warmth only arrives with low sun: gold below ~20 degrees, a deep golden
+# orange below ~10 (夕方: the land, roads and air glow orange and the shade
+# goes dark and warm, as in the reference pictures), and in the last few
+# degrees a deep red-orange sun, as a real one is when its light crosses the
+# most air - at sunset (日没) and at sunrise (早朝) alike. Kept orange rather
+# than pink-red (no blue in it): photos of real sunsets read orange. Below
+# the horizon the colour only feeds sky scattering, which paints the rose and
+# violet of twilight.
 SUN_COLOR = {
     0.000: [255, 248, 236],
     0.150: [255, 246, 232],
     0.200: [255, 240, 220],
     0.230: [255, 222, 180],
-    0.250: [255, 178, 88],
-    0.265: [255, 146, 54],
-    0.275: [255, 118, 34],
-    0.283: [255, 96, 22],
+    0.250: [255, 184, 100],
+    0.265: [255, 152, 62],
+    0.275: [255, 124, 40],
+    0.283: [255, 100, 24],
     0.300: [255, 110, 120],
     0.330: [255, 140, 150],
     0.500: [255, 110, 60],
@@ -208,11 +209,13 @@ MOON_COLOR = [124, 160, 255]
 # How much the sky lights the shade (0.1-1.0; vanilla 1.0 all day). Full sky
 # light is what gives stock Vibrant Visuals its flat, evenly grey look; well
 # under half the gap between sunlit and shaded faces is back at 0.6, so
-# shadows read as shadows while staying blue-grey rather than black. More sky
-# light at sunset, when the glowing sky is the main light; least at night,
-# when the moon should do the lighting.
+# shadows read as shadows while staying blue-grey rather than black. A little
+# less in golden hour (夕方), so the shade of a landscape lit from behind
+# goes deep and warm and the orange light stands out of it; more once the sun
+# is down, when the glowing sky is the main light; least at night, when the
+# moon should do the lighting.
 SKY_INTENSITY = mirror({
-    0.000: 0.60, 0.200: 0.62, 0.250: 0.68, 0.283: 0.75, 0.300: 0.72,
+    0.000: 0.60, 0.200: 0.60, 0.250: 0.56, 0.265: 0.55, 0.283: 0.64, 0.300: 0.70,
     0.330: 0.58, 0.360: 0.45, 0.400: 0.30, 0.500: 0.30,
 })
 
@@ -353,12 +356,13 @@ RAYLEIGH = mirror({0.0: 1.30, 0.15: 1.30, 0.20: 1.20, 0.25: 1.15, 0.283: 1.15,
 # few units gather it into a bright halo around the sun, as in
 # Complementary - small at noon (at 8 and twice this strength the first
 # in-game test showed a large white blotch round the sun), spreading into a
-# big warm glow as the sun sets. The same lobe shapes the moon's glow at
-# night.
-SUN_MIE = mirror({0.0: 0.22, 0.15: 0.26, 0.20: 0.45, 0.25: 1.20, 0.283: 2.20,
-                  0.30: 1.10, 0.34: 0.0, 0.5: 0.0})
-SUN_GLARE = mirror({0.0: 12.0, 0.15: 10.0, 0.20: 6.5, 0.25: 4.0, 0.283: 2.6,
-                    0.30: 3.0, 0.34: 5.0, 0.5: 5.0})
+# big warm glow as the sun sets - in golden hour a wide, bright glow that
+# the tone curve turns white round the sun, as in the reference pictures. The
+# same lobe shapes the moon's glow at night.
+SUN_MIE = mirror({0.0: 0.22, 0.15: 0.26, 0.20: 0.50, 0.25: 1.60, 0.265: 2.10,
+                  0.283: 2.40, 0.30: 1.10, 0.34: 0.0, 0.5: 0.0})
+SUN_GLARE = mirror({0.0: 12.0, 0.15: 10.0, 0.20: 6.5, 0.25: 3.4, 0.265: 2.8,
+                    0.283: 2.5, 0.30: 3.0, 0.34: 5.0, 0.5: 5.0})
 MOON_MIE = {0.0: 0.0, 0.27: 0.0, 0.33: 0.40, 0.67: 0.40, 0.73: 0.0, 1.0: 0.0}
 
 # Horizon blend: vanilla's shape, with the zenith taking over a little lower at
@@ -377,11 +381,16 @@ NIGHT_HORIZON = [46, 64, 118]
 DEEP_NIGHT_ZENITH = [5, 9, 27]
 DEEP_NIGHT_HORIZON = [12, 18, 38]
 
-# Sunsets and sunrises like photos of real ones: at sunset the sky warms to
-# amber overhead over a deep red-orange horizon; at sunrise a red-orange
-# band lies along the horizon under an indigo sky. (The pastel lavender and
-# coral-pink of earlier versions read too soft.)
-DUSK_ZENITH = (176, 112, 92)
+# Evenings like the reference pictures (a shader screenshot and two photos):
+# in golden hour (夕方) a gold-orange sky low down and round the sun, under a
+# dusky lavender-blue sky overhead, peach where the two meet, while the land
+# below glows orange (the sun's colour, above); with the sun on the horizon
+# (日没) the horizon deepens to orange and red-orange under a dusky mauve sky.
+# Sunrises like a photo of a real one: a red-orange band along the horizon
+# under an indigo sky. The sun's colour also tints the sky, so these are a
+# little cooler than the colours meant on screen.
+GOLDEN_ZENITH = (132, 136, 198)
+DUSK_ZENITH = (156, 118, 138)
 DAWN_ZENITH = (72, 76, 154)
 
 
@@ -390,22 +399,26 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
     """Zenith and horizon colour keyframes around one day palette.
 
     Stops sit at real sun elevations (see the table above SUN_ILLUMINANCE):
-    blue noon; a gold, then orange horizon under a warming sky as the sun
-    gets low (夕方); a deep red-orange horizon under an amber sky with the
-    sun on the horizon (日没), like a photo of a real sunset; a red afterglow
-    fading through maroon and dusky violet; navy night. Dawn has its own
-    colours: a red-orange band along the horizon under an indigo sky (早朝),
-    turning gold, then a warm horizon in a blue morning sky (朝).
+    blue noon; a gold-orange horizon under a dusky lavender-blue sky as the
+    sun gets low (夕方), like the reference pictures; an orange, then
+    red-orange horizon under a dusky mauve sky with the sun on the horizon
+    (日没); a red afterglow fading through maroon and dusky violet; navy
+    night. Dawn has its own colours: a red-orange band along the horizon
+    under an indigo sky (早朝), turning gold, then a warm horizon in a blue
+    morning sky (朝).
     """
     t = twilight or {}
     day_zenith, day_horizon = list(day_zenith), list(day_horizon)
     dusk_zenith, dawn_zenith = list(dusk_zenith), list(dawn_zenith)
-    golden = t.get("golden", [255, 172, 80])
+    golden = t.get("golden", [255, 204, 136])
+    golden_zenith = list(t.get("zenith_golden", GOLDEN_ZENITH))
     morning = t.get("morning", [255, 204, 150])
     zenith = {
         0.000: day_zenith,
-        0.200: lerp_rgb(day_zenith, dusk_zenith, 0.1),
-        0.250: lerp_rgb(day_zenith, dusk_zenith, 0.55),
+        0.200: lerp_rgb(day_zenith, golden_zenith, 0.15),
+        0.235: lerp_rgb(day_zenith, golden_zenith, 0.6),
+        0.255: golden_zenith,
+        0.270: golden_zenith,
         0.283: dusk_zenith,
         0.300: t.get("zenith_dusk", [74, 52, 108]),
         0.330: NIGHT_ZENITH,
@@ -422,13 +435,13 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
         0.000: day_horizon,
         0.167: day_horizon,
         0.210: lerp_rgb(day_horizon, golden, 0.35),
-        0.235: lerp_rgb(day_horizon, golden, 0.7),
+        0.235: lerp_rgb(day_horizon, golden, 0.75),
         0.250: golden,
-        0.265: t.get("sunset", [255, 130, 42]),
-        0.278: t.get("sunset_deep", [255, 96, 24]),
-        0.290: t.get("afterglow", [232, 70, 32]),
-        0.300: t.get("rose", [164, 60, 72]),
-        0.315: t.get("violet", [90, 56, 118]),
+        0.265: t.get("sunset", [255, 176, 96]),
+        0.278: t.get("sunset_deep", [255, 140, 60]),
+        0.290: t.get("afterglow", [246, 104, 42]),
+        0.300: t.get("rose", [172, 70, 90]),
+        0.315: t.get("violet", [92, 60, 124]),
         0.340: NIGHT_HORIZON,
         0.400: DEEP_NIGHT_HORIZON,
         0.600: DEEP_NIGHT_HORIZON,
@@ -501,8 +514,8 @@ def flat_atmosphere(identifier, zenith, horizon, rayleigh, *, start=0.8, mie_sta
 DAY_ZENITH = [88, 146, 224]
 DAY_HORIZON = [184, 208, 236]
 
-DESERT_TWILIGHT = {"golden": [255, 180, 96], "sunset": [255, 140, 52],
-                   "sunset_deep": [255, 104, 30], "rose": [176, 70, 70]}
+DESERT_TWILIGHT = {"golden": [255, 198, 124], "sunset": [255, 168, 86],
+                   "sunset_deep": [255, 132, 54], "rose": [180, 76, 80]}
 
 ATMOSPHERICS = {
     "atmospherics.json": overworld_atmosphere(
@@ -537,7 +550,7 @@ ATMOSPHERICS = {
         dusk_zenith=(96, 100, 110), dawn_zenith=(96, 100, 110), mie_scale=0.0, rayleigh_scale=0.5,
         twilight={"golden": [200, 190, 180], "sunset": [190, 170, 160],
                   "sunset_deep": [170, 150, 150], "rose": [140, 130, 140],
-                  "violet": [110, 110, 130]}),
+                  "violet": [110, 110, 130], "zenith_golden": [100, 104, 116]}),
     # Nether: no sky to see, but these set the colour of distance haze.
     "hell_atmospherics.json": flat_atmosphere(
         "minecraft:hell_atmospherics", [74, 18, 10], [74, 18, 10], 0.15),
