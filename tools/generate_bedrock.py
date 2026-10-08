@@ -143,17 +143,19 @@ def lerp_rgb(a, b, t):
 # the sky in game once the ACES curve and the grade's gain were on top; the
 # contrast with the shade comes from the reduced sky light below instead.
 # The fall-off follows the air the light crosses, not sin(elevation) - the
-# engine already shades surfaces by angle - so low sun stays strong and warm.
+# engine already shades surfaces by angle - so low sun stays strong and warm,
+# and still lights the land orange with the sun on the horizon (at 5.5 there
+# the first in-game sunset showed the land lit only by the sky).
 SUN_ILLUMINANCE = mirror({
     0.000: 100.0,
     0.080: 99.0,
     0.150: 94.0,
     0.200: 84.0,
-    0.230: 70.0,
-    0.250: 56.0,
-    0.265: 40.0,
-    0.275: 23.0,
-    0.282: 5.5,
+    0.230: 72.0,
+    0.250: 62.0,
+    0.265: 48.0,
+    0.275: 34.0,
+    0.282: 16.0,
     0.2915: 0.01,
     0.292: 0.0,
     0.500: 0.0,
@@ -173,10 +175,10 @@ SUN_COLOR = {
     0.150: [255, 246, 232],
     0.200: [255, 240, 220],
     0.230: [255, 222, 180],
-    0.250: [255, 184, 100],
-    0.265: [255, 152, 62],
-    0.275: [255, 124, 40],
-    0.283: [255, 100, 24],
+    0.250: [255, 176, 88],
+    0.265: [255, 142, 50],
+    0.275: [255, 118, 32],
+    0.283: [255, 96, 20],
     0.300: [255, 110, 120],
     0.330: [255, 140, 150],
     0.500: [255, 110, 60],
@@ -209,23 +211,24 @@ MOON_COLOR = [124, 160, 255]
 # How much the sky lights the shade (0.1-1.0; vanilla 1.0 all day). Full sky
 # light is what gives stock Vibrant Visuals its flat, evenly grey look; well
 # under half the gap between sunlit and shaded faces is back at 0.6, so
-# shadows read as shadows while staying blue-grey rather than black. A little
-# less in golden hour (夕方), so the shade of a landscape lit from behind
-# goes deep and warm and the orange light stands out of it; more once the sun
-# is down, when the glowing sky is the main light; least at night, when the
-# moon should do the lighting.
+# shadows read as shadows while staying blue-grey rather than black. More
+# sky light in the evening, when the sky is orange: everything the sun does
+# not reach - roads and walls seen against the sun, shade - is lit orange by
+# it (in the first in-game sunset, under a lavender sky, they were
+# blue-grey); least at night, when the moon should do the lighting.
 SKY_INTENSITY = mirror({
-    0.000: 0.60, 0.200: 0.60, 0.250: 0.56, 0.265: 0.55, 0.283: 0.64, 0.300: 0.70,
+    0.000: 0.60, 0.200: 0.62, 0.250: 0.66, 0.265: 0.70, 0.283: 0.78, 0.300: 0.74,
     0.330: 0.58, 0.360: 0.45, 0.400: 0.30, 0.500: 0.30,
 })
 
 # Fallback light for caves and for surfaces with nothing to reflect. Kept at
 # vanilla strength so caves stay dark, pale blue-white by day like the open
-# sky, deep blue at night, lilac through twilight.
+# sky, orange in the evening, deep blue at night, lilac at dawn.
 AMBIENT_COLOR = {
     0.000: [210, 224, 255],
-    0.230: [218, 216, 240],
-    0.290: [184, 170, 220],
+    0.230: [236, 216, 200],
+    0.265: [255, 186, 130],
+    0.290: [214, 140, 130],
     0.340: [128, 150, 220],
     0.660: [128, 150, 220],
     0.710: [196, 172, 214],
@@ -381,16 +384,20 @@ NIGHT_HORIZON = [46, 64, 118]
 DEEP_NIGHT_ZENITH = [5, 9, 27]
 DEEP_NIGHT_HORIZON = [12, 18, 38]
 
-# Evenings like the reference pictures (a shader screenshot and two photos):
-# in golden hour (夕方) a gold-orange sky low down and round the sun, under a
-# dusky lavender-blue sky overhead, peach where the two meet, while the land
-# below glows orange (the sun's colour, above); with the sun on the horizon
-# (日没) the horizon deepens to orange and red-orange under a dusky mauve sky.
-# Sunrises like a photo of a real one: a red-orange band along the horizon
-# under an indigo sky. The sun's colour also tints the sky, so these are a
-# little cooler than the colours meant on screen.
-GOLDEN_ZENITH = (132, 136, 198)
-DUSK_ZENITH = (156, 118, 138)
+# Evenings strongly orange, like the reference pictures (a shader screenshot
+# and two photos): in golden hour (夕方) the whole sky warms to amber-orange,
+# gold-orange low down and round the sun; with the sun on the horizon (日没)
+# it deepens to orange overhead over a red-orange horizon. Sunrises like a
+# photo of a real one: a red-orange band along the horizon under an indigo
+# sky.
+#
+# The game does not show these colours as they are: its Rayleigh scattering
+# adds blue. In the first in-game sunset a mauve zenith of (156, 118, 138)
+# showed as a purple-blue (102, 99, 156) - blue up about 1.7x against red,
+# green 1.1x - so a lavender sky meant to read dusky came out violet. The
+# colours below are orange enough that what shows is still orange.
+GOLDEN_ZENITH = (228, 146, 84)
+DUSK_ZENITH = (232, 122, 50)
 DAWN_ZENITH = (72, 76, 154)
 
 
@@ -399,18 +406,17 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
     """Zenith and horizon colour keyframes around one day palette.
 
     Stops sit at real sun elevations (see the table above SUN_ILLUMINANCE):
-    blue noon; a gold-orange horizon under a dusky lavender-blue sky as the
-    sun gets low (夕方), like the reference pictures; an orange, then
-    red-orange horizon under a dusky mauve sky with the sun on the horizon
-    (日没); a red afterglow fading through maroon and dusky violet; navy
-    night. Dawn has its own colours: a red-orange band along the horizon
+    blue noon; a gold-orange horizon under an amber-orange sky as the sun
+    gets low (夕方), like the reference pictures; a red-orange horizon under
+    an orange sky with the sun on the horizon (日没); a red afterglow fading
+    through maroon and dusky violet; navy night. Dawn has its own colours: a red-orange band along the horizon
     under an indigo sky (早朝), turning gold, then a warm horizon in a blue
     morning sky (朝).
     """
     t = twilight or {}
     day_zenith, day_horizon = list(day_zenith), list(day_horizon)
     dusk_zenith, dawn_zenith = list(dusk_zenith), list(dawn_zenith)
-    golden = t.get("golden", [255, 204, 136])
+    golden = t.get("golden", [255, 184, 96])
     golden_zenith = list(t.get("zenith_golden", GOLDEN_ZENITH))
     morning = t.get("morning", [255, 204, 150])
     zenith = {
@@ -420,7 +426,7 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
         0.255: golden_zenith,
         0.270: golden_zenith,
         0.283: dusk_zenith,
-        0.300: t.get("zenith_dusk", [74, 52, 108]),
+        0.300: t.get("zenith_dusk", [110, 56, 70]),
         0.330: NIGHT_ZENITH,
         0.400: DEEP_NIGHT_ZENITH,
         0.600: DEEP_NIGHT_ZENITH,
@@ -437,11 +443,11 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
         0.210: lerp_rgb(day_horizon, golden, 0.35),
         0.235: lerp_rgb(day_horizon, golden, 0.75),
         0.250: golden,
-        0.265: t.get("sunset", [255, 176, 96]),
-        0.278: t.get("sunset_deep", [255, 140, 60]),
-        0.290: t.get("afterglow", [246, 104, 42]),
-        0.300: t.get("rose", [172, 70, 90]),
-        0.315: t.get("violet", [92, 60, 124]),
+        0.265: t.get("sunset", [255, 150, 56]),
+        0.278: t.get("sunset_deep", [255, 120, 36]),
+        0.290: t.get("afterglow", [240, 92, 32]),
+        0.300: t.get("rose", [170, 62, 60]),
+        0.315: t.get("violet", [90, 52, 100]),
         0.340: NIGHT_HORIZON,
         0.400: DEEP_NIGHT_HORIZON,
         0.600: DEEP_NIGHT_HORIZON,
@@ -514,8 +520,8 @@ def flat_atmosphere(identifier, zenith, horizon, rayleigh, *, start=0.8, mie_sta
 DAY_ZENITH = [88, 146, 224]
 DAY_HORIZON = [184, 208, 236]
 
-DESERT_TWILIGHT = {"golden": [255, 198, 124], "sunset": [255, 168, 86],
-                   "sunset_deep": [255, 132, 54], "rose": [180, 76, 80]}
+DESERT_TWILIGHT = {"golden": [255, 188, 100], "sunset": [255, 156, 60],
+                   "sunset_deep": [255, 126, 40], "rose": [180, 72, 64]}
 
 ATMOSPHERICS = {
     "atmospherics.json": overworld_atmosphere(
@@ -1070,7 +1076,7 @@ PBR = {
 # The skyboxes are clouds on a transparent background, so these values only
 # decide how the clouds are lit; the sky behind them is the atmosphere.
 #  - sky light: clouds take on the colour of the sky around them
-#  - directional light: they turn gold and pink at sunset with the sun,
+#  - directional light: they turn gold and orange at sunset with the sun,
 #    and - the main reason it carries most of their light - it dims in
 #    rain, when the game turns the sun down and the sky grey: clouds lit
 #    mostly by it grey over with the sky, which then reads as one
@@ -1082,7 +1088,8 @@ PBR = {
 #  - ambient: the only light here that follows the clock, but not the
 #    weather, so it is kept small - at 8 by day it held the clouds white
 #    through rain. It fills in by day, fades through sunset under the
-#    sun's share, so clouds keep its gold, and is zero at night, when
+#    sun's share - quickly, so this white light does not wash out the
+#    orange the sun and sky give them - and is zero at night, when
 #    clouds should be dim grey-blue shapes against the sky. In game this
 #    scale is strong (0.7 made clouds glow white at midnight); low at
 #    dawn, when clouds are dark silhouettes (早朝). Keyframes sit at real
@@ -1096,8 +1103,8 @@ CLOUD_CUBEMAP = {
         "description": {"identifier": "minecraft:default_cubemap"},
         "lighting": {
             "ambient_light_illuminance": keyframes({
-                0.000: 2.5, 0.150: 2.4, 0.200: 2.0, 0.250: 1.5, 0.265: 1.0,
-                0.283: 0.6, 0.300: 0.3, 0.330: 0.04, 0.400: 0.0, 0.600: 0.0,
+                0.000: 2.5, 0.150: 2.4, 0.200: 2.0, 0.250: 1.3, 0.265: 0.8,
+                0.283: 0.45, 0.300: 0.25, 0.330: 0.04, 0.400: 0.0, 0.600: 0.0,
                 0.670: 0.04, 0.700: 0.2, 0.717: 0.4, 0.735: 1.0, 0.750: 1.5,
                 0.800: 2.0, 0.850: 2.4, 1.000: 2.5,
             }),
