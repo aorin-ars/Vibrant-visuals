@@ -382,10 +382,11 @@ pip install pillow numpy
 V=bedrock-samples/resource_pack
 
 python3 tools/generate_bedrock.py --vanilla $V   # settings files (bedrock/ and diagnostic/)
-python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes; also the lite clouds)
+python3 tools/draw_sky.py                        # round sun and moon, cloud skyboxes (takes minutes)
 python3 tools/draw_water.py                      # plain water textures
 python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
 tools/package.sh --vanilla $V                    # distributables, including the PBR add-on
+python3 tools/release.py --vanilla $V            # the public release (build/release/), without the PBR add-on
 
 python3 tools/validate_shaders.py     # Java GLSL, 52 stages x 4 macro variants
 python3 tools/check_options.py        # Java options consistency

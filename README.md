@@ -359,10 +359,11 @@ pip install pillow numpy
 V=bedrock-samples/resource_pack
 
 python3 tools/generate_bedrock.py --vanilla $V   # 設定ファイルを生成（bedrock/ と diagnostic/）
-python3 tools/draw_sky.py                        # 丸い太陽と月、雲のスカイボックスを描く（数分かかる。軽量版の雲も一緒に作る）
+python3 tools/draw_sky.py                        # 丸い太陽と月、雲のスカイボックスを描く（数分かかる）
 python3 tools/draw_water.py                      # 模様のない水のテクスチャ
 python3 tools/check_bedrock.py --vanilla $V      # 統合版パックの検証（キー名・値の範囲・全バイオーム網羅）
 tools/package.sh --vanilla $V                    # 配布ファイルを生成（PBR 追加パックを含む）
+python3 tools/release.py --vanilla $V            # 公開用一式（build/release/。PBR 追加パックは含めない）
 
 python3 tools/validate_shaders.py     # Java版 GLSL を全52ステージ×4構成でコンパイル
 python3 tools/check_options.py        # Java版の設定項目の整合性

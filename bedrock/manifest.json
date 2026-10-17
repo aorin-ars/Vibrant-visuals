@@ -2,7 +2,7 @@
   "format_version": 2,
   "header": {
     "name": "VYSE-Vibrant Visuals",
-    "description": "Shader-style Vibrant Visuals: a filmic picture, strong sunlight against blue shade, a deep sky with soft drifting clouds, a small sun and moon, clear air and light shafts, misty rain, clear water and coloured block light. Turn on Vibrant Visuals in Video Settings; pick the sky with the gear in the pack settings.",
+    "description": "Shader-style Vibrant Visuals: a filmic picture, strong sunlight against blue shade, deep orange sunsets, a deep sky with soft painted clouds, a small sun and moon, clear air and light shafts, misty rain, clear water and coloured block light. Turn on Vibrant Visuals in Video Settings; pick the sky with the gear in the pack settings.",
     "uuid": "0e682665-2038-4c85-9402-d8e77c5c7e65",
     "version": [3, 2, 0],
     "min_engine_version": [1, 26, 0]
@@ -10,7 +10,7 @@
   "modules": [
     {
       "type": "resources",
-      "description": "Shader-style Vibrant Visuals: a filmic picture, strong sunlight against blue shade, a deep sky with soft drifting clouds, a small sun and moon, clear air and light shafts, misty rain, clear water and coloured block light. Turn on Vibrant Visuals in Video Settings; pick the sky with the gear in the pack settings.",
+      "description": "Shader-style Vibrant Visuals: a filmic picture, strong sunlight against blue shade, deep orange sunsets, a deep sky with soft painted clouds, a small sun and moon, clear air and light shafts, misty rain, clear water and coloured block light. Turn on Vibrant Visuals in Video Settings; pick the sky with the gear in the pack settings.",
       "uuid": "eac9213d-21ec-48bf-bafb-e30430db73e4",
       "version": [3, 2, 0]
     }
