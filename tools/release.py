@@ -10,7 +10,7 @@ Mojang's textures and is for personal use only - and lays them out as
         VYSE-Vibrant-Visuals-v<ver>.mcaddon  the resource pack and the Weather
                                              Sync behavior pack, imported together
         VYSE-Vibrant-Visuals-v<ver>.mcpack   the resource pack alone
-        VYSE-Weather-Sync-v<ver>.mcpack      the behavior pack alone
+        VYSE-Weather-Sync-v<bp ver>.mcpack   the behavior pack alone
         README.txt                           install notes (docs/release_readme.txt)
         LICENSE.txt
     build/release/VYSE-Vibrant-Visuals-v<ver>.zip   all of the above, to upload
@@ -85,11 +85,9 @@ def main() -> int:
     describe = git("describe", "--tags", "--always", "--dirty")
     rp = ROOT / f"build/VYSE-Vibrant-Visuals-{describe}.mcpack"
     bp = ROOT / f"build/VYSE-Weather-Sync-{describe}.mcpack"
-    rp_manifest, bp_manifest = manifest(rp), manifest(bp)
-    ver = version(rp_manifest)
-    if version(bp_manifest) != ver:
-        print(f"version mismatch: resource pack {ver}, behavior pack {version(bp_manifest)}")
-        return 1
+    # The release takes the resource pack's version; the behavior pack keeps
+    # its own (both carry the same commit count as their patch number).
+    ver, bp_ver = version(manifest(rp)), version(manifest(bp))
 
     name = f"VYSE-Vibrant-Visuals-v{ver}"
     folder = OUT / name
@@ -100,9 +98,10 @@ def main() -> int:
     write_mcaddon(folder / f"{name}.mcaddon",
                   {"VYSE-Vibrant-Visuals": rp, "VYSE-Weather-Sync": bp})
     shutil.copy2(rp, folder / f"{name}.mcpack")
-    shutil.copy2(bp, folder / f"VYSE-Weather-Sync-v{ver}.mcpack")
+    shutil.copy2(bp, folder / f"VYSE-Weather-Sync-v{bp_ver}.mcpack")
     readme = (ROOT / "docs/release_readme.txt").read_text(encoding="utf-8")
-    (folder / "README.txt").write_text(readme.replace("{version}", ver), encoding="utf-8-sig")
+    readme = readme.replace("{version}", ver).replace("{bp_version}", bp_ver)
+    (folder / "README.txt").write_text(readme, encoding="utf-8-sig")
     shutil.copy2(ROOT / "LICENSE", folder / "LICENSE.txt")
 
     archive = OUT / f"{name}.zip"

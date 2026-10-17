@@ -13,7 +13,7 @@ English below.
     本体と Weather Sync をまとめて読み込みます（おすすめ）
 - VYSE-Vibrant-Visuals-v{version}.mcpack
     本体（リソースパック）だけ
-- VYSE-Weather-Sync-v{version}.mcpack
+- VYSE-Weather-Sync-v{bp_version}.mcpack
     雨の空の修正（ビヘイビアーパック・任意）だけ
 - LICENSE.txt
     ライセンス（MIT）
@@ -64,7 +64,7 @@ Requirements
 Files
 - VYSE-Vibrant-Visuals-v{version}.mcaddon   the pack and Weather Sync together (recommended)
 - VYSE-Vibrant-Visuals-v{version}.mcpack    the resource pack alone
-- VYSE-Weather-Sync-v{version}.mcpack       the optional behavior pack alone
+- VYSE-Weather-Sync-v{bp_version}.mcpack   the optional behavior pack alone
 - LICENSE.txt                               MIT License
 
 Install
