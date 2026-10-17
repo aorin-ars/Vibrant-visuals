@@ -3,8 +3,7 @@
 
     tools/release.py [--vanilla <bedrock-samples>/resource_pack]
 
-Builds the packs with tools/package.sh - never the PBR add-on, which holds
-Mojang's textures and is for personal use only - and lays them out as
+Builds the packs with tools/package.sh and lays them out as
 
     build/release/VYSE-Vibrant-Visuals-v<ver>/
         VYSE-Vibrant-Visuals-v<ver>.mcaddon  the resource pack and the Weather
@@ -14,10 +13,19 @@ Mojang's textures and is for personal use only - and lays them out as
         README.txt                           install notes (docs/release_readme.txt)
         LICENSE.txt
     build/release/VYSE-Vibrant-Visuals-v<ver>.zip   all of the above, to upload
+    build/release/distribution_page.md               text for the download page
+                                                     (docs/distribution_page.md)
 
-The working tree must be clean, so a release is exactly one commit. With
---vanilla, every image shipped is also checked against the vanilla pack:
-none may be a copy of Mojang's.
+With --vanilla, every image in the zip is also checked against the vanilla
+pack - none may be a copy of Mojang's - and the PBR add-on is built too, on
+its own, outside the zip:
+
+    build/release/personal_use_only/VYSE-Vibrant-Visuals-PBR-v<ver>.mcpack
+
+It has to hold Mojang's block textures (a texture set may only use images
+from its own pack), so it is for the owner's own use and never uploaded.
+
+The working tree must be clean, so a release is exactly one commit.
 """
 
 from __future__ import annotations
@@ -80,7 +88,8 @@ def main() -> int:
     if git("status", "--porcelain"):
         print("the working tree has changes: commit them first, so the release is one commit")
         return 1
-    subprocess.run(["bash", "tools/package.sh"], cwd=ROOT, check=True)
+    vanilla_args = ["--vanilla", str(args.vanilla)] if args.vanilla else []
+    subprocess.run(["bash", "tools/package.sh", *vanilla_args], cwd=ROOT, check=True)
 
     describe = git("describe", "--tags", "--always", "--dirty")
     rp = ROOT / f"build/VYSE-Vibrant-Visuals-{describe}.mcpack"
@@ -103,6 +112,8 @@ def main() -> int:
     readme = readme.replace("{version}", ver).replace("{bp_version}", bp_ver)
     (folder / "README.txt").write_text(readme, encoding="utf-8-sig")
     shutil.copy2(ROOT / "LICENSE", folder / "LICENSE.txt")
+    page = (ROOT / "docs/distribution_page.md").read_text(encoding="utf-8")
+    (OUT / "distribution_page.md").write_text(page.replace("{version}", ver), encoding="utf-8")
 
     archive = OUT / f"{name}.zip"
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
@@ -121,9 +132,20 @@ def main() -> int:
             return 1
         print(f"no image is a copy of one in {args.vanilla}")
 
-    for path in sorted(folder.iterdir()):
+        pbr = ROOT / f"build/VYSE-Vibrant-Visuals-PBR-{describe}.mcpack"
+        personal = OUT / "personal_use_only"
+        personal.mkdir()
+        shutil.copy2(pbr, personal / f"VYSE-Vibrant-Visuals-PBR-v{version(manifest(pbr))}.mcpack")
+        (personal / "README.txt").write_text(
+            "VYSE-Vibrant Visuals PBR\n\n"
+            "Mojang のブロックのテクスチャを含むため、自分で使う分だけにしてください。\n"
+            "配布ページなどにはアップロードしないでください。\n"
+            "VYSE-Vibrant Visuals の上に置いて、一緒に有効にします。\n\n"
+            "Contains Mojang's block textures: for your own use only, never upload it.\n"
+            "Place it above VYSE-Vibrant Visuals and activate both.\n", encoding="utf-8-sig")
+
+    for path in sorted(p for p in OUT.rglob("*") if p.is_file()):
         print(f"{path.relative_to(ROOT)}  {path.stat().st_size / 1e6:.1f} MB")
-    print(f"{archive.relative_to(ROOT)}  {archive.stat().st_size / 1e6:.1f} MB")
     return 0
 
 

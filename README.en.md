@@ -386,7 +386,7 @@ python3 tools/draw_sky.py                        # round sun and moon, cloud sky
 python3 tools/draw_water.py                      # plain water textures
 python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every biome covered
 tools/package.sh --vanilla $V                    # distributables, including the PBR add-on
-python3 tools/release.py --vanilla $V            # the public release (build/release/), without the PBR add-on
+python3 tools/release.py --vanilla $V            # the public release and download-page text (build/release/); the PBR add-on goes to personal_use_only/, never into the zip
 
 python3 tools/validate_shaders.py     # Java GLSL, 52 stages x 4 macro variants
 python3 tools/check_options.py        # Java options consistency
