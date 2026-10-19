@@ -374,6 +374,7 @@ python3 tools/check_options.py        # Java版の設定項目の整合性
 
 ## ライセンス
 
-MIT License — [LICENSE](LICENSE) を参照してください。
+(c) 2026 aorin-ars. All rights reserved. 利用のみ可で、**改変・再配布・販売は禁止**です。
+詳しくは [LICENSE](LICENSE)（利用規約）を見てください。
 PBR 追加パック（`tools/build_pbr.py` の出力）は Mojang のテクスチャを含むため、
-このライセンスの対象外で、個人利用に限ります。
+個人利用に限ります。

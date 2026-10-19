@@ -16,7 +16,7 @@ English below.
 - VYSE-Weather-Sync-v{bp_version}.mcpack
     雨の空の修正（ビヘイビアーパック・任意）だけ
 - LICENSE.txt
-    ライセンス（MIT）
+    利用規約
 
 ■ 導入
 1. .mcaddon（または .mcpack）をタップ／ダブルクリックして開きます。自動で読み込まれます。
@@ -45,8 +45,10 @@ English below.
 - 描いた雲は空に固定された画像なので動きません。
 - 見た目は端末やゲームのバージョンによって少し変わることがあります。
 
-■ ライセンス
-MIT License (c) 2026 aorin-ars
+■ 利用規約
+(c) 2026 aorin-ars. All rights reserved.
+自分の Minecraft で使うこと、スクリーンショットや動画を公開することはできます。
+改変・再配布（転載）・販売は禁止です。詳しくは LICENSE.txt を見てください。
 https://github.com/aorin-ars/Vibrant-visuals
 
 
@@ -65,7 +67,7 @@ Files
 - VYSE-Vibrant-Visuals-v{version}.mcaddon   the pack and Weather Sync together (recommended)
 - VYSE-Vibrant-Visuals-v{version}.mcpack    the resource pack alone
 - VYSE-Weather-Sync-v{bp_version}.mcpack   the optional behavior pack alone
-- LICENSE.txt                               MIT License
+- LICENSE.txt                               terms of use
 
 Install
 1. Open the .mcaddon (or .mcpack); the game imports it.
@@ -89,4 +91,7 @@ Notes
 - The painted clouds are an image fixed in the sky; they do not move.
 - The look can differ a little between devices and game versions.
 
-MIT License (c) 2026 aorin-ars - https://github.com/aorin-ars/Vibrant-visuals
+Terms of use: (c) 2026 aorin-ars. All rights reserved. You may use it in your
+own game and publish screenshots and videos; modifying, redistributing
+(re-uploading) and selling it are not allowed. See LICENSE.txt.
+https://github.com/aorin-ars/Vibrant-visuals

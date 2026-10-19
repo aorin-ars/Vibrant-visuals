@@ -397,6 +397,7 @@ Pass `--glslang <path>` if `glslangValidator` is not on `PATH`
 
 ## License
 
-MIT — see [LICENSE](LICENSE). The PBR add-on (output of
-`tools/build_pbr.py`) contains Mojang's textures, is not covered by this
-license, and is for personal use only.
+(c) 2026 aorin-ars. All rights reserved. Use only: **modifying,
+redistributing and selling are not allowed**. See [LICENSE](LICENSE) (terms
+of use). The PBR add-on (output of `tools/build_pbr.py`) contains Mojang's
+textures and is for personal use only.

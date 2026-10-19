@@ -60,10 +60,11 @@
 ブロックに凹凸・つや・発光を付ける「VYSE-Vibrant Visuals PBR」もありますが、Mojang のテクスチャを含むため配布していません。
 パソコンで自分用に作る方法は GitHub に載せています。
 
-## ライセンス・クレジット
+## 利用規約・クレジット
 
 - 制作: aorin-ars
-- ライセンス: MIT License（改変・再配布できます。著作権表示とライセンス文を残してください）
+- 自分の Minecraft で使うこと、スクリーンショットや動画を公開することはできます。
+- **改変・再配布（転載）・販売は禁止**です。紹介するときは、このページへのリンクを載せてください。
 - ソース: https://github.com/aorin-ars/Vibrant-visuals
 - Java版の影MOD（Complementary Shaders など）の雰囲気を参考にしていますが、各作者とは無関係の非公式パックです。コードや素材は流用していません。
 - Minecraft 公式の製品ではありません。Mojang / Microsoft の承認を受けたものではなく、関係もありません。
@@ -129,10 +130,11 @@ A behavior pack that fixes a game bug: reopening a world while it rains shows a 
 
 A "VYSE-Vibrant Visuals PBR" add-on (block relief, gloss and glow) also exists, but it contains Mojang's textures, so it is not distributed. The GitHub page explains how to build it on a computer for your own use.
 
-## License and credits
+## Terms of use and credits
 
 - By aorin-ars
-- MIT License (modify and redistribute freely; keep the copyright notice and licence text)
+- You may use it in your own game and publish screenshots and videos.
+- **Modifying, redistributing (re-uploading) and selling it are not allowed.** To share it, link to this page.
 - Source: https://github.com/aorin-ars/Vibrant-visuals
 - Inspired by the look of Java shader packs such as Complementary Shaders; unofficial and not affiliated with their authors. No code or assets are taken from them.
 - NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.

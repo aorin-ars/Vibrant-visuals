@@ -1,21 +1,52 @@
-MIT License
+VYSE-Vibrant Visuals - 利用規約 / Terms of Use
 
-Copyright (c) 2026 aorin-ars
+Copyright (c) 2026 aorin-ars. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+日本語
+------
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+このリポジトリと配布ファイル（リソースパック、ビヘイビアーパック、シェーダー、
+ツール、画像、文章を含みます。以下「本作品」）の著作権は aorin-ars が持っています。
+
+許可すること
+- 本作品をダウンロードして、自分の Minecraft で使うこと
+- 本作品を使ったスクリーンショットや動画を公開すること
+  （本作品のファイルそのものを配布しない場合に限ります）
+
+禁止すること
+- 本作品の改変（一部を取り出して使うこと、改変したものを公開することを含みます）
+- 本作品の再配布・転載（そのままでも、改変したものでも、ほかの作品に同梱する場合も
+  含みます。配布するときは、公式の配布ページへのリンクを紹介してください）
+- 本作品の販売、および本作品を有料で提供すること
+
+本作品は無保証で提供されます。本作品を使ったことで生じた損害について、作者は責任を
+負いません。
+
+Minecraft 公式の製品ではありません。Mojang / Microsoft の承認を受けたものではなく、
+関係もありません。
+
+
+English
+-------
+
+This repository and its released files (resource packs, behavior packs,
+shaders, tools, images and text; "the Work") are copyright aorin-ars.
+
+You may
+- download the Work and use it in your own Minecraft game
+- publish screenshots and videos made with the Work, as long as you do not
+  distribute the Work's files themselves
+
+You may not
+- modify the Work (including taking parts of it, or publishing a modified
+  version)
+- redistribute or re-upload the Work, as it is, modified, or bundled with
+  anything else (link to the official download page instead)
+- sell the Work or offer it for a fee
+
+The Work is provided "as is", without warranty of any kind. The author is not
+liable for any damage arising from its use.
+
+NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG
+OR MICROSOFT.
