@@ -49,7 +49,6 @@ English below.
 (c) 2026 aorin-ars. All rights reserved.
 自分の Minecraft で使うこと、スクリーンショットや動画を公開することはできます。
 改変・再配布（転載）・販売は禁止です。詳しくは LICENSE.txt を見てください。
-https://github.com/aorin-ars/Vibrant-visuals
 
 
 ------------------------------------------------------------
@@ -94,4 +93,3 @@ Notes
 Terms of use: (c) 2026 aorin-ars. All rights reserved. You may use it in your
 own game and publish screenshots and videos; modifying, redistributing
 (re-uploading) and selling it are not allowed. See LICENSE.txt.
-https://github.com/aorin-ars/Vibrant-visuals
