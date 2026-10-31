@@ -21,8 +21,10 @@ pack - none may be a copy of Mojang's - and the PBR add-on is built too, on
 its own, outside the zip:
 
     build/release/personal_use_only/VYSE-Vibrant-Visuals-PBR-v<ver>.mcpack
+    build/release/personal_use_only/VYSE-Vibrant-Visuals-Full-v<ver>.mcpack
+                                         the main pack and the PBR add-on in one
 
-It has to hold Mojang's block textures (a texture set may only use images
+They have to hold Mojang's block textures (a texture set may only use images
 from its own pack), so it is for the owner's own use and never uploaded.
 
 The working tree must be clean, so a release is exactly one commit.
@@ -67,6 +69,52 @@ def write_mcaddon(dest: Path, packs: dict[str, Path]) -> None:
                 for info in z.infolist():
                     if not info.is_dir():
                         out.writestr(f"{folder}/{info.filename}", z.read(info))
+
+
+# The combined pack (main pack + PBR add-on in one) has identifiers of its
+# own, so the game never mistakes it for either of the separate packs and
+# both can stay installed next to it. Fixed, so a rebuilt one upgrades in place.
+FULL_HEADER_UUID = "0778aec2-50cb-4ff8-b389-143b67019688"
+FULL_MODULE_UUID = "6910e298-efd5-45ca-aada-01f1be698d98"
+
+
+def write_full_pack(dest: Path, rp: Path, pbr: Path) -> str:
+    """The main pack and the PBR add-on merged into one pack, for one's own use.
+
+    The two share no file but manifest.json and pack_icon.png: the add-on is
+    block and entity texture sets, entity files and their images, the main
+    pack light, sky, fog, clouds and water. Everything of the main pack is
+    kept as it is (subpacks included); the add-on's files are added beside
+    it. The manifest is the main pack's with its own name and identifiers and
+    the higher of the two minimum game versions. Returns the version."""
+    m = manifest(rp)
+    pbr_m = manifest(pbr)
+    header = m["header"]
+    header["name"] = "VYSE-Vibrant Visuals Full"
+    header["description"] = (
+        "VYSE-Vibrant Visuals and its PBR add-on in one pack: the full look plus block relief, "
+        "glowing light blocks and ores, glossy ice and metal, mobs wet in rain. Contains "
+        "Mojang's block textures - for personal use only. Use it instead of the two separate "
+        "packs, not with them.")
+    header["uuid"] = FULL_HEADER_UUID
+    header["min_engine_version"] = max(header["min_engine_version"],
+                                       pbr_m["header"]["min_engine_version"])
+    (module,) = m["modules"]
+    module["description"] = header["description"]
+    module["uuid"] = FULL_MODULE_UUID
+    m["metadata"]["license"] = "All rights reserved (personal use only; contains Mojang textures)"
+
+    with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as out:
+        out.writestr("manifest.json", json.dumps(m, indent=2, ensure_ascii=False) + "\n")
+        written = {"manifest.json"}
+        for pack in (rp, pbr):
+            with zipfile.ZipFile(pack) as z:
+                for info in z.infolist():
+                    if info.is_dir() or info.filename in written:
+                        continue
+                    out.writestr(info.filename, z.read(info))
+                    written.add(info.filename)
+    return version(m)
 
 
 def shipped_images(archive, label: str):
@@ -136,13 +184,22 @@ def main() -> int:
         personal = OUT / "personal_use_only"
         personal.mkdir()
         shutil.copy2(pbr, personal / f"VYSE-Vibrant-Visuals-PBR-v{version(manifest(pbr))}.mcpack")
+        full_tmp = OUT / "full.mcpack"
+        full_ver = write_full_pack(full_tmp, rp, pbr)
+        full_tmp.rename(personal / f"VYSE-Vibrant-Visuals-Full-v{full_ver}.mcpack")
         (personal / "README.txt").write_text(
-            "VYSE-Vibrant Visuals PBR\n\n"
+            "VYSE-Vibrant Visuals PBR / VYSE-Vibrant Visuals Full\n\n"
             "Mojang のブロックのテクスチャを含むため、自分で使う分だけにしてください。\n"
-            "配布ページなどにはアップロードしないでください。\n"
-            "VYSE-Vibrant Visuals の上に置いて、一緒に有効にします。\n\n"
+            "配布ページなどにはアップロードしないでください。\n\n"
+            "どちらか一方を使います。\n"
+            "- PBR: VYSE-Vibrant Visuals の上に置いて、一緒に有効にします。\n"
+            "- Full: 本体と PBR を 1 つにまとめたパックです。これだけを有効にします\n"
+            "  （本体や PBR と一緒に有効にしないでください）。空の種類は歯車から選べます。\n\n"
             "Contains Mojang's block textures: for your own use only, never upload it.\n"
-            "Place it above VYSE-Vibrant Visuals and activate both.\n", encoding="utf-8-sig")
+            "Use one of the two:\n"
+            "- PBR: place it above VYSE-Vibrant Visuals and activate both.\n"
+            "- Full: the main pack and PBR in one; activate it alone, not with the\n"
+            "  other two. Pick the sky with the gear as usual.\n", encoding="utf-8-sig")
 
     for path in sorted(p for p in OUT.rglob("*") if p.is_file()):
         print(f"{path.relative_to(ROOT)}  {path.stat().st_size / 1e6:.1f} MB")

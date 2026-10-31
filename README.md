@@ -33,6 +33,9 @@ Vibrant Visuals で再現するリソースパックです。
 
 **PBR 追加パック（任意）**: **VYSE-Vibrant Visuals PBR**（`VYSE-Vibrant-Visuals-PBR-*.mcpack`）を
 VYSE-Vibrant Visuals の**上**に置いて一緒に有効にすると、ブロックの質感が変わります。
+本体と PBR を 1 つにまとめた **VYSE-Vibrant Visuals Full**（`VYSE-Vibrant-Visuals-Full-*.mcpack`）も
+作れます。こちらはこれだけを有効にします（本体・PBR と一緒には使いません）。どちらも Mojang の
+テクスチャを含むので自分用です。
 
 | | 中身 |
 |---|---|
@@ -367,7 +370,7 @@ python3 tools/draw_sky.py                        # 丸い太陽と月、雲の�
 python3 tools/draw_water.py                      # 模様のない水のテクスチャ
 python3 tools/check_bedrock.py --vanilla $V      # 統合版パックの検証（キー名・値の範囲・全バイオーム網羅）
 tools/package.sh --vanilla $V                    # 配布ファイルを生成（PBR 追加パックを含む）
-python3 tools/release.py --vanilla $V            # 公開用一式と配布ページの文（build/release/）。PBR 追加パックは zip に入れず personal_use_only/ に自分用として作る
+python3 tools/release.py --vanilla $V            # 公開用一式と配布ページの文（build/release/）。PBR 追加パックと、本体と PBR を 1 つにまとめた Full パックは zip に入れず personal_use_only/ に自分用として作る
 
 python3 tools/validate_shaders.py     # Java版 GLSL を全52ステージ×4構成でコンパイル
 python3 tools/check_options.py        # Java版の設定項目の整合性
