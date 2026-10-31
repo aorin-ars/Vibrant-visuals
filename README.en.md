@@ -55,8 +55,8 @@ To install by hand, unzip into `com.mojang/resource_packs/`.
 | | Vanilla Vibrant Visuals | VYSE-Vibrant Visuals |
 |---|---|---|
 | Picture | "generic" tone mapping | **ACES (filmic) tone mapping**: firm shade, rich midtones, bright skies and sunsets rolling smoothly into white. A different look from stock Vibrant Visuals at the root |
-| Sunlight | Whitish, fades early in the afternoon | **Clear white** at noon, at vanilla's 100 (125 blew out bright walls and the sky); the contrast with the shade comes from less sky light. Gold as the sun gets low, then deep orange: **in the evening the land, roads, walls and air glow orange**. It stays strong until it touches the horizon and goes out as soon as it is under (so a sunken sun does not show in the sea); a **red-orange sun** in its last few degrees at sunset and sunrise |
-| Sky through the day | Muted | **Strongly orange sunrises and sunsets**, like photographs. Sunrise (indigo overhead, a red-orange band along the horizon) → morning (warm cream horizon in a blue sky) → noon (blue sky paling to an almost white horizon) → evening (like the reference pictures, **the whole sky amber to orange**: gold to orange low down and round the sun, a big white glow round the sun) → sunset (orange overhead, a red-orange horizon) → afterglow (red fading to violet) → night (navy) → late night (deep navy). Never black |
+| Sunlight | Whitish, fades early in the afternoon | **Clear white** at noon, at vanilla's 100 (125 blew out bright walls and the sky); the contrast with the shade comes from less sky light. Gold as the sun gets low, then deep orange: **in the evening the land, roads, walls and air glow orange** (sooner in the evening than in the morning: gold from about 35 degrees up, orange from 20; the haze takes its colour from the sunlight, so it glows orange with it). It stays strong until it touches the horizon and goes out as soon as it is under (so a sunken sun does not show in the sea); a **red-orange sun** in its last few degrees at sunset and sunrise |
+| Sky through the day | Muted | **Strongly orange sunrises and sunsets**, like photographs. Sunrise (indigo overhead, a red-orange band along the horizon) → morning (warm cream horizon in a blue sky) → noon (blue sky paling to an almost white horizon) → evening (like the reference pictures, **the whole sky amber to orange**: gold to orange low down and round the sun, a big orange glow round the sun) → sunset (orange overhead, a red-orange horizon) → afterglow (red fading to violet) → night (navy) → late night (deep navy). Never black |
 | Sky | Nearly one even blue (Rayleigh 10) | Rayleigh down to 1.3, so the sky is a real gradient from the blue zenith to a pale horizon; a **small halo gathered around the sun** instead of vanilla's milky haze over half the sky; a faint halo around the moon at night |
 | Shadows | Grey (full sky light) | Sky light cut to 60 %, for a clear step between sun and shade; shade stays blue-grey, never black. Short shadows (noon sun 78° up). More sky light in the evening, so the orange sky lights the shade and roads and walls seen against the sun orange too |
 | Night | Moonlight 0.4 | Early in the night **moonlight 0.6**, blue: moonlit faces stand out and the valley haze glows blue. **The deep night is dark like a real one**: moonlight 0.2 (half of vanilla), less sky light, a nearly black-blue sky; shapes show faint blue-grey and shade is close to black. Torches and other block light are not dimmed, so they stand out in the dark |
@@ -102,14 +102,18 @@ tap the active VYSE-Vibrant Visuals → the gear (⚙).
 
 | Option | What it is | The game's own clouds |
 |---|---|---|
-| **Sky: soft clouds** (default) | Soft fair-weather clouds | **Hidden automatically** (no flat blocky clouds) |
-| Sky: soft clouds + the game's clouds | The same clouds | Keep them on — for pairing with the shadow-casting vanilla clouds |
+| **Sky: soft clouds** (default) | Soft fair-weather clouds (normal amount) | **Hidden automatically** (no flat blocky clouds) |
+| Sky: soft clouds, fewer | Fewer clouds (about half the normal amount, more blue sky) | Hidden automatically |
+| Sky: soft clouds, more | More clouds (the amount up to v3.2) | Hidden automatically |
+| Sky: soft clouds + the game's clouds | The same clouds (normal amount) | Keep them on — for pairing with the shadow-casting vanilla clouds |
 | Sky: no clouds | Nothing painted | Up to you |
 | Lite: the game's clouds, faster | Nothing painted, plus lighter water. [Lite mode](#lite-mode) | Shown as usual (turn them off in Video Settings for even less work) |
 
 Worth knowing:
 
 - Painted clouds **do not move**; they are fixed to the sky
+- There are three amounts of cloud. Share of the sky under cloud: fewer about 9 %, normal about 17 %, more about 28 %
+  (v3.3 lowered the default to normal; the previous amount is the "more" option)
 - Distant clouds fade to pale blue inside the images (the game's haze erased low clouds entirely)
 - Only the Overworld has them; the Nether and the End are unchanged
 
@@ -340,7 +344,7 @@ JSON directly works too, but regenerating overwrites it).
 | More biome colour in water | `biome_water_color_contribution` in `WATER` (0–1) |
 | Block light colours | `LIGHT_COLORS` |
 | Cloud brightness and sunset tint | `ambient_light_illuminance` (brightness) and `directional_light_contribution` (how much the sun colours them) in `CLOUD_CUBEMAP` |
-| Amount of cloud | `n + 0.03` in `cloud_density`, in `tools/draw_sky.py` (raise the `0.03` for more cloud) |
+| Amount of cloud | `CLOUD_COVER` in `tools/draw_sky.py` (three amounts: `fewer` / `normal` / `more`; higher numbers mean more cloud) |
 | How the game places the sky images (if clouds sit wrong) | `EYE_BELOW_CENTRE` (how far below the cube's centre the eye is), in `tools/draw_sky.py` |
 | Tilt of the sun's path | `ORBITAL_OFFSET` (degrees) |
 

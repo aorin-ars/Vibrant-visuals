@@ -200,9 +200,24 @@ FACES = [(_F, _R, -_U), (_R, -_F, -_U), (-_F, -_R, -_U), (-_R, _F, -_U),
 # a square overhead; painted for a flat box, they came out stretched tall.
 EYE_BELOW_CENTRE = 0.40
 
-# Subpacks that get the painted clouds; they are the same images. The folders
-# and their order live in bedrock/manifest.json.
-CLOUD_SUBPACKS = ["unbound_clouds", "high_clouds"]
+# Subpacks that get the painted clouds, and how much cloud each paints. The
+# folders and their order live in bedrock/manifest.json.
+#
+# The amount is the offset added to the noise before it turns into cloud
+# (see cloud_density): higher means more sky covered. Share of the sky
+# above 3 degrees under cloud (mean opacity), measured over the field:
+#
+#   +0.03  28 %   the amount every cloud subpack had up to v3.2 - "a little
+#                 too much" in game, so it is now the "more" option
+#   -0.02  17 %   normal: about 60 % of that, with wider blue gaps
+#   -0.07   9 %   fewer: scattered patches in a mostly clear sky
+CLOUD_COVER = {"more": 0.03, "normal": -0.02, "fewer": -0.07}
+CLOUD_SUBPACKS = {
+    "unbound_clouds": "normal",
+    "high_clouds": "normal",
+    "clouds_more": "more",
+    "clouds_fewer": "fewer",
+}
 SEED = 7
 HORIZON_HAZE = np.array([0.80, 0.87, 0.97])   # what distant clouds fade toward
 
@@ -210,7 +225,7 @@ HORIZON_HAZE = np.array([0.80, 0.87, 0.97])   # what distant clouds fade toward
 # transparent clouds.png, which removes the flat block clouds without the
 # player having to find the video setting. The other keeps the game's 3D
 # clouds (which cast shadows in Vibrant Visuals) with the painted ones.
-REPLACES_VANILLA_CLOUDS = {"unbound_clouds"}
+REPLACES_VANILLA_CLOUDS = {"unbound_clouds", "clouds_more", "clouds_fewer"}
 
 
 def face_dirs(face: int, n: int, rows: slice = slice(None)) -> np.ndarray:
@@ -303,8 +318,9 @@ def shell_distance(up, altitude):
     return -b + np.sqrt(b * b + 2.0 * EARTH_RADIUS * altitude + altitude * altitude)
 
 
-def cloud_density(x, z, seed: int = SEED):
-    """0..1 cloud at layer position x, z, and the mid-scale noise (for shading)."""
+def cloud_density(x, z, seed: int = SEED, cover: float = CLOUD_COVER["normal"]):
+    """0..1 cloud at layer position x, z, and the mid-scale noise (for shading).
+    `cover` is the amount of cloud (CLOUD_COVER)."""
     # Patches are stretched a little along the wind and their outlines
     # warped, so they line up in loose rows without forming stripes.
     u = (x * np.cos(WIND) + z * np.sin(WIND)) / 1.35
@@ -318,15 +334,15 @@ def cloud_density(x, z, seed: int = SEED):
     n = 0.60 * big + 0.32 * mid + 0.16 * fine + 0.10 * (puffs - 0.5)
     # Thickness rises quickly past the edge and saturates in the cores, so
     # margins stay thin and translucent while the middles are solid white.
-    d = 1.0 - np.exp(-9.0 * np.clip(n + 0.03, 0.0, None))
+    d = 1.0 - np.exp(-9.0 * np.clip(n + cover, 0.0, None))
     return d, mid
 
 
-def clouds(d: np.ndarray):
+def clouds(d: np.ndarray, cover: float):
     """Straight-alpha colour and opacity of the clouds for view directions d."""
     up = np.clip(d[:, 1], 0.0, 1.0)
     t = shell_distance(up, CLOUD_ALTITUDE)
-    dens, mid = cloud_density(d[:, 0] * t, d[:, 2] * t)
+    dens, mid = cloud_density(d[:, 0] * t, d[:, 2] * t, cover=cover)
     # Thin margins are faintly blue; cores are white, with some lumps a
     # touch grey-blue, which gives the patches volume.
     edge = np.array([0.90, 0.94, 1.0])
@@ -341,7 +357,7 @@ def clouds(d: np.ndarray):
     return rgb, alpha * (d[:, 1] > 0.0)
 
 
-def draw_cloud_face(face: int) -> Image.Image:
+def draw_cloud_face(face: int, cover: float) -> Image.Image:
     if face == 5:                                   # below the horizon: nothing to draw
         return Image.new("RGBA", (FACE_SIZE, FACE_SIZE), (230, 230, 230, 0))
     n = FACE_SIZE * SUPERSAMPLE
@@ -352,7 +368,7 @@ def draw_cloud_face(face: int) -> Image.Image:
     for r in range(0, last, 128):
         rows = slice(r, min(r + 128, last))
         dirs = face_dirs(face, n, rows)
-        rgb, alpha = clouds(dirs.reshape(-1, 3))
+        rgb, alpha = clouds(dirs.reshape(-1, 3), cover)
         pre[rows] = np.dstack([(rgb * alpha[:, None]).reshape(dirs.shape),
                                alpha.reshape(dirs.shape[:-1])])
     # Downsample in premultiplied space, then store straight alpha. The colour
@@ -365,8 +381,10 @@ def draw_cloud_face(face: int) -> Image.Image:
 
 
 def draw_skyboxes() -> None:
-    faces = [draw_cloud_face(face) for face in range(6)]
-    for name in CLOUD_SUBPACKS:
+    faces_by_amount = {amount: [draw_cloud_face(face, CLOUD_COVER[amount]) for face in range(6)]
+                       for amount in sorted(set(CLOUD_SUBPACKS.values()))}
+    for name, amount in CLOUD_SUBPACKS.items():
+        faces = faces_by_amount[amount]
         out = ROOT / "bedrock/subpacks" / name / "textures/environment/overworld_cubemap"
         out.mkdir(parents=True, exist_ok=True)
         for face, image in enumerate(faces):
@@ -378,7 +396,7 @@ def draw_skyboxes() -> None:
         elif clouds.exists():
             clouds.unlink()
         size = sum((out / f"cubemap_{f}.png").stat().st_size for f in range(6))
-        print(f"{out}: 6 faces {FACE_SIZE}x{FACE_SIZE} RGBA, {size / 1e6:.1f} MB")
+        print(f"{out}: {amount} clouds, 6 faces {FACE_SIZE}x{FACE_SIZE} RGBA, {size / 1e6:.1f} MB")
 
 
 def main() -> None:

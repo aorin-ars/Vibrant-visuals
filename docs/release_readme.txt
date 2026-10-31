@@ -31,6 +31,10 @@ English below.
 リソースパックの一覧で VYSE-Vibrant Visuals をタップ → 歯車（⚙）から選べます。
 - Sky: soft clouds（初期設定）
     空一面のふわふわの雲。ゲームの四角い雲は自動で消えます
+- Sky: soft clouds, fewer
+    雲が少なめ（青空が多い）
+- Sky: soft clouds, more
+    雲が多め（v3.2 までの量）
 - Sky: soft clouds + the game's clouds
     描いた雲とゲームの雲の両方
 - Sky: no clouds
@@ -81,6 +85,8 @@ Sky options and lite mode: tap VYSE-Vibrant Visuals in the resource pack
 list, then the gear.
 - Sky: soft clouds (default)              soft clouds across the sky; the game's
                                           blocky clouds are hidden
+- Sky: soft clouds, fewer                 fewer clouds, more blue sky
+- Sky: soft clouds, more                  more clouds (the amount up to v3.2)
 - Sky: soft clouds + the game's clouds    both
 - Sky: no clouds                          no painted clouds
 - Lite: the game's clouds, faster         lite mode: no sky images, lighter water

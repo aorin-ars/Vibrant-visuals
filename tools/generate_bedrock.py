@@ -114,6 +114,15 @@ def mirror(evening: dict[float, object], morning: dict[float, object] | None = N
     return out
 
 
+def evening_only(evening: dict[float, object], unchanged: dict[float, object],
+                 ) -> dict[float, object]:
+    """Like mirror(evening), but the morning keeps the stops of mirror(unchanged):
+    for tables whose evening is tuned on its own while dawn stays as it was."""
+    out = {t: v for t, v in evening.items() if t <= 0.5}
+    out.update({t: v for t, v in mirror(unchanged).items() if t > 0.5})
+    return out
+
+
 def scale_rgb(rgb, tint):
     return [max(0, min(255, round(c * k))) for c, k in zip(rgb, tint)]
 
@@ -176,15 +185,24 @@ SUN_ILLUMINANCE = mirror({
 # than pink-red (no blue in it): photos of real sunsets read orange. Below
 # the horizon the colour only feeds sky scattering, which paints the rose and
 # violet of twilight.
+#
+# Evening warmth starts earlier than dawn's (v3.3): in game, with the sun
+# still 20-30 degrees up, the old near-white sun lit the haze milky white
+# and left the scene pale pink-grey under a white glare, where the reference
+# photos (a sunlit facade, a river sunset) are orange all over. The haze has
+# no colour of its own per time of day - fog settings take no keyframes -
+# it scatters the sun's light, so an orange sun is what turns it orange.
+# Gold from about 35 degrees, orange from 20; the morning keeps its colours.
 SUN_COLOR = {
     0.000: [255, 248, 236],
-    0.150: [255, 246, 232],
-    0.200: [255, 240, 220],
-    0.230: [255, 222, 180],
-    0.250: [255, 176, 88],
-    0.265: [255, 142, 50],
-    0.275: [255, 118, 32],
-    0.283: [255, 96, 20],
+    0.150: [255, 244, 228],
+    0.180: [255, 230, 196],
+    0.200: [255, 212, 156],
+    0.230: [255, 176, 96],
+    0.250: [255, 148, 60],
+    0.265: [255, 126, 40],
+    0.275: [255, 108, 28],
+    0.283: [255, 92, 18],
     0.300: [255, 110, 120],
     0.330: [255, 140, 150],
     0.500: [255, 110, 60],
@@ -222,7 +240,12 @@ MOON_COLOR = [124, 160, 255]
 # not reach - roads and walls seen against the sun, shade - is lit orange by
 # it (in the first in-game sunset, under a lavender sky, they were
 # blue-grey); least at night, when the moon should do the lighting.
-SKY_INTENSITY = mirror({
+# The evening side rises a little sooner (v3.3), along with the earlier
+# orange sun, so shade is filled with the orange sky from golden hour on.
+SKY_INTENSITY = evening_only({
+    0.000: 0.60, 0.200: 0.63, 0.230: 0.67, 0.250: 0.71, 0.265: 0.74, 0.283: 0.78,
+    0.300: 0.74, 0.330: 0.58, 0.360: 0.45, 0.400: 0.30, 0.500: 0.30,
+}, {
     0.000: 0.60, 0.200: 0.62, 0.250: 0.66, 0.265: 0.70, 0.283: 0.78, 0.300: 0.74,
     0.330: 0.58, 0.360: 0.45, 0.400: 0.30, 0.500: 0.30,
 })
@@ -232,8 +255,9 @@ SKY_INTENSITY = mirror({
 # sky, orange in the evening, deep blue at night, lilac at dawn.
 AMBIENT_COLOR = {
     0.000: [210, 224, 255],
-    0.230: [236, 216, 200],
-    0.265: [255, 186, 130],
+    0.180: [226, 222, 226],
+    0.230: [255, 204, 158],
+    0.265: [255, 172, 106],
     0.290: [214, 140, 130],
     0.340: [128, 150, 220],
     0.660: [128, 150, 220],
@@ -357,8 +381,16 @@ LIGHTING = {
 # (the scale of Mojang's own documentation example) the zenith and horizon
 # colours below come through as a real gradient: blue overhead, paling toward
 # the horizon, and lit by the sun's colour, so sunsets tint the whole sky.
-RAYLEIGH = mirror({0.0: 1.30, 0.15: 1.30, 0.20: 1.20, 0.25: 1.15, 0.283: 1.15,
-                   0.30: 1.05, 0.33: 1.30, 0.40: 1.60, 0.5: 1.60})
+#
+# Rayleigh scattering is what adds blue to the sky colours below (see
+# GOLDEN_ZENITH), so in the evening it is turned down (v3.3): at 1.15-1.20
+# an amber-orange zenith still came out pink-grey with the sun 20-30
+# degrees up. The morning keeps its values.
+RAYLEIGH_DAWN = {0.0: 1.30, 0.15: 1.30, 0.20: 1.20, 0.25: 1.15, 0.283: 1.15,
+                 0.30: 1.05, 0.33: 1.30, 0.40: 1.60, 0.5: 1.60}
+RAYLEIGH = evening_only({0.0: 1.30, 0.15: 1.30, 0.20: 1.05, 0.235: 0.85, 0.25: 0.80,
+                         0.283: 0.85, 0.30: 1.00, 0.33: 1.30, 0.40: 1.60, 0.5: 1.60},
+                        RAYLEIGH_DAWN)
 
 # The glow around the sun. sun_glare_shape is the tightness of that lobe:
 # vanilla's ~0.05 spreads it over half the sky as a milky haze; values of a
@@ -368,8 +400,13 @@ RAYLEIGH = mirror({0.0: 1.30, 0.15: 1.30, 0.20: 1.20, 0.25: 1.15, 0.283: 1.15,
 # big warm glow as the sun sets - in golden hour a wide, bright glow that
 # the tone curve turns white round the sun, as in the reference pictures. The
 # same lobe shapes the moon's glow at night.
-SUN_MIE = mirror({0.0: 0.22, 0.15: 0.26, 0.20: 0.50, 0.25: 1.60, 0.265: 2.10,
-                  0.283: 2.40, 0.30: 1.10, 0.34: 0.0, 0.5: 0.0})
+# In the evening the glow is a little weaker than it was (v3.3): with the sun
+# 20-30 degrees up it spread a white glare over half the picture. Now that
+# the sun is orange sooner the glow is orange too; dawn is unchanged.
+SUN_MIE = evening_only({0.0: 0.22, 0.15: 0.26, 0.20: 0.42, 0.25: 1.25, 0.265: 1.70,
+                        0.283: 2.00, 0.30: 1.10, 0.34: 0.0, 0.5: 0.0},
+                       {0.0: 0.22, 0.15: 0.26, 0.20: 0.50, 0.25: 1.60, 0.265: 2.10,
+                        0.283: 2.40, 0.30: 1.10, 0.34: 0.0, 0.5: 0.0})
 SUN_GLARE = mirror({0.0: 12.0, 0.15: 10.0, 0.20: 6.5, 0.25: 3.4, 0.265: 2.8,
                     0.283: 2.5, 0.30: 3.0, 0.34: 5.0, 0.5: 5.0})
 MOON_MIE = {0.0: 0.0, 0.27: 0.0, 0.33: 0.40, 0.67: 0.40, 0.73: 0.0, 1.0: 0.0}
@@ -427,8 +464,9 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
     morning = t.get("morning", [255, 204, 150])
     zenith = {
         0.000: day_zenith,
-        0.200: lerp_rgb(day_zenith, golden_zenith, 0.15),
-        0.235: lerp_rgb(day_zenith, golden_zenith, 0.6),
+        # Warmer sooner than before v3.3 (0.15 and 0.6), with the sun.
+        0.200: lerp_rgb(day_zenith, golden_zenith, 0.35),
+        0.235: lerp_rgb(day_zenith, golden_zenith, 0.85),
         0.255: golden_zenith,
         0.270: golden_zenith,
         0.283: dusk_zenith,
@@ -446,8 +484,8 @@ def sky_tables(day_zenith, day_horizon, *, dusk_zenith=DUSK_ZENITH,
     horizon = {
         0.000: day_horizon,
         0.167: day_horizon,
-        0.210: lerp_rgb(day_horizon, golden, 0.35),
-        0.235: lerp_rgb(day_horizon, golden, 0.75),
+        0.210: lerp_rgb(day_horizon, golden, 0.6),      # 0.35 before v3.3
+        0.235: lerp_rgb(day_horizon, golden, 0.95),     # 0.75 before v3.3
         0.250: golden,
         0.265: t.get("sunset", [255, 150, 56]),
         0.278: t.get("sunset_deep", [255, 120, 36]),
@@ -1108,9 +1146,12 @@ CLOUD_CUBEMAP = {
     "minecraft:cubemap_settings": {
         "description": {"identifier": "minecraft:default_cubemap"},
         "lighting": {
+            # The evening side falls sooner than dawn's rises (v3.3): this
+            # light is white, and at 2.0 and 1.3 with the sun 20-30 degrees
+            # up it kept the clouds white against an orange evening.
             "ambient_light_illuminance": keyframes({
-                0.000: 2.5, 0.150: 2.4, 0.200: 2.0, 0.250: 1.3, 0.265: 0.8,
-                0.283: 0.45, 0.300: 0.25, 0.330: 0.04, 0.400: 0.0, 0.600: 0.0,
+                0.000: 2.5, 0.150: 2.3, 0.200: 1.5, 0.230: 0.9, 0.250: 0.55, 0.265: 0.35,
+                0.283: 0.22, 0.300: 0.12, 0.330: 0.04, 0.400: 0.0, 0.600: 0.0,
                 0.670: 0.04, 0.700: 0.2, 0.717: 0.4, 0.735: 1.0, 0.750: 1.5,
                 0.800: 2.0, 0.850: 2.4, 1.000: 2.5,
             }),
@@ -1146,6 +1187,8 @@ SKY_SUBPACKS = {
     "no_clouds": DEFAULT_CUBEMAP,
     "high_clouds": CLOUD_CUBEMAP,
     "lite": DEFAULT_CUBEMAP,
+    "clouds_fewer": CLOUD_CUBEMAP,
+    "clouds_more": CLOUD_CUBEMAP,
     "unbound_clouds": CLOUD_CUBEMAP,
 }
 # The lightweight subpack: no sky images (the game's own clouds, like
