@@ -395,6 +395,8 @@ python3 tools/check_bedrock.py --vanilla $V      # keys, value ranges, every bio
 tools/package.sh --vanilla $V                    # distributables, including the PBR add-on
 python3 tools/release.py --vanilla $V            # the public release and download-page text (build/release/); the PBR add-on and the Full pack (main + PBR in one) go to personal_use_only/, never into the zip
 
+node web/pbr/check_against_python.mjs --vanilla $V --python build/pbr   # the browser build of the PBR add-on (web/pbr/) gives the same output as the Python one
+
 python3 tools/validate_shaders.py     # Java GLSL, 52 stages x 4 macro variants
 python3 tools/check_options.py        # Java options consistency
 ```

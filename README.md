@@ -372,6 +372,8 @@ python3 tools/check_bedrock.py --vanilla $V      # 統合版パックの検証�
 tools/package.sh --vanilla $V                    # 配布ファイルを生成（PBR 追加パックを含む）
 python3 tools/release.py --vanilla $V            # 公開用一式と配布ページの文（build/release/）。PBR 追加パックと、本体と PBR を 1 つにまとめた Full パックは zip に入れず personal_use_only/ に自分用として作る
 
+node web/pbr/check_against_python.mjs --vanilla $V --python build/pbr   # ブラウザ版 PBR（web/pbr/）が Python 版と同じ出力か確かめる
+
 python3 tools/validate_shaders.py     # Java版 GLSL を全52ステージ×4構成でコンパイル
 python3 tools/check_options.py        # Java版の設定項目の整合性
 ```

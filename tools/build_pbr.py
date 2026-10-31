@@ -41,6 +41,11 @@ of the vanilla files instead of living in the repository, and why it is a
 separate pack from the main one: it is for your own use, not for
 redistribution.
 
+web/pbr/lib/pbr.js is a JavaScript port of this file and wet_entities.py,
+so a web page can build the add-on on each player's own device from Mojang's
+own files (nothing of Mojang's is shipped). Change both together and check
+them with web/pbr/check_against_python.mjs.
+
 Left without relief on purpose: water (the main pack's own texture sets
 win), lava (vanilla already gives it a normal map), fire, portals and
 bubble columns.
