@@ -161,7 +161,8 @@ def main() -> int:
     (folder / "README.txt").write_text(readme, encoding="utf-8-sig")
     shutil.copy2(ROOT / "LICENSE", folder / "LICENSE.txt")
     page = (ROOT / "docs/distribution_page.md").read_text(encoding="utf-8")
-    (OUT / "distribution_page.md").write_text(page.replace("{version}", ver), encoding="utf-8")
+    (OUT / "distribution_page.md").write_text(
+        page.replace("{version}", ver).replace("{bp_version}", bp_ver), encoding="utf-8")
 
     archive = OUT / f"{name}.zip"
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:

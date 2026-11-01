@@ -33,10 +33,19 @@
 
 重いと感じたときは、軽量化モードに加えてビデオ設定の「アップスケーリングをオン」「点光源の影をオフ」「ボリュメトリックフォグを低〜中」がおすすめです。
 
-## 同梱: VYSE Weather Sync（任意）
+## ダウンロード
 
-雨のままワールドを開き直すと、空が晴れたまま雨が降るというゲームの不具合を直すビヘイビアーパックです。
-入れたワールドでは**実績が解除されなくなる**ので、実績が必要なワールドでは入れないでください（本体だけでも問題なく使えます）。
+| ファイル | 内容 |
+|---|---|
+| **VYSE-Vibrant-Visuals-v{version}.mcpack** | **本体**。これだけで使えます。リソースパックなので**実績もそのまま解除できます** |
+| VYSE-Weather-Sync-v{bp_version}.mcpack | **任意**の追加ビヘイビアーパック（下を参照）。入れたワールドは実績が解除されなくなります |
+
+## VYSE Weather Sync（任意）
+
+雨のままワールドを開き直すと、天気が次に変わるまで空が晴れたまま雨が降る、という**ゲーム側の不具合**があります（VYSE が原因ではなく、待っていれば天気が変わったときに直ります）。
+リソースパックは天気に触れられないため、これを直したい人向けに別のビヘイビアーパックを用意しています。ワールドに入って 3 秒後、雨なら一瞬だけ雨を止めて降らせ直し、空を雨の空に戻します。
+
+Minecraft の仕様で、**自分で読み込んだビヘイビアーパックを入れたワールドは、中身に関係なく実績が解除されなくなります**。実績が必要なワールドには入れず、本体だけで使ってください。
 
 ## 動作環境
 
@@ -45,10 +54,10 @@
 
 ## 導入方法
 
-1. `.mcaddon` を開きます（自動で読み込まれます）。
+1. 本体の `.mcpack` を開きます（自動で読み込まれます）。
 2. 設定 → ビデオで、Vibrant Visuals をオンにします。
 3. ワールドの設定 → リソースパックで「VYSE-Vibrant Visuals」を有効にします。
-4. （任意）ワールドの設定 → ビヘイビアーパックで「VYSE Weather Sync」を有効にします。
+4. （任意）Weather Sync の `.mcpack` も開き、ワールドの設定 → ビヘイビアーパックで「VYSE Weather Sync」を有効にします（そのワールドは実績が解除されなくなります）。
 
 ## 注意
 
@@ -59,7 +68,7 @@
 
 ## PBR 追加パックについて
 
-ブロックに凹凸・つや・発光を付ける「VYSE-Vibrant Visuals PBR」もありますが、Mojang のテクスチャを含むため配布していません。
+ブロックに凹凸・つや・発光を付け、雨でエンティティを濡らす「VYSE-Vibrant Visuals PBR」もあります。Mojang のテクスチャを含むためファイルとしては配布せず、専用ページで**自分の端末の中で作る**形にしています（画像は端末が Mojang 公式の bedrock-samples から直接読み込みます）。できたパックは自分用で、再配布はできません。
 
 ## 利用規約・クレジット
 
@@ -105,9 +114,18 @@ Tap VYSE-Vibrant Visuals in the resource pack list, then the gear (⚙).
 
 If it runs slowly, use lite mode and, in Video Settings, turn upscaling on, turn point light shadows off and set volumetric fog to low or medium.
 
-## Included: VYSE Weather Sync (optional)
+## Downloads
 
-A behavior pack that fixes a game bug: reopening a world while it rains shows a clear sky with rain falling. **A world with a behavior pack cannot earn achievements**, so leave it out of worlds where you want them; the resource pack works fine on its own.
+| File | What it is |
+|---|---|
+| **VYSE-Vibrant-Visuals-v{version}.mcpack** | **The pack.** All you need; as a resource pack it **keeps achievements working** |
+| VYSE-Weather-Sync-v{bp_version}.mcpack | **Optional** behavior pack (see below). A world with it cannot earn achievements |
+
+## VYSE Weather Sync (optional)
+
+The game has a bug of its own: reopen a world while it rains and the sky stays clear, with rain falling, until the weather next changes (VYSE does not cause it, and it goes away when the weather changes). A resource pack cannot touch the weather, so this separate behavior pack is there for those who want it fixed: 3 seconds after you join, if it is raining, it stops the rain for a moment and starts it again, which brings the rainy sky back.
+
+In Minecraft, **a world with any behavior pack you imported cannot earn achievements**, whatever the pack does. Leave it out of worlds where you want achievements and use the resource pack alone.
 
 ## Requirements
 
@@ -116,10 +134,10 @@ A behavior pack that fixes a game bug: reopening a world while it rains shows a 
 
 ## Installation
 
-1. Open the `.mcaddon`; the game imports it.
+1. Open the pack's `.mcpack`; the game imports it.
 2. Settings > Video: turn on Vibrant Visuals.
 3. World settings > Resource Packs: activate "VYSE-Vibrant Visuals".
-4. Optional: World settings > Behavior Packs: activate "VYSE Weather Sync".
+4. Optional: open the Weather Sync `.mcpack` too, then World settings > Behavior Packs: activate "VYSE Weather Sync" (that world can no longer earn achievements).
 
 ## Notes
 
@@ -130,7 +148,7 @@ A behavior pack that fixes a game bug: reopening a world while it rains shows a 
 
 ## About the PBR add-on
 
-A "VYSE-Vibrant Visuals PBR" add-on (block relief, gloss and glow) also exists, but it contains Mojang's textures, so it is not distributed.
+A "VYSE-Vibrant Visuals PBR" add-on (block relief, gloss and glow, mobs wet in rain) also exists. It contains Mojang's textures, so it is not offered as a file: a dedicated page **builds it on your own device**, reading the images straight from Mojang's official bedrock-samples. The result is for your own use and may not be redistributed.
 
 ## Terms of use and credits
 
